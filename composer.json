@@ -1,0 +1,9 @@
+{
+     "name": "zicht/service-wrapper",
+     "description": "Service Wrapper classes",
+     "require": {"php": ">=5.3"},
+     "authors": [{"name": "Gerard van Helden", "email": "gerard@zicht.nl"}],
+     "autoload": {
+          "psr-0": { "": ["src/", "tests/"]}
+     }
+}
