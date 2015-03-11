@@ -95,12 +95,7 @@ class ServiceWrapper
         } else {
             $parent = null;
         }
-        $call = new ServiceCall(
-            $this,
-            new Request($methodName, $args),
-            new Response(),
-            $parent
-        );
+        $call = $this->createServiceCall($methodName, $args, $parent);
         $this->callStack[] = $call;
 
         /** @var ServiceObserver[] $observers */
@@ -162,5 +157,21 @@ class ServiceWrapper
         $logger = new Observers\Logger();
         $logger->setRaisedLogLevels($raisedLogLevels);
         $this->registerObserver($logger);
+    }
+
+    /**
+     * @param $methodName
+     * @param $args
+     * @param $parent
+     * @return ServiceCall
+     */
+    protected function createServiceCall($methodName, $args, $parent)
+    {
+        return new ServiceCall(
+            $this,
+            new Request($methodName, $args),
+            new Response(),
+            $parent
+        );
     }
 }

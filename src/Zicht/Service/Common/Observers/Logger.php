@@ -78,7 +78,7 @@ class Logger extends LoggableServiceObserverAdapter
             $fault = $call->getResponse()->getError();
             $faultLogLevel = 300;
             if ($fault instanceof LoggableException) {
-                /** @var \Sro\Service\LoggableException $fault */
+                /** @var LoggableException $fault */
                 $faultLogLevel = max($logLevel, $fault->getLogLevel());
             }
             $this->addLogRecord(
@@ -124,7 +124,7 @@ class Logger extends LoggableServiceObserverAdapter
     /**
      * Returns the default log level for the given event.
      *
-     * @param \Sro\Service\Observable $event
+     * @param ServiceCallInterface $event
      * @return int
      */
     protected function getDefaultLogLevel(ServiceCallInterface $event)
