@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author Gerard van Helden <gerard@zicht.nl>
+ * @copyright Zicht Online <http://zicht.nl>
+ */
 
 namespace Zicht\Service\Common\Cache;
 
@@ -7,8 +11,17 @@ namespace Zicht\Service\Common\Cache;
  */
 class RedisBase
 {
+    /**
+     * @var
+     */
     private $host;
+    /**
+     * @var
+     */
     private $prefix;
+    /**
+     * @var bool
+     */
     private $inited = false;
 
     /**
@@ -16,6 +29,12 @@ class RedisBase
      */
     protected $redis;
 
+    /**
+     * Constructor.
+     *
+     * @param string $host
+     * @param string $prefix
+     */
     protected function __construct($host, $prefix)
     {
         $this->host = $host;
@@ -24,6 +43,8 @@ class RedisBase
 
     /**
      * Connects to redis.
+     *
+     * @return void
      */
     protected function init()
     {

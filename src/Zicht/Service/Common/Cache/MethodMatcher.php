@@ -53,8 +53,7 @@ class MethodMatcher implements RequestMatcher
      *         )
      * )
      *
-     * @param string $config
-     * @param array $parameterSpec
+     * @param array $config
      */
     public function __construct(array $config)
     {
