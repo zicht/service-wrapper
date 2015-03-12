@@ -39,7 +39,7 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase {
     }
 
 
-    function testGetInnerServiceReturnsSoapImplementation() {
+    function testGetWrappedServiceReturnsSoapImplementation() {
         $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(array('testMethod'))->getMock();
         $soap = new ServiceWrapper($mock, array());
         $this->assertEquals($mock, $soap->getWrappedService());
