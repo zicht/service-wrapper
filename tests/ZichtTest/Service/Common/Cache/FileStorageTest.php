@@ -27,7 +27,7 @@ class FileStorageTest extends PHPUnit_Framework_TestCase {
 
 
     /**
-     * @return \Sro\Service\Caching\FileStorage
+     * @return void
      */
     function testCreateFileStorageWillCreatePath() {
         $this->assertFalse(is_dir($this->path));

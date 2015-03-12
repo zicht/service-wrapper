@@ -34,7 +34,7 @@ class LoggerTest extends PHPUnit_Framework_TestCase {
     function setUp() {
         $this->service = $this->getMockBuilder('Zicht\Service\Common\ServiceWrapper')->disableOriginalConstructor()->getMock();
         $this->loggerImpl = $this->getMock('\Monolog\Logger', array('addDebug', 'addInfo', 'addCritical', 'addError', 'addWarning', 'addRecord'), array('test'));
-        $this->soapImpl = $this->getMock('\Sro\Service\SoapClient', array('getLastRequest', 'getLastResponse'));
+        $this->soapImpl = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->getMock();
     }
 
     function testFaultNotificationWillLogError() {
@@ -62,7 +62,7 @@ class LoggerTest extends PHPUnit_Framework_TestCase {
     function testLoggableExceptionWillDefineLogLevel() {
         $logger = new LoggerObserver($this->soapImpl);
         $logger->setLogger($this->loggerImpl);
-        $logLevel = rand(1, 9999);
+        $logLevel = rand(100, 9999);
         $this->loggerImpl->expects($this->once())->method('addRecord')->with($logLevel);
         $event = new ServiceCall($this->service, new Request(''), new Response(null, new LoggableExceptionStub($logLevel)));
         $logger->notifyAfter($event);

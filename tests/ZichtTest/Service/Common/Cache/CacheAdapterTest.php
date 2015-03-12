@@ -17,7 +17,7 @@ use \Zicht\Service\Common\Cache\RequestMatcher;
  * @covers Zicht\Service\Common\Cache\CacheConfiguration
  */
 class CacheAdapterTest extends PHPUnit_Framework_TestCase {
-    /** @var \Sro\Service\Caching\CacheAdapter */
+    /** @var CacheAdapter */
     public $cache;
     public $matcher;
     public $backend;

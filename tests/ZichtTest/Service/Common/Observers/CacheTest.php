@@ -18,7 +18,7 @@ use \Zicht\Service\Common\ServiceCall;
 
 class CacheTest extends PHPUnit_Framework_TestCase {
     /**
-     * @var \Sro\Service\Observers\Cache
+     * @var Cache
      */
     protected $cacheManager;
 

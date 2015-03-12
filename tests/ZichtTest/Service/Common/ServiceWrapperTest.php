@@ -101,9 +101,8 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase {
 
 
     function testCancellingEventWillCancelExecution() {
-        $mock = $this->getMock('Sro\Service\SoapClient', array('testMethod', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest'));
+        $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(array('testMethod'))->getMock();
         $observer = $this->getMock('Zicht\Service\Common\ServiceObserver', array('notifyBefore', 'notifyAfter'));
-
         $soap = new ServiceWrapper($mock, array());
 
         $soap->registerObserver(new CancellingObserver());
@@ -113,7 +112,7 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase {
     }
 
     function testSoapFaultIsDelegatedToObserver() {
-        $mock = $this->getMock('Sro\Service\SoapClient', array('testMethod', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest'));
+        $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(array('testMethod'))->getMock();
         $observer = $this->getMock('Zicht\Service\Common\ServiceObserver', array('notifyBefore', 'notifyAfter'));
 
         $soap = new ServiceWrapper($mock, array());
@@ -228,7 +227,7 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase {
         $observer = $this->getMock('Zicht\Service\Common\Observers\LoggableServiceObserverAdapter', array('setLogger'));
         $observer->expects($this->once())->method('setLogger')->with($loggerInstance);
 
-        $service = new ServiceWrapper($this->getMock('Sro\Service\SoapClient'));
+        $service = new ServiceWrapper($this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->getMock());
         $service->setLogger($loggerInstance);
         $service->registerObserver($observer);
     }
@@ -240,7 +239,7 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase {
         $observer = $this->getMock('Zicht\Service\Common\Observers\LoggableServiceObserverAdapter', array('setLogger'));
         $observer->expects($this->once())->method('setLogger')->with($loggerInstance);
 
-        $service = new ServiceWrapper($this->getMock('Sro\Service\SoapClient'));
+        $service = new ServiceWrapper($this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->getMock());
 
         $service->registerObserver($observer);
         $service->setLogger($loggerInstance);
