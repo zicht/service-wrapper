@@ -4,18 +4,18 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 
-namespace SroTest\Service\Caching;
+namespace ZichtTest\Service\Common\Caching;
 
 use \PHPUnit_Framework_TestCase;
-use \Sro\Service\Caching\MethodMatcher;
-use \Sro\Service\Request;
-use \Sro\Service\Caching\EntityMatcher;
+
+use \Zicht\Service\Common\Cache\MethodMatcher;
+use \Zicht\Service\Common\Request;
 
 /**
- * @covers Sro\Service\Caching\MethodMatcher
+ * @covers Zicht\Service\Common\Cache\MethodMatcher
  */
 class MethodMatcherTest extends PHPUnit_Framework_TestCase {
-    /** @var EntityMatcher */
+    /** @var MethodMatcher */
     protected $matcher;
 
     function setUp() {

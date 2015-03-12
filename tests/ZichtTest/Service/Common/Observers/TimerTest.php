@@ -4,15 +4,16 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 
-namespace SroTest\Service\Observers;
+namespace ZichtTest\Service\Common\Observers;
 use PHPUnit_Framework_TestCase;
-use \Sro\Service\Request;
-use \Sro\Service\Response;
-use \Sro\Service\Event;
-use \Monolog\Logger as Monolog;
-use Sro\Service\Observers\Timer;
 
-class TimerStub extends \Sro\Service\Observers\Timer {
+use \Monolog\Logger as Monolog;
+use \Zicht\Service\Common\Response;
+use \Zicht\Service\Common\Request;
+use \Zicht\Service\Common\ServiceCall;
+use \Zicht\Service\Common\Observers\Timer;
+
+class TimerStub extends Timer {
     public $return = null;
 
     protected function _stop($serviceMethod) {
@@ -20,7 +21,7 @@ class TimerStub extends \Sro\Service\Observers\Timer {
     }
 }
 
-class TimerStub2 extends \Sro\Service\Observers\Timer {
+class TimerStub2 extends Timer {
     public $calls = array();
 
     protected function _start($serviceMethod) {
@@ -44,14 +45,14 @@ class TimerTest extends PHPUnit_Framework_TestCase {
 
 
     function testCustomThresholds() {
-        $timer = new \Sro\Service\Observers\Timer(array(0 => 'level 1', 500 => 'level 2', 2000 => 'level 3'));
+        $timer = new Timer(array(0 => 'level 1', 500 => 'level 2', 2000 => 'level 3'));
         $this->assertEquals('level 1', $timer->getLogLevel(0.1));
         $this->assertEquals('level 2', $timer->getLogLevel(0.7));
         $this->assertEquals('level 3', $timer->getLogLevel(2.5));
     }
 
     function testCustomThresholdsWillBeSorted() {
-        $timer = new \Sro\Service\Observers\Timer( array(500 => 'level 2', 2000 => 'level 3', 0 => 'level 1'));
+        $timer = new Timer( array(500 => 'level 2', 2000 => 'level 3', 0 => 'level 1'));
         $this->assertEquals('level 1', $timer->getLogLevel(0.1));
         $this->assertEquals('level 2', $timer->getLogLevel(0.7));
         $this->assertEquals('level 3', $timer->getLogLevel(2.5));

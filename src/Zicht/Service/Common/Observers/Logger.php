@@ -76,7 +76,7 @@ class Logger extends LoggableServiceObserverAdapter
         }
         if ($call->getResponse()->isError()) {
             $fault = $call->getResponse()->getError();
-            $faultLogLevel = 300;
+            $faultLogLevel = self::ERROR;
             if ($fault instanceof LoggableException) {
                 /** @var LoggableException $fault */
                 $faultLogLevel = max($logLevel, $fault->getLogLevel());

@@ -8,12 +8,13 @@ namespace ZichtTest\Service\Common\Observers;
 
 use \PHPUnit_Framework_TestCase;
 
-use \Zicht\Service\Common\RequestInterface;
-use \Zicht\Service\Common\ResponseInterface;
-use \Zicht\Service\Common\ServiceCall;
 use \Zicht\Service\Common\Cache\CacheAdapter;
 use \Zicht\Service\Common\Cache\ArrayMatcher;
 use \Zicht\Service\Common\Cache\MemoryStorage;
+use \Zicht\Service\Common\Observers\Cache;
+use \Zicht\Service\Common\Request;
+use \Zicht\Service\Common\Response;
+use \Zicht\Service\Common\ServiceCall;
 
 class CacheTest extends PHPUnit_Framework_TestCase {
     /**
@@ -22,6 +23,7 @@ class CacheTest extends PHPUnit_Framework_TestCase {
     protected $cacheManager;
 
     function setUp() {
+        $this->service = $this->getMockBuilder('Zicht\Service\Common\ServiceWrapper')->disableOriginalConstructor()->getMock();
         $this->cache = new \stdClass;
         $this->cacheManager = new Cache(
             new CacheAdapter(
@@ -35,7 +37,7 @@ class CacheTest extends PHPUnit_Framework_TestCase {
         $params = array(1, 2, 3);
 
         // first call will be executed
-        $event = new Event(new Request('cachable', $params), new Response());
+        $event = new ServiceCall($this->service, new Request('cachable', $params), new Response());
         $this->cacheManager->notifyBefore($event);
 
         $event->getResponse()->setResponse($response = rand(0, 9999));
@@ -48,7 +50,7 @@ class CacheTest extends PHPUnit_Framework_TestCase {
         $this->assertNotEquals(new \stdClass(), $this->cache);
 
         // and the next call will be cancelled
-        $event = new Event(new Request('cachable', $params), new Response());
+        $event = new ServiceCall($this->service, new Request('cachable', $params), new Response());
         $this->cacheManager->notifyBefore($event);
         $oldResponse = $response;
         $this->assertTrue((bool)$event->isCancelled());

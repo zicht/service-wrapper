@@ -4,17 +4,23 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 
-namespace SroTest\Service\Caching;
+namespace Zicht\Service\Common;
 
 use \PHPUnit_Framework_TestCase;
-use \Sro\Service\Request;
-use \Sro\Service\Caching\ArrayMatcher;
+
+use \Zicht\Service\Common\Response;
+use \Zicht\Service\Common\Cache\ArrayMatcher;
 
 /**
- * @covers Sro\Service\Caching\ArrayMatcher
+ * @covers Zicht\Service\Common\Cache\ArrayMatcher
  */
 class ArrayMatcherTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @var ArrayMatcher
+     */
+    public $matcher;
+
     function setUp()
     {
         $config = array(
@@ -62,11 +68,11 @@ class ArrayMatcherTest extends PHPUnit_Framework_TestCase
     {
         $this->assertEquals(
             $this->matcher->getKey(new Request('methodA', array('a' => 'b'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), null, array('unknown-attribute' => 'foo')))
+            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('unknown-attribute' => 'foo')))
         );
         $this->assertEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), null, array('five' => 'foo'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), null, array('five' => 'foo', 'unknown-attribute' => 'foo')))
+            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo'))),
+            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo', 'unknown-attribute' => 'foo')))
         );
     }
 
@@ -74,19 +80,19 @@ class ArrayMatcherTest extends PHPUnit_Framework_TestCase
     {
         $this->assertNotEquals(
             $this->matcher->getKey(new Request('methodA', array('a' => 'b'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), null, array('five' => 'foo')))
+            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo')))
         );
         $this->assertNotEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), null, array('five' => 'foo'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), null, array('five' => 'foo', 'three' => 'foo')))
+            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo'))),
+            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo', 'three' => 'foo')))
         );
     }
 
     function testKeyIsDifferentWhenAttributeValuesAreDifferent()
     {
         $this->assertNotEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), null, array('five' => 'foo'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), null, array('five' => 'bar')))
+            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo'))),
+            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'bar')))
         );
     }
 
@@ -109,8 +115,8 @@ class ArrayMatcherTest extends PHPUnit_Framework_TestCase
         // default 10 is the lowest
         $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'))));
         // attribute five exists and has the lowest ttl
-        $this->assertEquals(5, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'), null, array('five' => 'foo'))));
+        $this->assertEquals(5, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'), array('five' => 'foo'))));
         // attribute five and three exists, three has the lowest ttl
-        $this->assertEquals(3, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'), null, array('five' => 'foo', 'three' => 'foo'))));
+        $this->assertEquals(3, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'), array('five' => 'foo', 'three' => 'foo'))));
     }
 }

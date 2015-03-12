@@ -4,10 +4,11 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 
-namespace SroTest\Service\Caching;
+namespace ZichtTest\Service\Common\Caching;
 
 use \PHPUnit_Framework_TestCase;
-use \Sro\Service\Caching\MemoryStorage;
+
+use \Zicht\Service\Common\Cache\MemoryStorage;
 
 class MemoryStorageTest extends PHPUnit_Framework_TestCase {
     protected $container;

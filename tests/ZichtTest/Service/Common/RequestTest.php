@@ -1,9 +1,9 @@
 <?php
 
-namespace SroTest\Service;
+namespace ZichtTest\Service\Common;
 
 use PHPUnit_Framework_TestCase;
-use \Sro\Service\Request;
+use Zicht\Service\Common\Request;
 
 class RequestTest extends PHPUnit_Framework_TestCase {
     function testGetParameterDeep() {

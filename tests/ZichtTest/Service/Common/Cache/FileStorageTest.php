@@ -3,11 +3,12 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
-namespace SroTest\Service\Caching;
+namespace ZichtTest\Service\Common\Caching;
 
 use \PHPUnit_Framework_TestCase;
-use \Sro\Service\Caching\FileStorage;
- 
+
+use \Zicht\Service\Common\Cache\FileStorage;
+
 class FileStorageTest extends PHPUnit_Framework_TestCase {
     protected $path = '/tmp/file-storage-test';
 

@@ -3,17 +3,18 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
-namespace SroTest\Service\Caching;
+namespace ZichtTest\Service\Common\Caching;
 
 use \PHPUnit_Framework_TestCase;
-use \Sro\Service\Request;
-use \Sro\Service\Response;
-use \Sro\Service\Caching\CacheAdapter;
-use \Sro\Service\Caching\RequestMatcher;
+
+use \Zicht\Service\Common\Request;
+use \Zicht\Service\Common\Response;
+use \Zicht\Service\Common\Cache\CacheAdapter;
+use \Zicht\Service\Common\Cache\RequestMatcher;
 
 /**
- * @covers Sro\Service\Caching\CacheAdapter
- * @covers Sro\Service\Caching\CacheConfiguration
+ * @covers Zicht\Service\Common\Cache\CacheAdapter
+ * @covers Zicht\Service\Common\Cache\CacheConfiguration
  */
 class CacheAdapterTest extends PHPUnit_Framework_TestCase {
     /** @var \Sro\Service\Caching\CacheAdapter */
@@ -23,7 +24,7 @@ class CacheAdapterTest extends PHPUnit_Framework_TestCase {
 
     function setUp() {
         $this->matcher = $this->getMock(
-            'Sro\Service\Caching\RequestMatcher',
+            'Zicht\Service\Common\Cache\RequestMatcher',
             array(
                 'isMatch',
                 'isExpunger',
@@ -32,7 +33,7 @@ class CacheAdapterTest extends PHPUnit_Framework_TestCase {
             )
         );
         $this->backend = $this->getMock(
-            'Sro\Service\Caching\Storage',
+            'Zicht\Service\Common\Cache\Storage',
             array(
                 'read',
                 'write',
@@ -45,7 +46,8 @@ class CacheAdapterTest extends PHPUnit_Framework_TestCase {
     }
 
 
-    function testReadWillReadRequestMatcherKeyFromBackend() {
+    function testReadWillReadRequestMatcherKeyFromBackend()
+    {
         $key = (string) rand(1, 9999);
         $data = (string) rand(10000, 99999);
         $req = new Request('someMethod');
