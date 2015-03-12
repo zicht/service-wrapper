@@ -127,18 +127,6 @@ class ServiceWrapper
     }
 
     /**
-     * @{inheritDoc}
-     */
-    protected function execute(ServiceCallInterface $call)
-    {
-        return call_user_func_array(
-            array($this->service, $call->getRequest()->getMethod()),
-            $call->getRequest()->getParameters()
-        );
-    }
-
-
-    /**
      * Register a logger with the service.
      *
      * @param \Psr\Log\LoggerInterface $logger
@@ -160,12 +148,25 @@ class ServiceWrapper
     }
 
     /**
-     * @param $methodName
-     * @param $args
-     * @param $parent
+     * @{inheritDoc}
+     */
+    protected function execute(ServiceCallInterface $call)
+    {
+        return call_user_func_array(
+            array($this->service, $call->getRequest()->getMethod()),
+            $call->getRequest()->getParameters()
+        );
+    }
+
+    /**
+     * Creates a service call object.
+     *
+     * @param string $methodName
+     * @param array $args
+     * @param ServiceCall $parent
      * @return ServiceCall
      */
-    protected function createServiceCall($methodName, $args, $parent)
+    protected function createServiceCall($methodName, $args, $parent = null)
     {
         return new ServiceCall(
             $this,

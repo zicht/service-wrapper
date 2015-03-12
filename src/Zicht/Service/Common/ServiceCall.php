@@ -27,7 +27,7 @@ class ServiceCall implements ServiceCallInterface
      * @param ResponseInterface $response
      * @param ServiceCallInterface|null $parent
      */
-    public function __construct(ServiceWrapper $service, RequestInterface $request, ResponseInterface $response, $parent)
+    public function __construct(ServiceWrapper $service, RequestInterface $request, ResponseInterface $response, $parent = null)
     {
         $this->service = $service;
         $this->request = $request;
