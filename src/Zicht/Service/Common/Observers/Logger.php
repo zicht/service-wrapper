@@ -98,30 +98,6 @@ class Logger extends LoggableServiceObserverAdapter
 
 
     /**
-     * Formats the XML using DOMDocument
-     *
-     * @param string $xml
-     * @return string
-     */
-    public static function formatXml($xml)
-    {
-        try {
-            if (!empty($xml)) {
-                $domDocument = new DOMDocument();
-                $domDocument->loadXml($xml);
-                $domDocument->formatOutput = true;
-
-                return $domDocument->saveXML();
-            } else {
-                throw new Exception('XML was left empty');
-            }
-        } catch (Exception $e) {
-        }
-        return $xml;
-    }
-
-
-    /**
      * Returns the default log level for the given event.
      *
      * @param ServiceCallInterface $event
