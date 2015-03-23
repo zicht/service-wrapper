@@ -4,6 +4,7 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 namespace Zicht\Service\Common;
+use Zicht\Util\Debug;
 
 
 /**
@@ -149,16 +150,18 @@ class Request implements RequestInterface
      */
     public function __toString()
     {
-        $ret = $this->getMethod() . '(' . "\n";
-        $ret .= preg_replace(
-            '/^/m',
-            '    ', json_encode(
-                $this->getParameters(),
-                defined('JSON_PRETTY_PRINT') ? JSON_PRETTY_PRINT : 0,
-                4
-            )
-        );
-        $ret .= ')';
+        try {
+            $ret = $this->getMethod() . '(' . "\n";
+            $ret .= preg_replace(
+                '/^/m',
+                '    ',
+                Debug::dump($this->getParameters(), 2)
+            );
+            $ret .= ')';
+        } catch (\Exception $e) {
+            var_dump($e);
+            die();
+        }
         return $ret;
     }
 
