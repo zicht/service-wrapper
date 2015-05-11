@@ -12,6 +12,17 @@ namespace Zicht\Service\Common\Cache;
 class RedisStorage extends RedisBase implements Storage
 {
     /**
+     * Constructor, overridden to make it public.
+     *
+     * @param string $host
+     * @param string $prefix
+     */
+    public function __construct($host, $prefix)
+    {
+        parent::__construct($host, $prefix);
+    }
+
+    /**
      * @{inheritDoc}
      */
     public function read($key)
