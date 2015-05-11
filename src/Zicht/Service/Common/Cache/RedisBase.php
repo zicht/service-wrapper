@@ -35,7 +35,7 @@ class RedisBase
      * @param string $host
      * @param string $prefix
      */
-    public function __construct($host, $prefix)
+    protected function __construct($host, $prefix)
     {
         $this->host = $host;
         $this->prefix = $prefix;
