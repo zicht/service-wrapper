@@ -99,7 +99,11 @@ class Cache extends LoggableServiceObserverAdapter
     public function notifyAfter(ServiceCallInterface $event)
     {
         if (!array_pop($this->_stack)) {
-            if (!$event->getResponse()->isError() && $this->container->isCachable($event->getRequest())) {
+            if (
+                !$event->getResponse()->isError()
+                && $this->container->isCachable($event->getRequest())
+                && $event->getResponse()->isCachable()
+            ) {
                 $this->addLogRecord(
                     self::DEBUG,
                     'Cache store: ' . $event->getRequest()->getMethod(),

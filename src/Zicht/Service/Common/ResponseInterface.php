@@ -60,4 +60,15 @@ interface ResponseInterface
      * @return mixed
      */
     public function setResponse($response);
+
+    /**
+     * @return bool
+     */
+    public function isCachable();
+
+    /**
+     * @param bool $cachable
+     * @return void
+     */
+    public function setCachable($cachable);
 }

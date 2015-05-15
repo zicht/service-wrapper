@@ -16,6 +16,14 @@ class Response implements ResponseInterface
     private $error;
 
     /**
+     * By default, a response is cachable, but if any observer fails to add data that is needed in the cache,
+     * it may mark a response as 'uncachable', so it does not put incomplete or invalid data in the cache.
+     *
+     * @var bool
+     */
+    private $isCachable = true;
+
+    /**
      * Constructor.
      *
      * @param mixed $response
@@ -25,6 +33,30 @@ class Response implements ResponseInterface
     {
         $this->setResponse($response);
         $this->setError($error);
+    }
+
+
+    /**
+     * Returns whether this object is (still) cachable
+     *
+     * @return bool
+     */
+    public function isCachable()
+    {
+        return $this->isCachable;
+    }
+
+
+    /**
+     * Mark the response as (un)cachable. Use with care: don't set an object to 'cachable' when it's not, because
+     * there is probably a good reason it isn't: by default objects are cachable, but observers may mark a response
+     * uncachable.
+     *
+     * @param bool $cachable
+     */
+    public function setCachable($cachable)
+    {
+        $this->isCachable = (bool)$cachable;
     }
 
 
