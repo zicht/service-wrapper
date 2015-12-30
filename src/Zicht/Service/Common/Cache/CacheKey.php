@@ -17,6 +17,7 @@ namespace Zicht\Service\Common\Cache;
  */
 final class CacheKey implements CacheKeyInterface
 {
+    private $readableDepth;
     private $name;
     private $attributes;
 
@@ -54,9 +55,11 @@ final class CacheKey implements CacheKeyInterface
      *
      * @param string $name
      */
-    public function __construct($name)
+    public function __construct($name, $readableDepth = 1)
     {
         $this->name = strtolower($name);
+        $this->readableDepth = $readableDepth;
+
         $this->attributes = [];
     }
 
@@ -90,7 +93,7 @@ final class CacheKey implements CacheKeyInterface
         return array_reduce(
             array_values($this->attributes),
             function ($ret, $attribute) use ($keys, &$i) {
-                if (self::isAllScalar($attribute, 2)) {
+                if (self::isAllScalar($attribute, $this->readableDepth)) {
                     $strAttribute = str_replace(['"', "\n"], '', json_encode($attribute));
                 } elseif (!is_scalar($attribute)) {
                     $strAttribute = sha1(json_encode($attribute));
