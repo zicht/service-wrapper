@@ -54,22 +54,22 @@ class CacheKeyTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    public function testCacheKeyContainsAttributeValuesIfHash2Deep()
+    public function testCacheKeyHashesValuesIfTooDeep()
     {
         $key = new CacheKey('foo');
         $key->addAttribute('bar', [['key1' => 'baz', 'key2' => 'bat', 'key3' => 'qux']]);
 
-        $this->assertTrue(strpos((string)$key, 'baz') !== false);
-        $this->assertTrue(strpos((string)$key, 'key1') !== false);
+        $this->assertTrue(strpos((string)$key, 'baz') === false);
+        $this->assertTrue(strpos((string)$key, 'key1') === false);
     }
 
 
-    public function testCacheKeyHashesValuesIfHash3Deep()
+    public function testCacheKeyNotHashesValuesIfDepthHigherThanDefault()
     {
-        $key = new CacheKey('foo');
-        $key->addAttribute('bar', [[['key1' => 'baz', 'key2' => 'bat', 'key3' => 'qux']]]);
+        $key = new CacheKey('foo', 2);
+        $key->addAttribute('bar', [['key1' => 'baz', 'key2' => 'bat', 'key3' => 'qux']]);
 
-        $this->assertTrue(strpos((string)$key, 'baz') === false);
-        $this->assertTrue(strpos((string)$key, 'key1') === false);
+        $this->assertTrue(strpos((string)$key, 'baz') !== false);
+        $this->assertTrue(strpos((string)$key, 'key1') !== false);
     }
 }
