@@ -7,7 +7,6 @@
 namespace ZichtTest\Service\Common\Observers;
 use PHPUnit_Framework_TestCase;
 
-use \Monolog\Logger as Monolog;
 use \Zicht\Service\Common\Response;
 use \Zicht\Service\Common\Request;
 use \Zicht\Service\Common\ServiceCall;

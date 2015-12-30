@@ -6,8 +6,6 @@
 
 namespace Zicht\Service\Common\Observers;
 
-use \Monolog\Logger;
-
 /**
  * Base class for observers that do logging.
  *

@@ -119,6 +119,9 @@ class FileStorage implements Storage
     public function getFilePath($key)
     {
         $key = preg_replace('/[^a-z0-9_.-]/i', '_', $key);
+        if (strlen($key) > 60) {
+            $key = substr($key, 0, 30) . sha1($key);
+        }
         $subdir = join('/', preg_split('//', substr($key, 0, min(4, strlen($key)))));
         $path = $this->path . '/' . trim($subdir, '/');
         if (!is_dir($path)) {

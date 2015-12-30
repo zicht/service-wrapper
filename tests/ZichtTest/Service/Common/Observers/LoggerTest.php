@@ -9,6 +9,7 @@ namespace ZichtTest\Service\Common\Observers;
 use \PHPUnit_Framework_TestCase;
 use \Monolog\Logger as Monolog;
 
+use Zicht\Service\Common\LoggerConstants;
 use \Zicht\Service\Common\Observers\Logger as LoggerObserver;
 use \Zicht\Service\Common\Observers\LoggableException;
 use \Zicht\Service\Common\Response;
@@ -33,7 +34,7 @@ class LoggerTest extends PHPUnit_Framework_TestCase {
 
     function setUp() {
         $this->service = $this->getMockBuilder('Zicht\Service\Common\ServiceWrapper')->disableOriginalConstructor()->getMock();
-        $this->loggerImpl = $this->getMock('\Monolog\Logger', array('addDebug', 'addInfo', 'addCritical', 'addError', 'addWarning', 'addRecord'), array('test'));
+        $this->loggerImpl = $this->getMock('\Monolog\Logger', array('addDebug', 'addInfo', 'addCritical', 'addError', 'addWarning', 'addRecord'), array());
         $this->soapImpl = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->getMock();
     }
 
@@ -46,13 +47,13 @@ class LoggerTest extends PHPUnit_Framework_TestCase {
         }));
         $response = null;
         $logger->notifyAfter(new ServiceCall($this->service, new Request(''), new Response(null, new \SoapFault('a', 'b'))));
-        $this->assertGreaterThanOrEqual(\Monolog\Logger::ERROR, $recordedLevel);
+        $this->assertGreaterThanOrEqual(LoggerConstants::ERROR, $recordedLevel);
     }
 
     function testCancelIsLoggedAsDebug() {
         $logger = new LoggerObserver($this->soapImpl);
         $logger->setLogger($this->loggerImpl);
-        $this->loggerImpl->expects($this->once())->method('addRecord')->with(\Monolog\Logger::ERROR);
+        $this->loggerImpl->expects($this->once())->method('addRecord')->with(LoggerConstants::ERROR);
         $event = new ServiceCall($this->service, new Request(''), new Response(null, new \SoapFault('a', 'b')));
         $event->cancel(__METHOD__);
         $logger->notifyAfter($event);

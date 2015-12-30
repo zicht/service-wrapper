@@ -11,15 +11,8 @@ use \Zicht\Service\Common\RequestInterface;
 /**
  * Match a request based on an array configuration containing the method name and time to live.
  */
-class MethodMatcher implements RequestMatcher
+class MethodMatcher extends ArrayMatcher
 {
-    /**
-     * The entities with their default time to live and optionally attribute specific time to lives
-     *
-     * @var array
-     */
-    protected $config = array();
-
     /**
      * Construct a method matcher which allows for specific parameters of the method to be matched.
      *
@@ -57,28 +50,9 @@ class MethodMatcher implements RequestMatcher
      */
     public function __construct(array $config)
     {
-        foreach ($config as $method => $properties) {
-            $this->config[strtolower($method)] = $properties;
-        }
+        parent::__construct($config);
     }
 
-    /**
-     * Generates a cache storage key for the current request
-     *
-     * @param RequestInterface $request
-     * @return string
-     */
-    public function getKey(RequestInterface $request)
-    {
-        $key = array(
-            $request->getMethod(),
-            md5(serialize($request->getParameters()))
-        );
-        foreach ($this->config[strtolower($request->getMethod())]['attributes'] as $attribute => $ttl) {
-            $key []= md5(serialize($request->getAttribute($attribute)));
-        }
-        return strtolower(join('.', $key));
-    }
 
     /**
      * Return if the current request matcher is a candidate for the specified request
@@ -100,32 +74,5 @@ class MethodMatcher implements RequestMatcher
             }
         }
         return false;
-    }
-
-    /**
-     * @{inheritDoc}
-     */
-    public function isExpunger(RequestInterface $request)
-    {
-        return false;
-    }
-
-    /**
-     * Return the time to live (in seconds) for the specified request
-     *
-     * @param \Zicht\Service\Common\RequestInterface $request
-     * @return int
-     */
-    public function getTtl(RequestInterface $request)
-    {
-        $config = $this->config[strtolower($request->getMethod())];
-
-        $ttls = array($config['default']);
-        foreach ($config['attributes'] as $attribute => $ttl) {
-            if ($request->hasAttribute($attribute)) {
-                $ttls []= $ttl;
-            }
-        }
-        return min($ttls);
     }
 }

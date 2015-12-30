@@ -57,14 +57,16 @@ class ArrayMatcher implements RequestMatcher
      */
     public function getKey(RequestInterface $request)
     {
-        $key = array(
-            $request->getMethod(),
-            md5(serialize($request->getParameters()))
-        );
-        foreach ($this->config[strtolower($request->getMethod())]['attributes'] as $attribute => $ttl) {
-            $key []= md5(serialize($request->getAttribute($attribute)));
+        $key = new CacheKey($request->getMethod());
+        foreach ($request->getParameters() as $paramName => $paramValue) {
+            $key->addAttribute($paramName, $paramValue);
         }
-        return strtolower(join('.', $key));
+        foreach ($this->config[strtolower($request->getMethod())]['attributes'] as $attrName => $ttl) {
+            if ($attrValue = $request->getAttribute($attrName)) {
+                $key->addAttribute($attrName, $attrValue);
+            }
+        }
+        return $key;
     }
 
 

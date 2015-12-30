@@ -6,7 +6,7 @@
 
 namespace Zicht\Service\Common\Observers;
 
-use \Monolog\Logger as MonologLogger;
+use Zicht\Service\Common\LoggerConstants;
 
 /**
  * Times requests and logs them according to a map that specifies the log levels to use per threshold of execution
@@ -20,9 +20,9 @@ class Timer
      * @var array
      */
     public static $defaults = array(
-        0       => MonologLogger::DEBUG,
-        1500    => MonologLogger::INFO,
-        4000    => MonologLogger::WARNING
+        0       => LoggerConstants::DEBUG,
+        1500    => LoggerConstants::INFO,
+        4000    => LoggerConstants::WARNING
     );
 
     /**
@@ -95,7 +95,7 @@ class Timer
                 return $this->map[$threshold];
             }
         }
-        return MonologLogger::DEBUG;
+        return LoggerConstants::DEBUG;
     }
 
 

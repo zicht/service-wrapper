@@ -38,7 +38,7 @@ class RedisBase
     protected function __construct($host, $prefix)
     {
         $this->host = $host;
-        $this->prefix = $prefix;
+        $this->prefix = $prefix . '::';
     }
 
     /**
