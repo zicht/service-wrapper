@@ -18,7 +18,7 @@ class RedisBase
     /**
      * @var
      */
-    private $prefix;
+    protected $prefix;
     /**
      * @var bool
      */

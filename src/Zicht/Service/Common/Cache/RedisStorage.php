@@ -76,6 +76,13 @@ class RedisStorage extends RedisBase implements Storage
     public function getKeys()
     {
         $this->init();
-        return $this->redis->keys('*');
+
+        return array_map(
+            function ($key) {
+                return substr($key, strlen($this->prefix));
+            },
+
+            $this->redis->keys('*')
+        );
     }
 }
