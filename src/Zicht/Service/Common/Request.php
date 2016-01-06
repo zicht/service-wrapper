@@ -87,9 +87,9 @@ class Request implements RequestInterface
         $ptr = $this->parameters;
         foreach ($path as $key) {
             if (is_object($ptr) && isset($ptr->$key)) {
-                $ptr =& $ptr->$key;
+                $ptr = $ptr->$key;
             } elseif (is_array($ptr) && isset($ptr[$key])) {
-                $ptr =& $ptr[$key];
+                $ptr = $ptr[$key];
             } else {
                 return null;
             }
