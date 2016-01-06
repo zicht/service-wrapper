@@ -24,7 +24,7 @@ class SoapClient extends \SoapClient
         parent::SoapClient(
             $wsdl,
             $options + array(
-                'compression' => SOAP_COMPRESSION_GZIP | SOAP_COMPRESSION_ACCEPT,
+                'compression' => SOAP_COMPRESSION_GZIP | SOAP_COMPRESSION_ACCEPT | 9,
                 'features' => SOAP_SINGLE_ELEMENT_ARRAYS,
                 'trace' => 1
             )
