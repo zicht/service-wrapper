@@ -103,21 +103,41 @@ class Request implements RequestInterface
      */
     public function setParameterDeep(array $path, $value)
     {
-        $ptr =& $this->parameters;
-        foreach ($path as $key) {
-            if (is_object($ptr)) {
-                if (!isset($ptr->$key)) {
-                    $ptr->$key = array();
+        $this->parameters = $this->setValueDeep($this->parameters, $path, $value);
+    }
+
+    /**
+     * Helper function to set a deep value on an object recursively.
+     *
+     * This was rewritten from a former iterative implementation which worked with reference that broke
+     * stuff in such weird proportions that I've spent an entire day finding out what the heck was going on.
+     *
+     * In PHP7 that is.
+     *
+     * @param mixed $subject
+     * @param array $path
+     * @param mixed $value
+     * @return mixed
+     */
+    private function setValueDeep($subject, $path, $value)
+    {
+        if (count($path) === 0) {
+            return $value;
+        } else {
+            $property = array_shift($path);
+            if (is_object($subject)) {
+                if (!isset($subject->$property)) {
+                    $subject->$property = [];
                 }
-                $ptr =& $ptr->$key;
-            } elseif (is_array($ptr)) {
-                if (!isset($ptr[$key])) {
-                    $ptr[$key] = array();
+                $subject->$property = $this->setValueDeep($subject->$property, $path, $value);
+            } elseif (is_array($subject)) {
+                if (!isset($subject[$property])) {
+                    $subject[$property] = [];
                 }
-                $ptr =& $ptr[$key];
+                $subject[$property] = $this->setValueDeep($subject[$property], $path, $value);
             }
         }
-        $ptr = $value;
+        return $subject;
     }
 
     /**
