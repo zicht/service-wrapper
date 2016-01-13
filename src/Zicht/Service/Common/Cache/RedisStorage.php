@@ -7,7 +7,7 @@
 namespace Zicht\Service\Common\Cache;
 
 /**
- * Storage implementation for file (disk) storage
+ * Storage implementation for storage in Redis
  */
 class RedisStorage extends RedisBase implements Storage
 {
