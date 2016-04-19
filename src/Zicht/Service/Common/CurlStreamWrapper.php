@@ -52,6 +52,7 @@ class CurlStreamWrapper
     private $opened_path;
     private $buffer;
     private $pos;
+    private $ch;
 
     /**
      * Stub for logging
@@ -213,4 +214,3 @@ class CurlStreamWrapper
         $this->pos = 0;
     }
 }
-
