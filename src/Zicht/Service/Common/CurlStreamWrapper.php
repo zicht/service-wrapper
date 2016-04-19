@@ -201,13 +201,11 @@ class CurlStreamWrapper
             return;
         }
 
-        var_dump($location);
         foreach (self::$rewrites as $pattern => $replacement) {
             $location = preg_replace($pattern, $replacement, $location);
         }
 
         $this->ch = curl_init($location);
-        var_dump($location);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->buffer = curl_exec($this->ch);
