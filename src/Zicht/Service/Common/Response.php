@@ -168,14 +168,14 @@ class Response implements ResponseInterface
         foreach ($propertyPath as $key) {
             if (is_string($key) && preg_match('/^(.+)\[\]$/', $key, $matches)) {
                 $flatPropertyPath [] = $matches[1];
-                $nestedPropertyPath [] = [$flatPropertyPath, true];
+                $nestedPropertyPath [] = array($flatPropertyPath, true);
                 $flatPropertyPath = [];
             } else {
                 $flatPropertyPath [] = $key;
             }
         }
         if (!empty($flatPropertyPath)) {
-            $nestedPropertyPath [] = [$flatPropertyPath, false];
+            $nestedPropertyPath [] = array($flatPropertyPath, false);
         }
 
         // create list with raw data and their absolute path
@@ -189,13 +189,13 @@ class Response implements ResponseInterface
                         if (is_array($pointer)) {
                             foreach ($pointer as $key => $value) {
                                 $absolutePath = array_merge($basePath, $flatPropertyPath, array($key));
-                                $newPointers [] = [$absolutePath, $value];
+                                $newPointers [] = array($absolutePath, $value);
                             }
                         }
 
                     } else {
                         $absolutePath = array_merge($basePath, $flatPropertyPath);
-                        $newPointers [] = [$absolutePath, $pointer];
+                        $newPointers [] = array($absolutePath, $pointer);
                     }
                 }
             }
