@@ -1,4 +1,9 @@
-plugins: ['svn']
+plugins: ['svn', 'ci']
 
 vcs:
     url: svn://zon/projecten/zicht-libraries/ZichtServiceWrapper
+
+tasks:
+    ci.phpunit:
+        pre: composer install
+        do: ./vendor/bin/phpunit tests --verbose --coverage-text
