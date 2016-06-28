@@ -14,12 +14,31 @@ namespace Zicht\Service\Common;
 interface ResponseInterface
 {
     /**
-     * Get the property it the specified path
+     * Get the property at the specified path
+     *
+     * For example:
+     * > $response->getPropertyDeep(['response', 'product'])
      *
      * @param array $path
      * @return mixed
      */
     public function getPropertyDeep(array $path);
+
+    /**
+     * Get zero of more properties at the specified path.
+     *
+     * The path indicators ending with '[]' will be assumed to be arrays.
+     *
+     * For example:
+     * > $response->getPropertyDeep(['response', 'product', 'prices[]'])
+     *
+     * The return value is an array with [$path, $value] tuples.  This
+     * $path can be used in both getPropertyDeep and setPropertyDeep.
+     *
+     * @param array $path
+     * @return array
+     */
+    public function getPropertiesDeep(array $path);
 
     /**
      * Sets a response property at the specified path.

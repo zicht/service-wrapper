@@ -133,8 +133,19 @@ class Response implements ResponseInterface
      */
     public function getPropertyDeep(array $path)
     {
-        $ptr = $this->response;
-        foreach ($path as $key) {
+        return $this->_getPropertyDeep($this->response, $path);
+    }
+
+    /**
+     * Returns a property at $propertyPath in the $ptr data
+     *
+     * @param $ptr
+     * @param array $propertyPath
+     * @return mixed|null
+     */
+    protected function _getPropertyDeep($ptr, array $propertyPath)
+    {
+        foreach ($propertyPath as $key) {
             if (is_object($ptr) && isset($ptr->$key)) {
                 $ptr =& $ptr->$key;
             } elseif (is_array($ptr) && isset($ptr[$key])) {
@@ -143,10 +154,54 @@ class Response implements ResponseInterface
                 return null;
             }
         }
-
         return $ptr;
     }
 
+    /** 
+     * @{inheritDoc} 
+     */
+    public function getPropertiesDeep(array $propertyPath)
+    {
+        // prepare a nested property path
+        $flatPropertyPath = [];
+        $nestedPropertyPath = [];
+        foreach ($propertyPath as $key) {
+            if (is_string($key) && preg_match('/^(.+)\[\]$/', $key, $matches)) {
+                $flatPropertyPath [] = $matches[1];
+                $nestedPropertyPath [] = [$flatPropertyPath, true];
+                $flatPropertyPath = [];
+            } else {
+                $flatPropertyPath [] = $key;
+            }
+        }
+        if (!empty($flatPropertyPath)) {
+            $nestedPropertyPath [] = [$flatPropertyPath, false];
+        }
+
+        // create list with raw data and their absolute path
+        $pointers = [[[], $this->response]];
+        foreach ($nestedPropertyPath as list($flatPropertyPath, $multiple)) {
+            $newPointers = [];
+            foreach ($pointers as list($basePath, $pointer)) {
+                $pointer = $this->_getPropertyDeep($pointer, $flatPropertyPath);
+                if ($multiple) {
+                    if (is_array($pointer)) {
+                        foreach ($pointer as $key => $value) {
+                            $absolutePath = array_merge($basePath, $flatPropertyPath, [$key]);
+                            $newPointers [] = [$absolutePath, $value];
+                        }
+                    }
+
+                } else {
+                    $absolutePath = array_merge($basePath, $flatPropertyPath);
+                    $newPointers [] = [$absolutePath, $pointer];
+                }
+            }
+            $pointers = $newPointers;
+        }
+
+        return $pointers;
+    }
 
     /**
      * @{inheritDoc}
