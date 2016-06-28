@@ -163,8 +163,8 @@ class Response implements ResponseInterface
     public function getPropertiesDeep(array $propertyPath)
     {
         // prepare a nested property path
-        $flatPropertyPath = [];
-        $nestedPropertyPath = [];
+        $flatPropertyPath = array();
+        $nestedPropertyPath = array();
         foreach ($propertyPath as $key) {
             if (is_string($key) && preg_match('/^(.+)\[\]$/', $key, $matches)) {
                 $flatPropertyPath [] = $matches[1];
@@ -179,16 +179,16 @@ class Response implements ResponseInterface
         }
 
         // create list with raw data and their absolute path
-        $pointers = [[[], $this->response]];
+        $pointers = array(array(array(), $this->response));
         foreach ($nestedPropertyPath as list($flatPropertyPath, $multiple)) {
-            $newPointers = [];
+            $newPointers = array();
             foreach ($pointers as list($basePath, $pointer)) {
                 $pointer = $this->_getPropertyDeep($pointer, $flatPropertyPath);
                 if (!is_null($pointer)) {
                     if ($multiple) {
                         if (is_array($pointer)) {
                             foreach ($pointer as $key => $value) {
-                                $absolutePath = array_merge($basePath, $flatPropertyPath, [$key]);
+                                $absolutePath = array_merge($basePath, $flatPropertyPath, array($key));
                                 $newPointers [] = [$absolutePath, $value];
                             }
                         }
