@@ -184,17 +184,19 @@ class Response implements ResponseInterface
             $newPointers = [];
             foreach ($pointers as list($basePath, $pointer)) {
                 $pointer = $this->_getPropertyDeep($pointer, $flatPropertyPath);
-                if ($multiple) {
-                    if (is_array($pointer)) {
-                        foreach ($pointer as $key => $value) {
-                            $absolutePath = array_merge($basePath, $flatPropertyPath, [$key]);
-                            $newPointers [] = [$absolutePath, $value];
+                if (!is_null($pointer)) {
+                    if ($multiple) {
+                        if (is_array($pointer)) {
+                            foreach ($pointer as $key => $value) {
+                                $absolutePath = array_merge($basePath, $flatPropertyPath, [$key]);
+                                $newPointers [] = [$absolutePath, $value];
+                            }
                         }
-                    }
 
-                } else {
-                    $absolutePath = array_merge($basePath, $flatPropertyPath);
-                    $newPointers [] = [$absolutePath, $pointer];
+                    } else {
+                        $absolutePath = array_merge($basePath, $flatPropertyPath);
+                        $newPointers [] = [$absolutePath, $pointer];
+                    }
                 }
             }
             $pointers = $newPointers;
