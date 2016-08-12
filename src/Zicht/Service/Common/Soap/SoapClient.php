@@ -20,8 +20,6 @@ class SoapClient extends \SoapClient
      * The rewrite urls can be used to rewrite action URLs the SoapClient should operate. If the main wsdl imports
      * WSDL that refer to locations not reachable on the network, for example, those urls get rewritten when doing
      *
-     *
-     *
      * @param string $wsdl
      * @param array $options
      * @param array $rewriteUrls

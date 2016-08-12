@@ -41,14 +41,21 @@ class ServiceWrapper
     private $service;
 
     /**
-     * Constructs the facade based on the given soap client
+     * Constructs the facade based on the given service implementation
      *
      * @param mixed $service
      */
     public function __construct($service)
     {
-        $this->service = $service;
+        if ($service instanceof ServiceFactoryInterface) {
+            $this->serviceFactory = $service;
+            $this->service = null;
+        } else {
+            $this->serviceFactory = null;
+            $this->service = $service;
+        }
     }
+
 
     /**
      * Returns the wrapped service
@@ -57,6 +64,10 @@ class ServiceWrapper
      */
     public function getWrappedService()
     {
+        if (null === $this->service) {
+            $this->factory();
+        }
+
         return $this->service;
     }
 
@@ -122,7 +133,7 @@ class ServiceWrapper
      *
      * @throws \Exception
      */
-    public function __call($methodName, $args)
+    final public function __call($methodName, $args)
     {
         if (count($this->callStack)) {
             $parent = $this->callStack[count($this->callStack) -1];
@@ -139,6 +150,7 @@ class ServiceWrapper
         }
         try {
             if (!$call->isCancelled()) {
+                $this->factory(); // initialize the service, if it was not yet initialized.
                 $call->getResponse()->setResponse($this->execute($call));
             }
         } catch (\Exception $exception) {
@@ -208,5 +220,19 @@ class ServiceWrapper
             new Response(),
             $parent
         );
+    }
+
+
+    /**
+     * Calls the factory to initialize the service if applicable.
+     */
+    private function factory()
+    {
+        if (null === $this->serviceFactory) {
+            return;
+        }
+
+        $this->service = $this->serviceFactory->createService();
+        $this->serviceFactory = null;
     }
 }
