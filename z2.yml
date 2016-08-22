@@ -4,6 +4,10 @@ vcs:
     url: svn://zon/projecten/zicht-libraries/ZichtServiceWrapper
 
 tasks:
+    ci.all:
+        - @ci.phpcs
+        - @ci.phpunit
+
     ci.phpcs:
         pre: composer install
         do: ./vendor/bin/phpcs --standard=vendor/zicht-standards/php/Zicht src/

@@ -15,6 +15,9 @@ class RedisTest extends \PHPUnit_Framework_TestCase
      */
     public function testIntegration()
     {
+        if (!class_exists('\Redis')) {
+            $this->markTestSkipped("Redis extension not loaded");
+        }
         try {
             new \Redis();
         } catch(\Exception $e) {
