@@ -106,6 +106,7 @@ class CurlStreamWrapper
      * @return string content from pos to count
      */
     // @codingStandardsIgnoreStart
+    // @codeCoverageIgnoreStart
     public function stream_read($count)
     {
     // @codingStandardsIgnoreEnd
@@ -119,6 +120,7 @@ class CurlStreamWrapper
 
         return $read;
     }
+    // @codeCoverageIgnoreEnd
 
     /**
      * write the stream
@@ -127,6 +129,7 @@ class CurlStreamWrapper
      * @return string content from pos to count
      */
     // @codingStandardsIgnoreStart
+    // @codeCoverageIgnoreStart
     public function stream_write($data)
     {
     // @codingStandardsIgnoreEnd
@@ -135,6 +138,7 @@ class CurlStreamWrapper
         }
         return true;
     }
+    // @codeCoverageIgnoreEnd
 
 
     /**
@@ -157,11 +161,13 @@ class CurlStreamWrapper
      * @return int the position of the current read pointer
      */
     // @codingStandardsIgnoreStart
+    // @codeCoverageIgnoreStart
     public function stream_tell()
     {
     // @codingStandardsIgnoreEnd
         return $this->pos;
     }
+    // @codeCoverageIgnoreEnd
 
     /**
      * Flush stream data

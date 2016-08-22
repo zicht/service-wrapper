@@ -16,6 +16,9 @@ use \Zicht\Service\Common\Request;
 use \Zicht\Service\Common\Response;
 use \Zicht\Service\Common\ServiceCall;
 
+/**
+ * @covers \Zicht\Service\Common\Observers\Cache
+ */
 class CacheTest extends PHPUnit_Framework_TestCase {
     /**
      * @var Cache

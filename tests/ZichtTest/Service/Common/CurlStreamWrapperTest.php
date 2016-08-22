@@ -11,12 +11,11 @@ use Zicht\Service\Common\Soap\SoapClient;
 
 /**
  * @covers Zicht\Service\Common\CurlStreamWrapper
+ * @covers Zicht\Service\Common\Soap\SoapClient
+ * @group integration
  */
 class CurlStreamWrapperTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @group integration
-     */
     public function testSoapIntegration()
     {
         // this wsdl comes from http://quicksoftwaretesting.com/sample-wsdl-urls-testing-soapui/

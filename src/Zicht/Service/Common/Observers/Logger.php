@@ -13,6 +13,8 @@ use Zicht\Service\Common\ServiceCallInterface;
  */
 class Logger extends LoggableServiceObserverAdapter
 {
+    protected $timer = null;
+
     protected $raisedLogLevels = array();
 
     /**
@@ -20,9 +22,12 @@ class Logger extends LoggableServiceObserverAdapter
      *
      * @param bool $enableTimer
      */
-    public function __construct($enableTimer = true)
+    public function __construct($timer = true)
     {
-        $this->timer = ($enableTimer ? new Timer() : null);
+        if ($timer === true) {
+            $timer = new Timer();
+        }
+        $this->timer = $timer;
     }
 
 
@@ -61,6 +66,7 @@ class Logger extends LoggableServiceObserverAdapter
 
         $time = null;
         $logLevel = $this->getDefaultLogLevel($call);
+
         $msg = $call->getRequest()->getMethod() . ' done';
 
         if ($this->timer) {

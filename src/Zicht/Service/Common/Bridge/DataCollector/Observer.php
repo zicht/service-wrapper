@@ -37,10 +37,22 @@ class Observer implements ServiceObserver
      */
     public function notifyAfter(ServiceCallInterface $call)
     {
+        $message = null;
+        if ($call->getResponse()->isError()) {
+            $error = $call->getResponse()->getError();
+            if ($error instanceof \Exception) {
+                $message = sprintf('%s (%s)', $error->getMessage(), get_class($error));
+            } elseif (is_object($error)) {
+                $message = sprintf('Unknown error (%s)', get_class($error));
+            } else {
+                $message = $error;
+            }
+        }
+
         $this->calls[spl_object_hash($call)] = [
             'response' => $call->getResponse()->getResponse(),
             'cancelledBy' => $call->getCancelledBy(),
-            'error' => $call->getResponse()->isError() ? sprintf('%s (%s)', $call->getResponse()->getError()->getMessage(), get_class($call->getResponse()->getError())) : null,
+            'error' => $message,
             'is_error' => $call->getResponse()->isError(),
             't_end' => microtime(true),
             'mem_end' => memory_get_usage()

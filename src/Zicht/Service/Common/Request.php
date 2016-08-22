@@ -170,18 +170,13 @@ class Request implements RequestInterface
      */
     public function __toString()
     {
-        try {
-            $ret = $this->getMethod() . '(' . "\n";
-            $ret .= preg_replace(
-                '/^/m',
-                '    ',
-                Debug::dump($this->getParameters(), 2)
-            );
-            $ret .= ')';
-        } catch (\Exception $e) {
-            var_dump($e);
-            die();
-        }
+        $ret = $this->getMethod() . '(' . "\n";
+        $ret .= preg_replace(
+            '/^/m',
+            '    ',
+            Debug::dump($this->getParameters(), 2)
+        );
+        $ret .= ')';
         return $ret;
     }
 
@@ -189,7 +184,7 @@ class Request implements RequestInterface
      * @param array $attributes
      * @return void
      */
-    public function setAttributes($attributes)
+    public function setAttributes(array $attributes)
     {
         $this->attributes = $attributes;
     }

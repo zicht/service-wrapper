@@ -99,4 +99,68 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         $response->setPropertyDeep(array(0, 'a', 'b', 'c'), $value2);
         $this->assertEquals($value2, $response->getPropertyDeep(array(0, 'a', 'b', 'c')));
     }
+
+    function testSetPropertyDeepIfValueNotPreviouslySetOnObject()
+    {
+        $value2 = rand(10000, 19999);
+        $response = new Response(array(['a' => (object) ['b' => 'foo']]));
+        $response->setPropertyDeep(array(0, 'a', 'c'), $value2);
+        $this->assertEquals($value2, $response->getPropertyDeep(array(0, 'a', 'c')));
+    }
+
+    function testSetCachable()
+    {
+        $response = new Response();
+
+        // by default, all responses are cachable, until specified otherwise.
+        $this->assertTrue($response->isCachable());
+        $response->setCachable(true);
+        $this->assertTrue($response->isCachable());
+
+        $response->setCachable(false);
+        $this->assertFalse($response->isCachable());
+    }
+
+    /**
+     * @dataProvider supportedErrors
+     */
+    function testSetError($error)
+    {
+        $response = new Response();
+        $this->assertFalse($response->isError());
+
+        $response->setError($error);
+        $this->assertTrue($response->isError());
+
+        $this->assertEquals($error, $response->getError());
+    }
+    public function supportedErrors()
+    {
+        return [
+            ["error as string"],
+            [new \Exception("error as exception")]
+        ];
+    }
+
+    function testSetResponse()
+    {
+        $response = new Response();
+        $this->assertNull($response->getResponse());
+
+        $response->setResponse(['a' => 'b']);
+        $this->assertEquals(['a' => 'b'], $response->getResponse());
+
+        $response->setPropertyDeep(['a'], 'X');
+        $this->assertEquals(['a' => 'X'], $response->getResponse());
+    }
+
+
+    function testStringRepresentation()
+    {
+        $response = new Response();
+        $response->setResponse(['prop' => 'value']);
+
+        $this->assertRegExp('/prop/', (string)$response);
+        $this->assertRegExp('/value/', (string)$response);
+    }
 }
