@@ -5,6 +5,7 @@ vcs:
 
 tasks:
     ci.all:
+        - rm -f composer.lock # only run with clean composer install
         - @ci.phpcs
         - @ci.phpunit
 
