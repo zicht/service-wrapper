@@ -12,9 +12,10 @@ namespace Zicht\Service\Common;
 class CurlStreamWrapper
 {
     /**
-     * @var string[string]string
+     * @var array
      */
-    private static $rewrites;
+    private static $rewrites = [];
+    private static $protocols = [];
 
     /**
      * Register the wrapper.
@@ -22,17 +23,20 @@ class CurlStreamWrapper
      * @param string[] $rewrites
      * @return void
      */
-    public static function register(array $rewrites = [])
+    public static function register(array $rewrites = [], $protocols = ['http', 'https'])
     {
         // we unregister the current HTTP wrapper
-        @stream_wrapper_unregister('http');
-        @stream_wrapper_unregister('https');
+        foreach ($protocols as $protocol) {
+            @stream_wrapper_unregister($protocol);
+        }
 
+        self::$protocols = $protocols;
         self::$rewrites = $rewrites;
 
         // we register the new HTTP wrapper
-        stream_wrapper_register('http', __CLASS__);
-        stream_wrapper_register('https', __CLASS__);
+        foreach ($protocols as $protocol) {
+            @stream_wrapper_register($protocol, __CLASS__);
+        }
     }
 
 
@@ -43,8 +47,10 @@ class CurlStreamWrapper
      */
     public static function unregister()
     {
-        stream_wrapper_restore('https');
-        stream_wrapper_restore('http');
+        // we unregister the current HTTP wrapper
+        foreach (self::$protocols as $protocol) {
+            @stream_wrapper_unregister($protocol);
+        }
 
         self::$rewrites = [];
     }
@@ -57,16 +63,6 @@ class CurlStreamWrapper
     private $buffer;
     private $pos;
     private $ch;
-
-    /**
-     * Stub for logging
-     *
-     * @param string $str
-     * @return void
-     */
-    protected function log($str)
-    {
-    }
 
     /**
      * Open the stream
