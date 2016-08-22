@@ -93,7 +93,7 @@ class MemoryStorage implements Storage
      */
     public function getKeys()
     {
-        return get_object_vars($this->container);
+        return array_keys(get_object_vars($this->container));
     }
 
 

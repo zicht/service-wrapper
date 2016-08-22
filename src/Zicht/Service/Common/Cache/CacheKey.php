@@ -37,10 +37,7 @@ final class CacheKey implements CacheKeyInterface
             function ($v, $m) use ($allowDepth) {
                 return $v && (
                     is_scalar($m)
-                    || (
-                        $allowDepth > 1
-                        && self::isAllScalar($m, $allowDepth -1)
-                    )
+                    || ($allowDepth > 1 && self::isAllScalar($m, $allowDepth -1))
                 );
             },
             true

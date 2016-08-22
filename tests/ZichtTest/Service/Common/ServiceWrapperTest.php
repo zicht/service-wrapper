@@ -6,8 +6,11 @@
 
 namespace ZichtTest\Service\Common;
 
+use Zicht\Service\Common\Factory;
 use \Zicht\Service\Common\Observers\ServiceObserverAdapter;
 use \Zicht\Service\Common\ServiceCallInterface;
+use Zicht\Service\Common\ServiceFactoryInterface;
+use Zicht\Service\Common\ServiceObserver;
 use \Zicht\Service\Common\ServiceWrapper;
 
 
@@ -285,5 +288,58 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase {
             'notifyAfter@1',
             'notifyAfter@2'
         ), $order);
+    }
+
+
+    public function testServiceFactoryWillNotCreateServiceAtConstructionTime()
+    {
+        $mock = $this->getMock(ServiceFactoryInterface::class);
+        $mock->expects($this->never())->method('createService');
+        $wrapper = new ServiceWrapper($mock);
+    }
+
+    public function testServiceFactoryWillCreateServiceIfWrappedServiceIsRequested()
+    {
+        $mock = $this->getMock(ServiceFactoryInterface::class);
+        $mock->expects($this->once())->method('createService');
+        $wrapper = new ServiceWrapper($mock);
+        $wrapper->getWrappedService();
+    }
+
+    public function testServiceFactoryWillCreateServiceOnceIfWrappedServiceIsRequestedMultipleTimes()
+    {
+        $mock = $this->getMock(ServiceFactoryInterface::class);
+        $mock->expects($this->once())->method('createService');
+        $wrapper = new ServiceWrapper($mock);
+        $wrapper->getWrappedService();
+        $wrapper->getWrappedService();
+    }
+
+
+    public function testRegisterObserverAtIndex()
+    {
+        $wrapper = new ServiceWrapper(new \stdClass());
+        $wrapper->registerObserver($first = $this->getMock(ServiceObserver::class));
+        $this->assertEquals([$first], $wrapper->getObservers());
+        $wrapper->registerObserver($second = $this->getMock(ServiceObserver::class));
+        $this->assertEquals([$first, $second], $wrapper->getObservers());
+        $wrapper->registerObserver($newSecond = $this->getMock(ServiceObserver::class), 1);
+        $this->assertEquals([$first, $newSecond, $second], $wrapper->getObservers());
+    }
+
+    public function testUnregisterObserver()
+    {
+        $wrapper = new ServiceWrapper(new \stdClass());
+        $wrapper->registerObserver($first = $this->getMock(ServiceObserver::class));
+        $this->assertEquals([$first], $wrapper->getObservers());
+        $wrapper->registerObserver($second = $this->getMock(ServiceObserver::class));
+        $this->assertEquals([$first, $second], $wrapper->getObservers());
+        $wrapper->registerObserver($newSecond = $this->getMock(ServiceObserver::class), 1);
+        $this->assertEquals([$first, $newSecond, $second], $wrapper->getObservers());
+
+        $this->assertEquals([0, $first], $wrapper->unregisterObserver($first));
+        $this->assertEquals([$newSecond, $second], $wrapper->getObservers());
+
+        $this->assertEquals(null, $wrapper->unregisterObserver('SomeUnregisteredObserver'));
     }
 }

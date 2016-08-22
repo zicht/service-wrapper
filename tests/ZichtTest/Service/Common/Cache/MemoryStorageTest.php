@@ -10,19 +10,22 @@ use \PHPUnit_Framework_TestCase;
 
 use \Zicht\Service\Common\Cache\MemoryStorage;
 
-class MemoryStorageTest extends PHPUnit_Framework_TestCase {
+class MemoryStorageTest extends PHPUnit_Framework_TestCase
+{
     protected $container;
 
     /** @var MemoryStorage */
     protected $storage;
 
-    function setUp() {
+    function setUp()
+    {
         $this->container = new \stdClass;
         $this->storage = new MemoryStorage($this->container);
     }
 
 
-    function testReadWillReturnDataKeyFromContainerClass() {
+    function testReadWillReturnDataKeyFromContainerClass()
+    {
         $data = rand(1, 9999);
         $this->container->myKey = array(
             'data' => $data
@@ -31,7 +34,8 @@ class MemoryStorageTest extends PHPUnit_Framework_TestCase {
     }
 
 
-    function testWriteWillSaveDataInContainerClass() {
+    function testWriteWillSaveDataInContainerClass()
+    {
         $data = rand(1, 9999);
         $this->storage->write('myKey', $data, 10);
         $this->assertEquals($data, $this->container->myKey['data']);
@@ -40,36 +44,42 @@ class MemoryStorageTest extends PHPUnit_Framework_TestCase {
     }
 
 
-    function testIsValidWillCheckIfKeyExists() {
+    function testIsValidWillCheckIfKeyExists()
+    {
         $this->assertFalse($this->storage->isValid('myKey', 10));
     }
 
 
-    function testIsValidWillReturnFalseIfFormatIsInvalid() {
+    function testIsValidWillReturnFalseIfFormatIsInvalid()
+    {
         $this->container->myKey = array('foo' => 'bar');
         $this->assertFalse($this->storage->isValid('myKey', 10));
     }
 
-    function testIsValidWillRemoveObjectFromStorage() {
+    function testIsValidWillRemoveObjectFromStorage()
+    {
         $this->container->myKey = array('foo' => 'bar');
         $this->storage->isValid('myKey', 10);
         $this->assertFalse(property_exists($this->container, 'myKey'));
     }
 
 
-    function testIsValidWillReturnTrueIfTtlIsNull() {
+    function testIsValidWillReturnTrueIfTtlIsNull()
+    {
         $this->storage->write('myKey', 'a', null);
         $this->assertTrue($this->storage->isValid('myKey', null));
     }
 
 
-    function testIsValidWillReturnFalseIfObjectExpired() {
+    function testIsValidWillReturnFalseIfObjectExpired()
+    {
         $this->storage->write('myKey', 'a', null);
         $this->container->myKey['time'] = time() - 100;
         $this->assertFalse($this->storage->isValid('myKey', 10));
     }
 
-    function testIsValidWillRemoveObjectIfExpired() {
+    function testIsValidWillRemoveObjectIfExpired()
+    {
         $this->storage->write('myKey', 'a', null);
         $this->container->myKey['time'] = time() - 100;
         $this->storage->isValid('myKey', 10);
@@ -77,10 +87,18 @@ class MemoryStorageTest extends PHPUnit_Framework_TestCase {
     }
 
 
-    function testIsValidWillLetIsValidTtlPrevail() {
+    function testIsValidWillLetIsValidTtlPrevail()
+    {
         $this->storage->write('myKey', 'a', 200);
         $this->container->myKey['time'] = time() - 100;
         $this->assertFalse($this->storage->isValid('myKey', 10));
         $this->assertFalse(property_exists($this->container, 'myKey'));
+    }
+
+    function testGetKeys()
+    {
+        $this->storage->write('a', '1', 10);
+        $this->storage->write('b', '2', 10);
+        $this->assertEquals(['a', 'b'], $this->storage->getKeys());
     }
 }

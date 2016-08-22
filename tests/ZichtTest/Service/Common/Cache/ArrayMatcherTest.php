@@ -119,4 +119,10 @@ class ArrayMatcherTest extends PHPUnit_Framework_TestCase
         // attribute five and three exists, three has the lowest ttl
         $this->assertEquals(3, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'), array('five' => 'foo', 'three' => 'foo'))));
     }
+
+
+    public function testIsExpunger()
+    {
+        $this->assertFalse((new ArrayMatcher([]))->isExpunger($this->getMock(RequestInterface::class)));
+    }
 }

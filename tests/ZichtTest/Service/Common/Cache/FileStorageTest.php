@@ -51,6 +51,14 @@ class FileStorageTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('/tmp/file-storage-test/k/e/y/key', $storage->getFilePath('key'));
     }
 
+    function testGetFilePathWillShortenFileName() {
+        $storage = new FileStorage('/tmp/file-storage-test');
+        $this->assertRegExp(
+            '!^/tmp/file-storage-test/s/o/m/e/some-long-filename-which-we-ex[a-z0-9]{40}$!',
+            $storage->getFilePath('some-long-filename-which-we-expect-to-be-truncated-because-of-its-length')
+        );
+    }
+
 
     function testGetKeys() {
         $storage = new FileStorage($this->path);

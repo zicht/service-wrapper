@@ -21,6 +21,7 @@ class CurlStreamWrapper
      * Register the wrapper.
      *
      * @param string[] $rewrites
+     * @param string[] $protocols
      * @return void
      */
     public static function register(array $rewrites = [], $protocols = ['http', 'https'])
@@ -221,9 +222,11 @@ class CurlStreamWrapper
      */
     private function createBuffer($location)
     {
+        //@codeCoverageIgnoreStart
         if ($this->buffer) {
             return;
         }
+        //@codeCoverageIgnoreEnd
 
         foreach (self::$rewrites as $pattern => $replacement) {
             $location = preg_replace($pattern, $replacement, $location);

@@ -20,7 +20,7 @@ class Logger extends LoggableServiceObserverAdapter
     /**
      * Constructs the Logger observer
      *
-     * @param bool $enableTimer
+     * @param bool|Timer $timer
      */
     public function __construct($timer = true)
     {
