@@ -6,8 +6,8 @@
 
 namespace Zicht\Service\Common\Soap\Observer;
 
-use \Zicht\Service\Common\Observers\ServiceObserverAdapter;
-use \Zicht\Service\Common\ServiceCallInterface;
+use Zicht\Service\Common\Observers\ServiceObserverAdapter;
+use Zicht\Service\Common\ServiceCallInterface;
 
 /**
  * Adds SOAP request logging to the service call
@@ -21,9 +21,12 @@ class VerboseLoggingObserver extends ServiceObserverAdapter
      */
     public function notifyAfter(ServiceCallInterface $call)
     {
-        $call->addLogAttributes(array(
-            'request'   => $call->getService()->getWrappedService()->__getLastRequest(),
-            'response'  => $call->getService()->getWrappedService()->__getLastResponse()
-        ));
+        $wrappedService = $call->getService()->getWrappedService();
+        $call->addLogAttributes(
+            [
+                'request'   => $wrappedService->__getLastRequest(),
+                'response'  => $wrappedService->__getLastResponse()
+            ]
+        );
     }
 }

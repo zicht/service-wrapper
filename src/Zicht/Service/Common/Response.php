@@ -5,7 +5,7 @@
  */
 namespace Zicht\Service\Common;
 
-use \Zicht\Util\Debug;
+use Zicht\Util\Debug;
 
 /**
  * SOAP Response wrapper
@@ -133,17 +133,17 @@ class Response implements ResponseInterface
      */
     public function getPropertyDeep(array $path)
     {
-        return $this->_getPropertyDeep($this->response, $path);
+        return $this->getPropertyDeepFrom($this->response, $path);
     }
 
     /**
      * Returns a property at $propertyPath in the $ptr data
      *
-     * @param $ptr
+     * @param mixed $ptr
      * @param array $propertyPath
      * @return mixed|null
      */
-    protected function _getPropertyDeep($ptr, array $propertyPath)
+    protected function getPropertyDeepFrom($ptr, array $propertyPath)
     {
         foreach ($propertyPath as $key) {
             if (is_object($ptr) && isset($ptr->$key)) {
@@ -183,7 +183,7 @@ class Response implements ResponseInterface
         foreach ($nestedPropertyPath as list($flatPropertyPath, $multiple)) {
             $newPointers = array();
             foreach ($pointers as list($basePath, $pointer)) {
-                $pointer = $this->_getPropertyDeep($pointer, $flatPropertyPath);
+                $pointer = $this->getPropertyDeepFrom($pointer, $flatPropertyPath);
                 if (!is_null($pointer)) {
                     if ($multiple) {
                         if (is_array($pointer)) {
@@ -192,7 +192,6 @@ class Response implements ResponseInterface
                                 $newPointers [] = array($absolutePath, $value);
                             }
                         }
-
                     } else {
                         $absolutePath = array_merge($basePath, $flatPropertyPath);
                         $newPointers [] = array($absolutePath, $pointer);

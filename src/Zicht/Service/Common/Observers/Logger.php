@@ -6,9 +6,7 @@
 
 namespace Zicht\Service\Common\Observers;
 
-use \Exception;
-use \DOMDocument;
-use \Zicht\Service\Common\ServiceCallInterface;
+use Zicht\Service\Common\ServiceCallInterface;
 
 /**
  * The Logger is a logger utility to have request and response information logged in a Monolog\Logger implementation.

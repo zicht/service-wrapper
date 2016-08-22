@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector as BaseCollector;
 
+/**
+ * Data collector for calls to the wrapped service
+ */
 class DataCollector extends BaseCollector
 {
     /**
@@ -27,11 +30,15 @@ class DataCollector extends BaseCollector
         $this->data = ['calls' => $this->observer->getCalls()];
     }
 
-
+    /**
+     * Returns a list of calls with meta data
+     *
+     * @return array
+     */
     public function getCalls()
     {
         return array_map(
-            function($c) {
+            function ($c) {
                 $c['t_delta'] = -1;
                 $c['mem_delta'] = -1;
 
@@ -48,7 +55,11 @@ class DataCollector extends BaseCollector
     }
 
 
-
+    /**
+     * Get a summary for collected data
+     *
+     * @return string
+     */
     public function getSummary()
     {
         $ret = sprintf(
@@ -62,12 +73,17 @@ class DataCollector extends BaseCollector
     }
 
 
+    /**
+     * Get the total time spent inside the service call.
+     *
+     * @return float
+     */
     public function getTimeSpent()
     {
         return floor(
             array_sum(
                 array_map(
-                    function($call) {
+                    function ($call) {
                         return $call['t_end'] - $call['t_start'];
                     },
                     $this->data['calls']
@@ -77,17 +93,26 @@ class DataCollector extends BaseCollector
     }
 
 
+    /**
+     * Return the number of calls executed
+     *
+     * @return int
+     */
     public function getCallCount()
     {
         return count($this->data['calls']);
     }
 
-
+    /**
+     * Return the number of calls that resulted in an error
+     *
+     * @return mixed
+     */
     public function getErrorCount()
     {
         return array_reduce(
             $this->data['calls'],
-            function($t, $c) {
+            function ($t, $c) {
                 if ($c['is_error']) {
                     return $t +1;
                 }

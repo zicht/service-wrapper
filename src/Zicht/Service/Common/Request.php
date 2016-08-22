@@ -4,8 +4,8 @@
  * @copyright Zicht Online <http://zicht.nl>
  */
 namespace Zicht\Service\Common;
-use Zicht\Util\Debug;
 
+use Zicht\Util\Debug;
 
 /**
  * A request wrapper class for any request that gets sent to the Soap backend

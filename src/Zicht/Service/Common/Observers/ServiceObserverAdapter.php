@@ -6,8 +6,8 @@
 
 namespace Zicht\Service\Common\Observers;
 
-use \Zicht\Service\Common\ServiceCallInterface;
-use \Zicht\Service\Common\ServiceObserver;
+use Zicht\Service\Common\ServiceCallInterface;
+use Zicht\Service\Common\ServiceObserver;
 
 /**
  * Adapter for the ServiceObserver interface

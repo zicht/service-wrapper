@@ -75,6 +75,7 @@ class ServiceWrapper
      * Add an observer to the list of observers
      *
      * @param ServiceObserver $observer
+     * @param int $index
      * @return void
      */
     public function registerObserver(ServiceObserver $observer, $index = null)

@@ -6,8 +6,8 @@
 
 namespace Zicht\Service\Common\Observers;
 
-use \Zicht\Service\Common\Cache\CacheConfiguration;
-use \Zicht\Service\Common\ServiceCallInterface;
+use Zicht\Service\Common\Cache\CacheConfiguration;
+use Zicht\Service\Common\ServiceCallInterface;
 
 /**
  * The Cache observer caches responses per identified method in the passed cache container as object properties.
@@ -26,7 +26,7 @@ class Cache extends LoggableServiceObserverAdapter
      *
      * @var array
      */
-    protected $_stack = array();
+    protected $stack = array();
 
 
     /**
@@ -70,7 +70,7 @@ class Cache extends LoggableServiceObserverAdapter
                         'response' => $event->getResponse()
                     )
                 );
-                $this->_stack[] = true;
+                $this->stack[] = true;
             } else {
                 $this->addLogRecord(
                     self::DEBUG,
@@ -80,10 +80,10 @@ class Cache extends LoggableServiceObserverAdapter
                         'request' => $event->getRequest()
                     )
                 );
-                $this->_stack[]= false;
+                $this->stack[]= false;
             }
         } else {
-            $this->_stack[]= false;
+            $this->stack[]= false;
         }
     }
 
@@ -98,7 +98,7 @@ class Cache extends LoggableServiceObserverAdapter
      */
     public function notifyAfter(ServiceCallInterface $event)
     {
-        if (!array_pop($this->_stack)) {
+        if (!array_pop($this->stack)) {
             if (
                 !$event->getResponse()->isError()
                 && $this->container->isCachable($event->getRequest())

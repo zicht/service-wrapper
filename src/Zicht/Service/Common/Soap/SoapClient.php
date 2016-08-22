@@ -5,6 +5,7 @@
  */
 
 namespace Zicht\Service\Common\Soap;
+
 use Zicht\Service\Common\CurlStreamWrapper;
 
 /**
@@ -36,6 +37,7 @@ class SoapClient extends \SoapClient
             $options + array(
                 'compression' =>SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
                 'features' => SOAP_SINGLE_ELEMENT_ARRAYS,
+                'connection_timeout' => 1,
                 'trace' => 0
             )
         );
@@ -50,8 +52,10 @@ class SoapClient extends \SoapClient
     /**
      * @{inheritDoc}
      */
+    // @codingStandardsIgnoreStart
     public function __doRequest($request, $location, $action, $version, $one_way = 0)
     {
+    // @codingStandardsIgnoreEnd
         foreach ($this->rewriteUrls as $pattern => $replacement) {
             $location = preg_replace($pattern, $replacement, $location);
         }

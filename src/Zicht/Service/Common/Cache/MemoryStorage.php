@@ -10,7 +10,8 @@ namespace Zicht\Service\Common\Cache;
  * Storage "in-memory", i.e. the response is stored in a property of the cache object, which will (of course) be gone
  * the next page load.
  */
-class MemoryStorage implements Storage {
+class MemoryStorage implements Storage
+{
     /**
      * Construct the object storage with the specified container
      *

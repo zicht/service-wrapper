@@ -6,7 +6,7 @@
 
 namespace Zicht\Service\Common\Cache;
 
-use \Zicht\Service\Common\RequestInterface;
+use Zicht\Service\Common\RequestInterface;
 
 /**
  * The request matcher can tell which requests a specific storage can cache, what key to use (i.e., what identifies

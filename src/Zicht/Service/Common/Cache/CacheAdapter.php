@@ -6,8 +6,8 @@
 
 namespace Zicht\Service\Common\Cache;
 
-use \Zicht\Service\Common\RequestInterface;
-use \Zicht\Service\Common\ResponseInterface;
+use Zicht\Service\Common\RequestInterface;
+use Zicht\Service\Common\ResponseInterface;
 
 /**
  * The cache is a bridge between the Storage and the RequestMatcher.

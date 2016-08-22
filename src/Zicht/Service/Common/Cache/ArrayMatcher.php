@@ -6,8 +6,7 @@
 
 namespace Zicht\Service\Common\Cache;
 
-use \Zicht\Service\Common\RequestInterface;
-
+use Zicht\Service\Common\RequestInterface;
 
 /**
  * Match a request based on an array configuration containing the method name and time to live.

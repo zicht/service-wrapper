@@ -11,9 +11,6 @@ namespace Zicht\Service\Common\Cache;
  *
  * The implementation does it's best to have a very descriptive name, so the keys tell as much as they can about
  * their contents.
- *
- * Class CacheKey
- * @package Zicht\Service\Common\Cache
  */
 final class CacheKey implements CacheKeyInterface
 {
@@ -37,7 +34,7 @@ final class CacheKey implements CacheKeyInterface
     {
         return is_array($array) && array_reduce(
             $array,
-            function ($v, $m) use($allowDepth) {
+            function ($v, $m) use ($allowDepth) {
                 return $v && (
                     is_scalar($m)
                     || (
@@ -54,6 +51,7 @@ final class CacheKey implements CacheKeyInterface
      * Construct the key with the passed name as a namespace (such as service method name)
      *
      * @param string $name
+     * @param int $readableDepth
      */
     public function __construct($name, $readableDepth = 1)
     {

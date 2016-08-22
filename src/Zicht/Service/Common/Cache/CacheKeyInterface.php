@@ -7,7 +7,9 @@
 
 namespace Zicht\Service\Common\Cache;
 
-
+/**
+ * Interface for objects that generate their own cache key
+ */
 interface CacheKeyInterface
 {
     /**

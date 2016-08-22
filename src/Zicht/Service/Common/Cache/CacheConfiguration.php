@@ -6,8 +6,8 @@
 
 namespace Zicht\Service\Common\Cache;
 
-use \Zicht\Service\Common\RequestInterface;
-use \Zicht\Service\Common\ResponseInterface;
+use Zicht\Service\Common\RequestInterface;
+use Zicht\Service\Common\ResponseInterface;
 
 /**
  * Interface for a cache configuration

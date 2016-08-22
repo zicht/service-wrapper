@@ -81,7 +81,6 @@ class RedisStorage extends RedisBase implements Storage
             function ($key) {
                 return substr($key, strlen($this->prefix));
             },
-
             $this->redis->keys('*')
         );
     }

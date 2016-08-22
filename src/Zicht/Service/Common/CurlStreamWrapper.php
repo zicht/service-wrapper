@@ -11,11 +11,15 @@ namespace Zicht\Service\Common;
  */
 class CurlStreamWrapper
 {
+    /**
+     * @var string[string]string
+     */
     private static $rewrites;
 
     /**
      * Register the wrapper.
      *
+     * @param string[] $rewrites
      * @return void
      */
     public static function register(array $rewrites = [])
@@ -73,8 +77,10 @@ class CurlStreamWrapper
      * @param string $opened_path
      * @return bool
      */
+    // @codingStandardsIgnoreStart
     public function stream_open($path, $mode, $options, $opened_path)
     {
+    // @codingStandardsIgnoreEnd
         $this->path = $path;
         $this->mode = $mode;
         $this->options = $options;
@@ -90,8 +96,10 @@ class CurlStreamWrapper
      *
      * @return void
      */
+    // @codingStandardsIgnoreStart
     public function stream_close()
     {
+    // @codingStandardsIgnoreEnd
         curl_close($this->ch);
     }
 
@@ -101,8 +109,10 @@ class CurlStreamWrapper
      * @param int $count number of bytes to read
      * @return string content from pos to count
      */
+    // @codingStandardsIgnoreStart
     public function stream_read($count)
     {
+    // @codingStandardsIgnoreEnd
         if (strlen($this->buffer) == 0) {
             return false;
         }
@@ -120,8 +130,10 @@ class CurlStreamWrapper
      * @param string $data
      * @return string content from pos to count
      */
+    // @codingStandardsIgnoreStart
     public function stream_write($data)
     {
+    // @codingStandardsIgnoreEnd
         if (strlen($this->buffer) == 0) {
             return false;
         }
@@ -134,8 +146,10 @@ class CurlStreamWrapper
      *
      * @return bool
      */
+    // @codingStandardsIgnoreStart
     public function stream_eof()
     {
+    // @codingStandardsIgnoreEnd
         if ($this->pos > strlen($this->buffer)) {
             return true;
         }
@@ -146,16 +160,20 @@ class CurlStreamWrapper
     /**
      * @return int the position of the current read pointer
      */
+    // @codingStandardsIgnoreStart
     public function stream_tell()
     {
+    // @codingStandardsIgnoreEnd
         return $this->pos;
     }
 
     /**
      * Flush stream data
      */
+    // @codingStandardsIgnoreStart
     public function stream_flush()
     {
+    // @codingStandardsIgnoreEnd
         $this->buffer = null;
         $this->pos = null;
     }
@@ -165,8 +183,10 @@ class CurlStreamWrapper
      *
      * @return array stat information
      */
+    // @codingStandardsIgnoreStart
     public function stream_stat()
     {
+    // @codingStandardsIgnoreEnd
         $this->createBuffer($this->path);
         $stat = array(
             'size' => strlen($this->buffer),
@@ -180,8 +200,10 @@ class CurlStreamWrapper
      *
      * @return array stat information
      */
+    // @codingStandardsIgnoreStart
     public function url_stat($path, $flags)
     {
+    // @codingStandardsIgnoreEnd
         $this->createBuffer($path);
         $stat = array(
             'size' => strlen($this->buffer),
@@ -206,6 +228,8 @@ class CurlStreamWrapper
         }
 
         $this->ch = curl_init($location);
+
+        curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->buffer = curl_exec($this->ch);
