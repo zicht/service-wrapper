@@ -1,2 +1,0 @@
-plugins: ['core', 'svn']
-vcs: { url: "svn://zon/projecten/zicht-libraries/ZichtServiceWrapper" }
