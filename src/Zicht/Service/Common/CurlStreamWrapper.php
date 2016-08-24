@@ -51,6 +51,7 @@ class CurlStreamWrapper
         // we unregister the current HTTP wrapper
         foreach (self::$protocols as $protocol) {
             @stream_wrapper_unregister($protocol);
+            @stream_wrapper_restore($protocol);
         }
 
         self::$rewrites = [];

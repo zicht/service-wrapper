@@ -31,20 +31,20 @@ class SoapClient extends \SoapClient
             // this wrapper is needed for reading the WSDL from a rewritten url.
             CurlStreamWrapper::register($rewriteUrls);
         }
-
-        parent::SoapClient(
-            $wsdl,
-            $options + array(
-                'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
-                'features' => SOAP_SINGLE_ELEMENT_ARRAYS,
-                'connection_timeout' => 1,
-                'trace' => 0
-            )
-        );
-        $this->rewriteUrls = $rewriteUrls;
-
-        if ($rewriteUrls) {
-            CurlStreamWrapper::unregister();
+        try {
+            parent::SoapClient(
+                $wsdl,
+                $options + array(
+                    'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
+                    'features' => SOAP_SINGLE_ELEMENT_ARRAYS,
+                    'trace' => 0
+                )
+            );
+            $this->rewriteUrls = $rewriteUrls;
+        } finally {
+            if ($rewriteUrls) {
+                CurlStreamWrapper::unregister();
+            }
         }
     }
 
