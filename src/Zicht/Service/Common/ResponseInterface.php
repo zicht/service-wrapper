@@ -90,4 +90,9 @@ interface ResponseInterface
      * @return void
      */
     public function setCachable($cachable);
+
+    /**
+     * Freeze the response, i.e. forbid any further changes.
+     */
+    public function freeze();
 }

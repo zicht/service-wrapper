@@ -12,6 +12,8 @@ use Zicht\Util\Debug;
  */
 class Response implements ResponseInterface
 {
+    use FreezableTrait;
+
     private $response;
     private $error;
 
@@ -68,6 +70,8 @@ class Response implements ResponseInterface
      */
     public function setResponse($response)
     {
+        $this->assertNotFrozen();
+
         $this->response = $response;
     }
 
@@ -80,6 +84,8 @@ class Response implements ResponseInterface
      */
     public function setError($error)
     {
+        $this->assertNotFrozen();
+
         $this->error = $error;
     }
 
@@ -209,6 +215,8 @@ class Response implements ResponseInterface
      */
     public function setPropertyDeep(array $path, $value)
     {
+        $this->assertNotFrozen();
+
         $ptr =& $this->response;
         foreach ($path as $key) {
             if (is_object($ptr)) {

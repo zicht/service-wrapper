@@ -12,6 +12,8 @@ use Zicht\Util\Debug;
  */
 class Request implements RequestInterface
 {
+    use FreezableTrait;
+
     /**
      * The service method name
      *
@@ -68,6 +70,8 @@ class Request implements RequestInterface
      */
     public function setMethod($method)
     {
+        $this->assertNotFrozen();
+
         $this->method = $method;
     }
 
@@ -76,6 +80,8 @@ class Request implements RequestInterface
      */
     public function setParameters($parameters)
     {
+        $this->assertNotFrozen();
+
         $this->parameters = $parameters;
     }
 
@@ -103,6 +109,8 @@ class Request implements RequestInterface
      */
     public function setParameterDeep(array $path, $value)
     {
+        $this->assertNotFrozen();
+
         $this->parameters = $this->setValueDeep($this->parameters, $path, $value);
     }
 

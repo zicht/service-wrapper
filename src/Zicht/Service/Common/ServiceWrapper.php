@@ -83,12 +83,7 @@ class ServiceWrapper
         if ($this->logger && $observer instanceof Observers\LoggerAwareInterface) {
             $observer->setLogger($this->logger);
         }
-
-        if (null === $index) {
-            $this->observers[] = $observer;
-        } else {
-            array_splice($this->observers, $index, null, [$observer]);
-        }
+        $this->observers[] = $observer;
     }
 
     /**
@@ -145,8 +140,11 @@ class ServiceWrapper
         $this->callStack[] = $call;
 
         /** @var ServiceObserver[] $observers */
-        $observers = array_reverse($this->observers);
-        foreach ($observers as $observer) {
+        foreach ($this->observers as $observer) {
+            $observer->alterRequest($call);
+        }
+        $call->getRequest()->freeze();
+        foreach ($this->observers as $observer) {
             $observer->notifyBefore($call);
         }
         try {
@@ -160,7 +158,11 @@ class ServiceWrapper
             $call->getResponse()->setError($exception);
         }
 
-        while ($observer = array_pop($observers)) {
+        foreach ($this->observers as $observer) {
+            $observer->alterResponse($call);
+        }
+        $call->getResponse()->freeze();
+        foreach ($this->observers as $observer) {
             $observer->notifyAfter($call);
         }
         array_pop($this->callStack);

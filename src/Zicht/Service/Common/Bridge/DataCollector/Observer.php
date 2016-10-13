@@ -6,7 +6,7 @@
 
 namespace Zicht\Service\Common\Bridge\DataCollector;
 
-use Zicht\Service\Common\ServiceObserver;
+use Zicht\Service\Common\Observers\ServiceObserverAdapter;
 use Zicht\Service\Common\ServiceCallInterface;
 
 /**
@@ -14,7 +14,7 @@ use Zicht\Service\Common\ServiceCallInterface;
  *
  * @package Zicht\Bundle\SroBundle\Controller
  */
-class Observer implements ServiceObserver
+class Observer extends ServiceObserverAdapter
 {
     protected $i = 0;
     protected $calls = [];

@@ -75,7 +75,6 @@ interface RequestInterface
      */
     public function getParameters();
 
-
     /**
      * Set the SOAP parameters
      *
@@ -99,4 +98,11 @@ interface RequestInterface
      * @return bool
      */
     public function isMethod($methodName);
+
+    /**
+     * Freeze the request, i.e. forbid any further changes.
+     *
+     * @return mixed
+     */
+    public function freeze();
 }
