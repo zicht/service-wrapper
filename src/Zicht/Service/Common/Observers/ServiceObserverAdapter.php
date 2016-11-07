@@ -25,6 +25,9 @@ class ServiceObserverAdapter implements ServiceObserver
     }
 
 
+    /**
+     * @{inheritDoc}
+     */
     public function alterResponse(ServiceCallInterface $call)
     {
     }
