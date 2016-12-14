@@ -78,7 +78,7 @@ class ServiceWrapper
      * @param int $index
      * @return void
      */
-    public function registerObserver(ServiceObserver $observer, $index = null)
+    public function registerObserver(ServiceObserverInterface $observer, $index = null)
     {
         if ($this->logger && $observer instanceof Observers\LoggerAwareInterface) {
             $observer->setLogger($this->logger);
