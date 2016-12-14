@@ -23,3 +23,6 @@
 # 2.0.0 - Important bugfix release with breaking changes #
 - ServiceObserver was renamed to ServiceObserverInterface
 - This release contains a fix related to caching which has a breaking change. See RELEASE-2.0.md for more information
+
+# 2.1.0 #
+- Add a base service for REST api's
