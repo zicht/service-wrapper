@@ -42,3 +42,12 @@ echo $wrapper->doIt("Lisa");
 
 See doc/example.php for a more thorough example.
 
+## Applications ##
+
+You can implement observer that:
+
+- Add more data to responses, i.e. to enrich data
+- Add basic logging
+- Extensively monitor requests and responses with your own observers
+- Add sanity checks and such that are costly in development, but can now easily be isolated in one object.
+- Add caching
