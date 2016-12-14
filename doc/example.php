@@ -45,6 +45,7 @@ class MyObserver implements ServiceObserverInterface
 
     public function notifyAfter(ServiceCallInterface $call)
     {
+        fprintf(STDERR, "Call was made: %s(%s)\n", $call->getRequest()->getMethod(), json_encode($call->getRequest()->getParameterDeep([0])));
     }
 
     public function alterRequest(ServiceCallInterface $call)
@@ -60,8 +61,8 @@ class MyObserver implements ServiceObserverInterface
             return;
         }
         if ($call->getResponse()->isError()) {
+            $call->getResponse()->setResponse(sprintf("%s :(\n", $call->getResponse()->getError()->getMessage()));
             $call->getResponse()->setError(null);
-            $call->getResponse()->setResponse(":(\n");
         } else {
             $response = $call->getResponse();
             $response->setResponse(str_replace('Hi', 'Hello', $response->getResponse()));
