@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * @author Gerard van Helden <gerard@zicht.nl>
+ * @copyright Zicht online
+ */
 use Zicht\Service\Common\ServiceCallInterface;
 use Zicht\Service\Common\ServiceObserverInterface;
 use Zicht\Service\Common\ServiceWrapper;
@@ -74,4 +77,3 @@ echo $wrapper->doIt("Lisa"); // output: "Hello, Lisa Simpson!"
 echo $wrapper->doIt("Smithers"); // output: "Smithers, eh?"
 echo $wrapper->doIt("Sideshow Bob"); // output: ":("
 echo $wrapper->doIt(1); // output: ":("
-
