@@ -117,7 +117,6 @@ abstract class AbstractRest
     protected function send($method, $path, $parameters, $payload = [])
     {
         $request = $this->createRequest($method, $path, $parameters, $payload);
-var_dump($payload);
 
         try {
             $response = $this->client->send($request);
