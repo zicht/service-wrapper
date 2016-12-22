@@ -124,6 +124,10 @@ abstract class AbstractRest
             $response = $e->getResponse();
         }
 
+        if (!$response) {
+            return null;
+        }
+
         return $this->parseResponse($response);
     }
 
