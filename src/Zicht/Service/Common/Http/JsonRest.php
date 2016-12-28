@@ -13,14 +13,20 @@ use GuzzleHttp\Message\ResponseInterface;
  */
 class JsonRest extends AbstractRest
 {
+    /**
+     * @{inheritDoc}
+     */
     protected function parseResponse(ResponseInterface $response)
     {
         if (!preg_match('!^application/json!', $response->getHeader('Content-Type'))) {
-            $ex = new Exception\ServiceException(sprintf(
-                'Expected JSON content type from server, but got: %s, url:',
-                $response->getHeader('Content-Type'),
-                $response->getEffectiveUrl()
-            ), 500);
+            $ex = new Exception\ServiceException(
+                sprintf(
+                    'Expected JSON content type from server, but got: %s, url:',
+                    $response->getHeader('Content-Type'),
+                    $response->getEffectiveUrl()
+                ),
+                500
+            );
             $ex->setResponse($response);
             throw $ex;
         }

@@ -61,6 +61,7 @@ abstract class AbstractRest
      *
      * @param string $path
      * @param array|ChainIterator $parameters
+     * @param array $payload
      * @return mixed
      */
     public function put($path, $parameters = [], $payload = [])
@@ -73,6 +74,7 @@ abstract class AbstractRest
      *
      * @param string $path
      * @param array|ChainIterator $parameters
+     * @param array $payload
      * @return mixed
      */
     public function post($path, $parameters = [], $payload = [])
@@ -85,6 +87,7 @@ abstract class AbstractRest
      *
      * @param string $path
      * @param array|ChainIterator $parameters
+     * @param array $payload
      * @return mixed
      */
     public function patch($path, $parameters = [], $payload = [])
@@ -112,6 +115,7 @@ abstract class AbstractRest
      * @param string $method
      * @param string $path
      * @param array|ChainIterator $parameters
+     * @param array $payload
      * @return mixed
      */
     protected function send($method, $path, $parameters, $payload = [])
@@ -133,12 +137,12 @@ abstract class AbstractRest
 
 
     /**
-     * Create a request formatting the parameters in the expected format (either as part of the
-     * body (PUT, POST), or as part of the query string (DELETE, GET)
+     * Create a request by formatting the parameters in the expected format (either as part 
+     * of the body (PUT, POST), or as part of the query string (DELETE, GET)
      *
      * @param string $method
      * @param string $path
-     * @param array|ChainIterator $parameters
+     * @param array $parameters
      * @param array $payLoad
      * @return \GuzzleHttp\Message\RequestInterface
      */
@@ -161,7 +165,7 @@ abstract class AbstractRest
     }
 
     /**
-     * Construct a url based on path and parameters, preprended with the base url
+     * Construct a url based on path and parameters, prepended with the base url
      *
      * @param string $path
      * @param mixed[] $parameters
@@ -185,7 +189,7 @@ abstract class AbstractRest
     }
 
     /**
-     * Parse a response, expecting it to be JSON and decoding it's contents.
+     * Parse a response, e.g. validate its contents and/or parse accordingly
      *
      * @param ResponseInterface $response
      * @return mixed
