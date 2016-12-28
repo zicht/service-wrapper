@@ -173,7 +173,7 @@ abstract class AbstractRest
      */
     protected function composeUrl($path, $parameters)
     {
-        if (sizeof($parameters)) {
+        if (count($parameters)) {
             $encodeParameter = function ($value, $key) {
                 return sprintf('%s=%s', $key, urlencode($value));
             };
