@@ -44,7 +44,6 @@ interface ServiceObserverInterface
      *
      * @param ServiceCallInterface $call
      * @return void
-     * @deprecated
      */
     public function notifyBefore(ServiceCallInterface $call);
 
@@ -54,7 +53,6 @@ interface ServiceObserverInterface
      *
      * @param ServiceCallInterface $call
      * @return void
-     * @deprecated
      */
     public function notifyAfter(ServiceCallInterface $call);
 }

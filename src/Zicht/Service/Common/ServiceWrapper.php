@@ -120,8 +120,8 @@ class ServiceWrapper
     /**
      * Call a service, and notify all of the observers of the service being called. Each of the observers
      * can cancel a request by calling the cancel() method of the message that gets passed within the notifyBefore()
-     * method. Within the notifyBefore() and notifyAfter() methods, the observer can influence the response and/or fault
-     * rendered by the service call.
+     * method. Within the alterRequest() and alterResponse() methods, the observer can influence the response and/or
+     * fault rendered by the service call.
      *
      * @param string $methodName
      * @param array $args
@@ -139,7 +139,7 @@ class ServiceWrapper
         $call = $this->createServiceCall($methodName, $args, $parent);
         $this->callStack[] = $call;
 
-        /** @var ServiceObserver[] $observers */
+        /** @var ServiceObserverInterface[] $observers */
         foreach ($this->observers as $observer) {
             $observer->alterRequest($call);
         }
