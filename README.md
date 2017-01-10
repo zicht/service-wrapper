@@ -51,3 +51,6 @@ You can implement observer that:
 - Extensively monitor requests and responses with your own observers
 - Add sanity checks and such that are costly in development, but can now easily be isolated in one object.
 - Add caching
+
+# Maintainer(s)
+* Gerard van Helden <gerard@zicht.nl>
