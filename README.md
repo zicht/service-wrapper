@@ -53,4 +53,4 @@ You can implement observer that:
 - Add caching
 
 # Maintainer(s)
-* Gerard van Helden <gerard@zicht.nl>
+* Philip Bergman <philip@zicht.nl> 
