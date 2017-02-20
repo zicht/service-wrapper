@@ -6,6 +6,7 @@
 
 namespace Zicht\Service\Common\Bridge\DataCollector;
 
+use Zicht\Service\Common\Observers\Cache;
 use Zicht\Service\Common\Observers\ServiceObserverAdapter;
 use Zicht\Service\Common\ServiceCallInterface;
 
@@ -38,6 +39,7 @@ class Observer extends ServiceObserverAdapter
     public function notifyAfter(ServiceCallInterface $call)
     {
         $message = null;
+
         if ($call->getResponse()->isError()) {
             $error = $call->getResponse()->getError();
             if ($error instanceof \Exception) {
@@ -54,6 +56,7 @@ class Observer extends ServiceObserverAdapter
             'cancelledBy' => $call->getCancelledBy(),
             'error' => $message,
             'is_error' => $call->getResponse()->isError(),
+            'is_cached' => $call->isCancelled(Cache::class),
             't_end' => microtime(true),
             'mem_end' => memory_get_usage()
         ] + $this->calls[spl_object_hash($call)];
