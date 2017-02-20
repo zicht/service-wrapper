@@ -94,14 +94,14 @@ class DataCollectorTest extends \PHPUnit_Framework_TestCase
         $observer->expects($this->once())->method('getCalls')->will(
             $this->returnValue(
                 [
-                    ['t_start' => 10, 't_end' => 11, 'is_error' => true],   // delta t = 1
-                    ['t_start' => 15, 't_end' => 17, 'is_error' => false],  // delta t = 2
+                    ['t_start' => 10, 't_end' => 11, 'is_error' => true, 'is_cached' => false],  // delta t = 1
+                    ['t_start' => 15, 't_end' => 17, 'is_error' => false, 'is_cached' => true],  // delta t = 2
                 ]
             )
         );
 
         $collector->collect($this->getMock(Request::class), $this->getMock(Response::class), null);
-        $this->assertEquals("2 call(s) in 3000 ms\n1 error(s)", $collector->getSummary());
+        $this->assertEquals("2 call(s) in 3000 ms\n1 cached\n1 error(s)", $collector->getSummary());
     }
 
 
