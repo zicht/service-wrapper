@@ -114,7 +114,7 @@ class DataCollector extends BaseCollector
             $this->data['calls'],
             function ($t, $c) {
                 if ($c['is_cached']) {
-                    return $t +1;
+                    return ++$t;
                 }
                 return $t;
             },
@@ -133,7 +133,7 @@ class DataCollector extends BaseCollector
             $this->data['calls'],
             function ($t, $c) {
                 if ($c['is_error']) {
-                    return $t +1;
+                    return ++$t;
                 }
                 return $t;
             },
