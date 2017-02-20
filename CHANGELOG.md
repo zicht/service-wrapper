@@ -26,3 +26,6 @@
 
 # 2.0.2 #
 - Adds a counter to the symfony toolbar summary, telling how many service calls were cancelled by the cache observer
+
+# 2.1.0 #
+- Add a base service for REST api's
