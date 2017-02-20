@@ -23,3 +23,6 @@
 # 2.0.0 - Important bugfix release with breaking changes #
 - ServiceObserver was renamed to ServiceObserverInterface
 - This release contains a fix related to caching which has a breaking change. See RELEASE-2.0.md for more information
+
+# 2.0.2 #
+- Adds a counter to the symfony toolbar summary, telling how many service calls were cancelled by the cache observer
