@@ -63,9 +63,10 @@ class DataCollector extends BaseCollector
     public function getSummary()
     {
         $ret = sprintf(
-            "%d call(s) in %d ms\n%d error(s)",
+            "%d call(s) in %d ms\n%d cached\n%d error(s)",
             $this->getCallCount(),
             $this->getTimeSpent(),
+            $this->getCachedCount(),
             $this->getErrorCount()
         );
 
@@ -92,7 +93,6 @@ class DataCollector extends BaseCollector
         );
     }
 
-
     /**
      * Return the number of calls executed
      *
@@ -101,6 +101,25 @@ class DataCollector extends BaseCollector
     public function getCallCount()
     {
         return count($this->data['calls']);
+    }
+
+    /**
+     * Return the number of calls that were cancelled by the Cache observer
+     *
+     * @return mixed
+     */
+    public function getCachedCount()
+    {
+        return array_reduce(
+            $this->data['calls'],
+            function ($t, $c) {
+                if ($c['is_cached']) {
+                    return ++$t;
+                }
+                return $t;
+            },
+            0
+        );
     }
 
     /**
@@ -114,7 +133,7 @@ class DataCollector extends BaseCollector
             $this->data['calls'],
             function ($t, $c) {
                 if ($c['is_error']) {
-                    return $t +1;
+                    return ++$t;
                 }
                 return $t;
             },
