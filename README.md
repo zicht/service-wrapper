@@ -40,7 +40,7 @@ echo $wrapper->doIt("Bart");
 echo $wrapper->doIt("Lisa");
 ```
 
-See [doc/example.php] for a more thorough example.
+See [doc/example.php](doc/example.php) for a more thorough example.
 
 ## Applications ##
 
