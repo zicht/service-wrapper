@@ -53,7 +53,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
     function testSetParameterDeepIfDeepValueNotPreviouslySet()
     {
         $value2 = rand(10000, 19999);
-        $request = new Request('', array(['a' => (object)['b' => null]]));
+        $request = new Request('', array(['a' => (object)['b'=>null]]));
         $request->setParameterDeep(array(0, 'a', 'b', 'c', 'd'), $value2);
         $this->assertEquals($value2, $request->getParameterDeep(array(0, 'a', 'b', 'c', 'd')));
     }
@@ -103,17 +103,5 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $request->setAttributes([]);
         $this->assertEquals(false, $request->hasAttribute('q'));
         $this->assertEquals(false, $request->hasAttribute('a'));
-    }
-
-    public function testGetAttributesDeep()
-    {
-        $nestedAttributes1 = ['foo' => ['bar' => 'yo']];
-        $request = new Request('');
-        $request->setAttributes($nestedAttributes1);
-        $this->assertEquals('yo', $request->getAttributeDeep([0 => 'foo', 1 => 'bar']));
-
-        $nestedAttributes2 = ['foo' => ['bar' => ['yo' => 'yolo']]];
-        $request->setAttributes($nestedAttributes2);
-        $this->assertEquals('yolo', $request->getAttributeDeep([0 => 'foo', 1 => 'bar', 2 => 'yo']));
     }
 }
