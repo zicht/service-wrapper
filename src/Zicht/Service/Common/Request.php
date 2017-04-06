@@ -3,6 +3,7 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
+
 namespace Zicht\Service\Common;
 
 use Zicht\Util\Debug;
@@ -12,7 +13,7 @@ use Zicht\Util\Debug;
  */
 class Request implements RequestInterface
 {
-    use FreezableTrait;
+    use FreezableTrait, NestedValueTrait;
 
     /**
      * The service method name
@@ -90,17 +91,7 @@ class Request implements RequestInterface
      */
     public function getParameterDeep(array $path)
     {
-        $ptr = $this->parameters;
-        foreach ($path as $key) {
-            if (is_object($ptr) && isset($ptr->$key)) {
-                $ptr = $ptr->$key;
-            } elseif (is_array($ptr) && isset($ptr[$key])) {
-                $ptr = $ptr[$key];
-            } else {
-                return null;
-            }
-        }
-        return $ptr;
+        return $this->getValueFromPath($path, $this->parameters);
     }
 
 
@@ -234,5 +225,13 @@ class Request implements RequestInterface
     public function getAttribute($key, $default = null)
     {
         return isset($this->attributes[$key]) ? $this->attributes[$key] : $default;
+    }
+
+    /**
+     * @{inheritDoc}
+     */
+    public function getAttributeDeep(array $path)
+    {
+        return $this->getValueFromPath($path, $this->attributes);
     }
 }

@@ -12,7 +12,7 @@ use Zicht\Util\Debug;
  */
 class Response implements ResponseInterface
 {
-    use FreezableTrait;
+    use FreezableTrait, NestedValueTrait;
 
     private $response;
     private $error;
@@ -151,16 +151,7 @@ class Response implements ResponseInterface
      */
     protected function getPropertyDeepFrom($ptr, array $propertyPath)
     {
-        foreach ($propertyPath as $key) {
-            if (is_object($ptr) && isset($ptr->$key)) {
-                $ptr =& $ptr->$key;
-            } elseif (is_array($ptr) && isset($ptr[$key])) {
-                $ptr =& $ptr[$key];
-            } else {
-                return null;
-            }
-        }
-        return $ptr;
+        return $this->getValueFromPath($propertyPath, $ptr);
     }
 
     /** 
