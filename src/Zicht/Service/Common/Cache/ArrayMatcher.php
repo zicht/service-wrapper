@@ -61,7 +61,7 @@ class ArrayMatcher implements RequestMatcher
             $key->addAttribute($paramName, $paramValue);
         }
         foreach ($this->config[strtolower($request->getMethod())]['attributes'] as $attrName => $ttl) {
-            if ($attrValue = $request->getAttribute($attrName)) {
+            if ($attrValue = $request->getAttributeDeep(explode('.', $attrName))) {
                 $key->addAttribute($attrName, $attrValue);
             }
         }
@@ -103,7 +103,7 @@ class ArrayMatcher implements RequestMatcher
         $ttls = array($config['default']);
         foreach ($config['attributes'] as $attribute => $ttl) {
             if ($request->hasAttribute($attribute)) {
-                $ttls []= $ttl;
+                $ttls [] = $ttl;
             }
         }
         return min($ttls);
