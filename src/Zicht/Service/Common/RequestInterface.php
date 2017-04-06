@@ -46,14 +46,6 @@ interface RequestInterface
     public function getAttribute($name);
 
     /**
-     * Get an attribute by its path
-     *
-     * @param array $path
-     * @return mixed
-     */
-    public function getAttributeDeep(array $path);
-
-    /**
      * Returns whether the specified attribute is set in the request
      *
      * @param string $name
@@ -62,7 +54,7 @@ interface RequestInterface
     public function hasAttribute($name);
 
     /**
-     * Set a request parameter by its path.
+     * Set a request parameter by it's path.
      *
      * @param array $path
      * @param mixed $value
