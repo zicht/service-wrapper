@@ -16,7 +16,7 @@ trait NestedValueTrait
      * @param object|array $value
      * @return mixed|null
      */
-    public function getValueFromPath(array $path, $value)
+    protected function getValueFromPath(array $path, $value)
     {
         $ptr = $value;
         foreach ($path as $key) {
