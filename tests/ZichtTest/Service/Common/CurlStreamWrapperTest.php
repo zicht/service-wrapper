@@ -10,12 +10,18 @@ use Zicht\Service\Common\CurlStreamWrapper;
 use Zicht\Service\Common\Soap\SoapClient;
 
 /**
- * @covers Zicht\Service\Common\CurlStreamWrapper
- * @covers Zicht\Service\Common\Soap\SoapClient
+ * Class CurlStreamWrapperTest
+ *
+ * @covers \Zicht\Service\Common\CurlStreamWrapper
+ * @covers \Zicht\Service\Common\Soap\SoapClient
  * @group integration
+ * @package ZichtTest\Service\Common
  */
 class CurlStreamWrapperTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * Test soap integration
+     */
     public function testSoapIntegration()
     {
         // this wsdl comes from http://quicksoftwaretesting.com/sample-wsdl-urls-testing-soapui/
@@ -33,16 +39,63 @@ class CurlStreamWrapperTest extends \PHPUnit_Framework_TestCase
         $client->GetCitiesByCountry(['CountryName' => "Netherlands"]);
     }
 
-
-    public function testWrapping()
+    /**
+     * Test the url rewrite functionality
+     */
+    public function testWrappingWithUrlRewrites()
     {
-        $file = tempnam('/tmp', preg_replace('/\W/', '_', __CLASS__));
-        file_put_contents($file, 'http://www.example.org/');
+        // prepare a file for this test
+        $filename = tempnam('/tmp', 'unit-test');
+        file_put_contents($filename, 'This is the content you are looking for');
 
-        CurlStreamWrapper::register(['!foo://example.org!' => 'http://example.org'], ['foo']);
+        // configure the wrapper to (1) redirect to the file on disk,
+        // and (2) replace parts of the file content
+        $urlRewrites = [
+            '#foo://this-is-redirected-to-a-file#' => sprintf('file://%s', $filename),
+        ];
+        CurlStreamWrapper::register($urlRewrites, [], ['foo']);
 
-        file_get_contents('foo://example.org');
+        // check that the file contents has been modified as configured
+        $data = file_get_contents('foo://this-is-redirected-to-a-file');
+        $this->assertEquals('This is the content you are looking for', $data);
 
+        // cleanup
+        CurlStreamWrapper::unregister();
+    }
+
+    /**
+     * Test the url and content rewrite functionality
+     */
+    public function testWrappingWithContentRewrites()
+    {
+        // prepare a file for this test
+        $filename = tempnam('/tmp', 'unit-test');
+        file_put_contents($filename, 'This is not the content you are looking for');
+
+        // configure the wrapper to (1) redirect to the file on disk,
+        // and (2) replace parts of the file content
+        $urlRewrites = [
+            '#foo://this-is-redirected-to-a-file#' => sprintf('file://%s', $filename),
+        ];
+        $contentRewrites = [
+            [
+                'file_pattern' => sprintf('#%s#', $filename),
+                'pattern' => '#is not#',
+                'replacement' => 'IS',
+            ],
+            [
+                'file_pattern' => sprintf('#%s#', $filename),
+                'pattern' => '#looking#',
+                'replacement' => 'SEARCHING',
+            ],
+        ];
+        CurlStreamWrapper::register($urlRewrites, $contentRewrites, ['foo']);
+
+        // check that the file contents has been modified as configured
+        $data = file_get_contents('foo://this-is-redirected-to-a-file');
+        $this->assertEquals('This IS the content you are SEARCHING for', $data);
+
+        // cleanup
         CurlStreamWrapper::unregister();
     }
 }
