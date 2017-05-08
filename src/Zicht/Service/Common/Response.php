@@ -3,6 +3,7 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
+
 namespace Zicht\Service\Common;
 
 use Zicht\Util\Debug;
@@ -12,7 +13,7 @@ use Zicht\Util\Debug;
  */
 class Response implements ResponseInterface
 {
-    use FreezableTrait;
+    use FreezableTrait, NestedValueTrait;
 
     private $response;
     private $error;
@@ -139,32 +140,11 @@ class Response implements ResponseInterface
      */
     public function getPropertyDeep(array $path)
     {
-        return $this->getPropertyDeepFrom($this->response, $path);
+        return $this->getValueFromPath($path, $this->response);
     }
 
     /**
-     * Returns a property at $propertyPath in the $ptr data
-     *
-     * @param mixed $ptr
-     * @param array $propertyPath
-     * @return mixed|null
-     */
-    protected function getPropertyDeepFrom($ptr, array $propertyPath)
-    {
-        foreach ($propertyPath as $key) {
-            if (is_object($ptr) && isset($ptr->$key)) {
-                $ptr =& $ptr->$key;
-            } elseif (is_array($ptr) && isset($ptr[$key])) {
-                $ptr =& $ptr[$key];
-            } else {
-                return null;
-            }
-        }
-        return $ptr;
-    }
-
-    /** 
-     * @{inheritDoc} 
+     * @{inheritDoc}
      */
     public function getPropertiesDeep(array $propertyPath)
     {
@@ -189,7 +169,7 @@ class Response implements ResponseInterface
         foreach ($nestedPropertyPath as list($flatPropertyPath, $multiple)) {
             $newPointers = array();
             foreach ($pointers as list($basePath, $pointer)) {
-                $pointer = $this->getPropertyDeepFrom($pointer, $flatPropertyPath);
+                $pointer = $this->getValueFromPath($flatPropertyPath, $pointer);
                 if (!is_null($pointer)) {
                     if ($multiple) {
                         if (is_array($pointer)) {

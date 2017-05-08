@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 - Nothing so far
 
-## 2.2.0 [Unreleased]
+## 2.3.0 [Unreleased]
 ### Added
 - the ability to rewrite content while it is being downloaded,
   see the $rewriteContent parameter in the SoapClient constructor
+
+## 2.2.0 - 2017-04-06
+### Added
+- `getAttributesDeep` on Request
+- New trait for common code in `get[Attributes|Parameters|Properties]Deep` to ensure the same code is used
 
 ## 2.1.0 - 2016-12-28
 ### Added
