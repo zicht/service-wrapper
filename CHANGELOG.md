@@ -1,31 +1,54 @@
-# 1.0.0 #
-- First stable release based on observer logic from zicht/sro
+# Change Log
+All notable changes to this project will be documented in this file.
 
-# 1.1.0 #
-- Added a possibility to mark a response as uncachable 
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# 1.2.0 #
-- Added the unregisterObserver() method, which allows to remove an observer.
-- Added the $index parameter to the registerObserver() method, to restore a previously removed observer at the original position.
+## [Unreleased]
+- Nothing so far
 
-# 1.3.0 #
-- Add a CacheKey class and CacheKeyInterface interface for generating readable cache keys
+## 2.2.0 [Unreleased]
+### Added
+- the ability to rewrite content while it is being downloaded,
+  see the $rewriteContent parameter in the SoapClient constructor
 
-# 1.4.0 #
-- Add an option to rewrite Soap urls coming from the wsdl's
+## 2.1.0 - 2016-12-28
+### Added
+- a base service for REST api's
 
-# 1.5.0 #
-- Add a DataCollector to bridge with the Symfony profiler toolbar
+## 2.0.2 - 2017-02-20
+### Added
+- a counter to the symfony toolbar summary, telling how many service calls were cancelled by the cache observer
 
-# 1.6.0 #
-- Added a factory for services, which can be used to lazy-initialize e.g. a SoapClient
-
-# 2.0.0 - Important bugfix release with breaking changes #
+## 2.0.0 - 2016-10-13 [Important bugfix release with breaking changes]
+### Changed
 - ServiceObserver was renamed to ServiceObserverInterface
 - This release contains a fix related to caching which has a breaking change. See RELEASE-2.0.md for more information
 
-# 2.0.2 #
-- Adds a counter to the symfony toolbar summary, telling how many service calls were cancelled by the cache observer
+## 1.6.0 - 2016-08-12
+### Added
+- a factory for services, which can be used to lazy-initialize e.g. a SoapClient
 
-# 2.1.0 #
-- Add a base service for REST api's
+## 1.5.0 - 2016-07-21
+### Added
+- a DataCollector to bridge with the Symfony profiler toolbar
+
+## 1.4.0 - 2016-06-28
+### Added
+- an option to rewrite Soap urls coming from the wsdl's
+
+## 1.3.0 - 2015-12-30
+### Added
+- a CacheKey class and CacheKeyInterface interface for generating readable cache keys
+
+## 1.2.0 - 2015-11-02
+### Added
+- the unregisterObserver() method, which allows to remove an observer.
+- the $index parameter to the registerObserver() method, to restore a previously removed observer at the original position.
+
+## 1.1.0 - 2015-06-16
+### Added
+- a possibility to mark a response as uncachable
+
+## 1.0.0
+- First stable release based on observer logic from zicht/sro
