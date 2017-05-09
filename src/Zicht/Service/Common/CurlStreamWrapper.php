@@ -14,25 +14,28 @@ class CurlStreamWrapper
     /**
      * @var array
      */
-    private static $rewrites = [];
+    private static $urlRewrites = [];
+    private static $contentRewrites = [];
     private static $protocols = [];
 
     /**
      * Register the wrapper.
      *
-     * @param string[] $rewrites
+     * @param string[] $urlRewrites
+     * @param [] $contentRewrites
      * @param string[] $protocols
      * @return void
      */
-    public static function register(array $rewrites = [], $protocols = ['http', 'https'])
+    public static function register(array $urlRewrites = [], array $contentRewrites = [], array $protocols = ['http', 'https'])
     {
         // we unregister the current HTTP wrapper
         foreach ($protocols as $protocol) {
             @stream_wrapper_unregister($protocol);
         }
 
+        self::$urlRewrites = $urlRewrites;
+        self::$contentRewrites = $contentRewrites;
         self::$protocols = $protocols;
-        self::$rewrites = $rewrites;
 
         // we register the new HTTP wrapper
         foreach ($protocols as $protocol) {
@@ -54,7 +57,9 @@ class CurlStreamWrapper
             @stream_wrapper_restore($protocol);
         }
 
-        self::$rewrites = [];
+        self::$urlRewrites = [];
+        self::$contentRewrites = [];
+        self::$protocols = [];
     }
 
 
@@ -229,16 +234,23 @@ class CurlStreamWrapper
         }
         //@codeCoverageIgnoreEnd
 
-        foreach (self::$rewrites as $pattern => $replacement) {
+        // process url rewrites before downloading
+        foreach (self::$urlRewrites as $pattern => $replacement) {
             $location = preg_replace($pattern, $replacement, $location);
         }
 
         $this->ch = curl_init($location);
-
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 2);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         $this->buffer = curl_exec($this->ch);
         $this->pos = 0;
+
+        // process content rewrites after downloading
+        foreach (self::$contentRewrites as $contentRewrite) {
+            if (preg_match($contentRewrite['file_pattern'], $location)) {
+                $this->buffer = preg_replace($contentRewrite['pattern'], $contentRewrite['replacement'], $this->buffer);
+            }
+        }
     }
 }
