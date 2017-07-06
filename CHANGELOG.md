@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 - Nothing so far
 
+## 2.3.1 - 2017-07-06
+### Fixed
+- it is now possible to specify the redis port number
+
 ## 2.3.0 - 2017-05-09
 ### Added
 - the ability to rewrite content while it is being downloaded,

@@ -11,22 +11,21 @@ namespace Zicht\Service\Common\Cache;
  */
 class RedisBase
 {
-    /**
-     * @var
-     */
-    private $host;
-    /**
-     * @var
-     */
-    protected $prefix;
-    /**
-     * @var bool
-     */
-    private $inited = false;
+    const DEFAULT_REDIS_PORT = 6379;
 
-    /**
-     * @var \Redis
-     */
+    /** @var string */
+    protected $host;
+
+    /** @var integer */
+    protected $port;
+
+    /** @var string */
+    protected $prefix;
+
+    /** @var boolean */
+    protected $hasBeenInitialized;
+
+    /** @var \Redis */
     protected $redis;
 
     /**
@@ -34,11 +33,14 @@ class RedisBase
      *
      * @param string $host
      * @param string $prefix
+     * @param integer $port
      */
-    protected function __construct($host, $prefix)
+    public function __construct($host, $prefix, $port = null)
     {
         $this->host = $host;
+        $this->port = (null === $port ? self::DEFAULT_REDIS_PORT : $port);
         $this->prefix = $prefix . '::';
+        $this->hasBeenInitialized = false;
     }
 
     /**
@@ -48,10 +50,10 @@ class RedisBase
      */
     protected function init()
     {
-        if (!$this->inited) {
-            $this->inited = true;
+        if (!$this->hasBeenInitialized) {
+            $this->hasBeenInitialized = true;
             $this->redis = new \Redis();
-            $this->redis->connect($this->host);
+            $this->redis->connect($this->host, $this->port);
             $this->redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
             $this->redis->setOption(\Redis::OPT_PREFIX, $this->prefix);
         }
