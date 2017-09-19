@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 - Nothing so far
 
+## 2.3.1 - 2017-09-19
+### Fixed
+- The Redis host can now be either a hostname, or a hostname:port combination 
+
 ## 2.3.0 - 2017-05-09
 ### Added
 - the ability to rewrite content while it is being downloaded,
