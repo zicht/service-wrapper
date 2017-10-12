@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 - Nothing so far
 
+## 2.3.2 - 2017-10-12
+### Fixed
+- Cache keys, which use multiple attributes, will sort the attributes alphabetically to ensure
+  that the resulting keys are the same, regardless of how the request was made
+
 ## 2.3.1 - 2017-09-19
 ### Fixed
 - The Redis host can now be either a hostname, or a hostname:port combination 

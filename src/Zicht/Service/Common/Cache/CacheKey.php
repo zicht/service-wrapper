@@ -88,6 +88,10 @@ final class CacheKey implements CacheKeyInterface
         return array_reduce(
             array_values($this->attributes),
             function ($ret, $attribute) use ($keys, &$i) {
+                // sort array by key, to ensure that the cache key is the same for all similar requests
+                if (is_array($attribute)) {
+                    ksort($attribute);
+                }
                 if (self::isAllScalar($attribute, $this->readableDepth)) {
                     $strAttribute = str_replace(['"', "\n"], '', json_encode($attribute));
                 } elseif (!is_scalar($attribute)) {
