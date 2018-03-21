@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 - Nothing so far
 
+## 2.3.4 - 2018-03-21
+### Changed
+- Removed the `final` flag from the __call method, allowing us to
+  mock this method for unit-tests.
+
 ## 2.3.3 - 2017-10-31
 ### Fixed
 - Disabled WSDL_CACHE_MEMORY and WSDL_CACHE_BOTH.
-  
+
   We use only DISK cache.  Unfortunately there is a bug in the SoapClient
   that causes problems when WSDL_CACHE_MEMORY or WSDL_CACHE_BOTH are used,
   resulting in a segmentation fault, after exit, i.e. in a registered shutdown function.

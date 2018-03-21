@@ -129,7 +129,7 @@ class ServiceWrapper
      *
      * @throws \Exception
      */
-    final public function __call($methodName, $args)
+    public function __call($methodName, $args)
     {
         if (count($this->callStack)) {
             $parent = $this->callStack[count($this->callStack) -1];
