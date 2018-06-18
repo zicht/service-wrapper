@@ -21,10 +21,12 @@ class CurlStreamWrapperTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * Test soap integration
+     * @skip
      */
     public function testSoapIntegration()
     {
         // this wsdl comes from http://quicksoftwaretesting.com/sample-wsdl-urls-testing-soapui/
+        $this->markTestSkipped('Service with sample wsdl is no longer available');
 
         // we're making use of the fact that the windows-hosted service is case insensitive for testing this
         // without actually leading to errors.

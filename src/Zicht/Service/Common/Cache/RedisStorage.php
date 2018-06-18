@@ -52,7 +52,7 @@ class RedisStorage extends RedisBase implements Storage
     public function isValid($key, $ttl)
     {
         $this->init();
-        return $this->redis->exists($key);
+        return (bool)$this->redis->exists($key);
     }
 
     /**
