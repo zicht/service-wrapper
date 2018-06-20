@@ -56,10 +56,20 @@ class RedisBase
     {
         if (!$this->hasBeenInitialized) {
             $this->hasBeenInitialized = true;
-            $this->redis = new \Redis();
-            $this->redis->connect($this->host, $this->port);
-            $this->redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
-            $this->redis->setOption(\Redis::OPT_PREFIX, $this->prefix);
+            $this->redis = $this->createRedisClient();
         }
     }
+
+    /**
+     * @return \Redis
+     */
+    protected function createRedisClient()
+    {
+        $redis = new \Redis();
+        $redis->connect($this->host, $this->port);
+        $redis->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
+        $redis->setOption(\Redis::OPT_PREFIX, $this->prefix);
+        return $redis;
+    }
+
 }

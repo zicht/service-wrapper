@@ -48,6 +48,11 @@ interface Storage
      */
     public function invalidate($key);
 
+    public function claimExclusiveAccess($key);
+    public function releaseExclusiveAccess($key);
+    public function subscribe($key);
+    public function publish($key, $data);
+    public function transactionBlock(callable $callback);
 
     /**
      * Returns all keys in storage

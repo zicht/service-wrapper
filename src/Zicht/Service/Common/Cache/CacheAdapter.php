@@ -67,6 +67,13 @@ class CacheAdapter implements CacheConfiguration
         return $isCachable;
     }
 
+    /**
+     * @{inheritDoc}
+     */
+    public function getCacheKey(RequestInterface $request)
+    {
+        return $this->matcher->getKey($request);
+    }
 
     /**
      * Check if this cache has the specified request cached
@@ -93,6 +100,31 @@ class CacheAdapter implements CacheConfiguration
             }
         }
         return $ret;
+    }
+
+    public function claimExclusiveAccess(RequestInterface $request)
+    {
+        return $this->storage->claimExclusiveAccess($this->matcher->getKey($request));
+    }
+
+    public function releaseExclusiveAccess(RequestInterface $request)
+    {
+        return $this->storage->releaseExclusiveAccess($this->matcher->getKey($request));
+    }
+
+    public function subscribe(RequestInterface $request)
+    {
+        return $this->storage->subscribe($this->matcher->getKey($request));
+    }
+
+    public function publish(RequestInterface $request, ResponseInterface $response)
+    {
+        return $this->storage->publish($this->matcher->getKey($request), $response->getResponse());
+    }
+
+    public function transactionBlock(callable $callback)
+    {
+        return $this->storage->transactionBlock($callback);
     }
 
     /**

@@ -39,6 +39,7 @@ interface CacheConfiguration
      */
     public function isCachable(RequestInterface $request);
 
+    public function getCacheKey(RequestInterface $request);
 
     /**
      * Check if this cache has the specified request cached
@@ -48,6 +49,11 @@ interface CacheConfiguration
      */
     public function isValid(RequestInterface $request);
 
+    public function claimExclusiveAccess(RequestInterface $request);
+    public function releaseExclusiveAccess(RequestInterface $request);
+    public function subscribe(RequestInterface $request);
+    public function publish(RequestInterface $request, ResponseInterface $response);
+    public function transactionBlock(callable $callback);
 
     /**
      * Expunge all keys for which the callback returns boolean true

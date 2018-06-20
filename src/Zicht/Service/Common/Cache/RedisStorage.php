@@ -67,6 +67,67 @@ class RedisStorage extends RedisBase implements Storage
         $this->redis->del($key);
     }
 
+    public function claimExclusiveAccess($key)
+    {
+        $this->init();
+        dump(['incr', sprintf('exclusive-access::%s', $key)]);
+        return 1 === $this->redis->incr(sprintf('exclusive-access::%s', $key));
+    }
+
+    public function releaseExclusiveAccess($key)
+    {
+        $this->init();
+        dump(['decr', sprintf('exclusive-access::%s', $key)]);
+        return $this->redis->decr(sprintf('exclusive-access::%s', $key));
+    }
+
+    public function subscribe($key)
+    {
+        dump(['subscribe', 'exclusive-access-notification-channel', $key]);
+
+        // Create a new Redis connection to use `->subscribe`.  This
+        // is required because the redis client that we use does not provide
+        // any way of un-subscribing, the only way we can do that is by
+        // disconnecting from Redis.
+        $redis = $this->createRedisClient();
+        $redis->subscribe(['exclusive-access-notification-channel'], function (\Redis $redis, $channel, $message) use ($key) {
+            if ($message === (string)$key) {
+                // wake-up
+                $redis->close();
+            }
+        });
+
+        return $this->read($key);
+    }
+
+    public function publish($key, $data)
+    {
+        $this->init();
+        dump(['publish', 'exclusive-access-notification-channel', $key]);
+        $this->redis->publish('exclusive-access-notification-channel', $key);
+    }
+
+    public function transactionBlock(callable $callback)
+    {
+        $this->init();
+        dump(['multi']);
+        $hasException = false;
+        $this->redis->multi();
+        try {
+            $callback();
+        } catch (\Exception $exception) {
+            $hasException = true;
+            dump(['discard']);
+            $this->redis->discard();
+
+            throw $exception;
+        } finally {
+            if (!$hasException) {
+                dump(['exec']);
+                $this->redis->exec();
+            }
+        }
+    }
 
     /**
      * Returns all keys in storage
