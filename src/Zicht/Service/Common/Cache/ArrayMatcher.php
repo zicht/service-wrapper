@@ -65,7 +65,7 @@ class ArrayMatcher implements RequestMatcher
                 $key->addAttribute($attrName, $attrValue);
             }
         }
-        return $key;
+        return $key->getKey();
     }
 
 
