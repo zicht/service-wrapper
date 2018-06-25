@@ -8,6 +8,7 @@ namespace Zicht\Service\Common\Observers;
 use Zicht\Service\Common\Cache\RequestMatcher;
 use Zicht\Service\Common\RequestInterface;
 use Zicht\Service\Common\ServiceCallInterface;
+use Zicht\Service\Common\Storage\RedisStorageFactory;
 
 /**
  * Class RedisCacheObserver
@@ -18,6 +19,11 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
     const CACHE_HIT = 'HIT';
     const CACHE_ACTIVE_MISS = 'ACTIVE_MISS';
     const CACHE_PASSIVE_MISS = 'PASSIVE_MISS';
+
+    /**
+     * @var RedisStorageFactory
+     */
+    protected $redisStorageFactory;
 
     /**
      * Contains a stack of cached responses
@@ -32,38 +38,13 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
     protected $requestMatchers;
 
     /**
-     * @var string
-     */
-    protected $redisHost;
-
-    /**
-     * @var integer
-     */
-    protected $redisPort;
-
-    /**
-     * @var string
-     */
-    protected $redisPrefix;
-
-    /**
-     * @var null|\Redis
-     */
-    protected $redisClient;
-
-    /**
      * Construct the cache, and use $cache as the cache container object.
      *
-     * @param string $redisHost
-     * @param integer $redisPort
-     * @param string $redisPrefix
+     * @param RedisStorageFactory $redisStorageFactory
      */
-    public function __construct($redisHost, $redisPort, $redisPrefix)
+    public function __construct(RedisStorageFactory $redisStorageFactory)
     {
-        $this->redisHost = $redisHost;
-        $this->redisPort = $redisPort;
-        $this->redisPrefix = $redisPrefix;
-        $this->redisClient = null;
+        $this->redisStorageFactory = $redisStorageFactory;
         $this->requestMatchers = [];
         $this->callStack = [];
     }
@@ -95,7 +76,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
         }
 
         $key = $requestMatcher->getKey($request);
-        $redis = $this->getRedisClient();
+        $redis = $this->redisStorageFactory->getClient();
         $value = $redis->get($key);
         if (false === $value) {
             //
@@ -117,7 +98,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
                 // is required because the redis client that we use does not provide
                 // any way of un-subscribing, the only way we can do that is by
                 // disconnecting from Redis.
-                $channelRedis = $this->createRedisClient();
+                $channelRedis = $this->redisStorageFactory->createClient();
                 $channelRedis->subscribe(['exclusive-access-notification-channel'], function (\Redis $redis, $channel, $message) use ($key) {
                     if ($message === (string)$key) {
                         // wake-up
@@ -164,7 +145,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
 //                sleep(10);
 
                 $response = $event->getResponse();
-                $redis = $this->getRedisClient();
+                $redis = $this->redisStorageFactory->getClient();
 
                 try {
                     if (!$response->isError() && $response->isCachable()) {
@@ -180,37 +161,16 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
                 break;
 
             case self::CACHE_PASSIVE_MISS:
-                $redis = $this->getRedisClient();
+                $redis = $this->redisStorageFactory->getClient();
                 $redis->decr(sprintf('exclusive-access-counter::%s', $key));
                 break;
         }
     }
 
     /**
-     * @return \Redis
-     */
-    protected function getRedisClient()
-    {
-        if (null === $this->redisClient) {
-            $this->redisClient = $this->createRedisClient();
-        }
-        return $this->redisClient;
-    }
-
-    /**
-     * @return \Redis
-     */
-    protected function createRedisClient()
-    {
-        $redisClient = new \Redis();
-        $redisClient->connect($this->redisHost, $this->redisPort);
-        $redisClient->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
-        $redisClient->setOption(\Redis::OPT_PREFIX, sprintf('%s::', $this->redisPrefix));
-        return $redisClient;
-    }
-
-    /**
-     * @param $request
+     * Given $request returns the first RequestMatcher that supports that request
+     *
+     * @param RequestInterface $request
      * @return null|RequestMatcher
      */
     protected function getRequestMatcher(RequestInterface $request)
