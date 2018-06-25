@@ -17,8 +17,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
 {
     const CACHE_IGNORE = 'IGNORE';
     const CACHE_HIT = 'HIT';
-    const CACHE_ACTIVE_MISS = 'ACTIVE_MISS';
-    const CACHE_PASSIVE_MISS = 'PASSIVE_MISS';
+    const CACHE_MISS = 'MISS';
 
     /**
      * @var RedisStorageFactory
@@ -83,34 +82,8 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
             // Cache miss
             //
 
-            if (1 === $redis->incr(sprintf('exclusive-access-counter::%s', $key))) {
-                // We were able to claim exclusive access, therefore, we will continue the service call
-                // and the response will be written when it returns
-                $this->callStack[] = [self::CACHE_ACTIVE_MISS, $key, $requestMatcher->getTtl($request)];
-                $this->addLogRecord(self::DEBUG, 'Cache active-miss', [$key]);
-            } else {
-                // We were *not* able to claim exclusive access, therefore, we will wait until
-                // the process that did claim access responds
-                $this->callStack[] = [self::CACHE_PASSIVE_MISS, $key, null];
-                $this->addLogRecord(self::DEBUG, 'Cache passive-miss', [$key]);
-
-                // Create a new Redis connection to use `->subscribe`.  This
-                // is required because the redis client that we use does not provide
-                // any way of un-subscribing, the only way we can do that is by
-                // disconnecting from Redis.
-                $channelRedis = $this->redisStorageFactory->createClient();
-                $channelRedis->subscribe(['exclusive-access-notification-channel'], function (\Redis $redis, $channel, $message) use ($key) {
-                    if ($message === (string)$key) {
-                        // wake-up
-                        $redis->close();
-                    }
-                });
-
-                // Cancel the actual request
-                $event->cancel($this);
-                $event->getResponse()->setResponse($redis->get($key));
-                $this->addLogRecord(self::DEBUG, 'Cache passive-hit', [$key]);
-            }
+            $this->callStack[] = [self::CACHE_MISS, $key, $requestMatcher->getTtl($request)];
+            $this->addLogRecord(self::DEBUG, 'Cache miss', [$key]);
         } else {
             //
             // Cache hit
@@ -141,28 +114,13 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
             case self::CACHE_HIT:
                 break;
 
-            case self::CACHE_ACTIVE_MISS:
-//                sleep(10);
-
+            case self::CACHE_MISS:
                 $response = $event->getResponse();
-                $redis = $this->redisStorageFactory->getClient();
-
-                try {
-                    if (!$response->isError() && $response->isCachable()) {
-                        $redis->setex($key, $ttl, $response->getResponse());
-                        $this->addLogRecord(self::DEBUG, 'Cache write', [$key, $ttl]);
-                    }
-                } finally {
-                    $redis->multi();
-                    $redis->decr(sprintf('exclusive-access-counter::%s', $key));
-                    $redis->publish('exclusive-access-notification-channel', $key);
-                    $redis->exec();
+                if (!$response->isError() && $response->isCachable()) {
+                    $redis = $this->redisStorageFactory->getClient();
+                    $redis->setex($key, $ttl, $response->getResponse());
+                    $this->addLogRecord(self::DEBUG, 'Cache write', [$key, $ttl]);
                 }
-                break;
-
-            case self::CACHE_PASSIVE_MISS:
-                $redis = $this->redisStorageFactory->getClient();
-                $redis->decr(sprintf('exclusive-access-counter::%s', $key));
                 break;
         }
     }
