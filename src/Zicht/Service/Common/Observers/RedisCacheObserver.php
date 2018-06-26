@@ -15,8 +15,13 @@ use Zicht\Service\Common\Storage\RedisStorageFactory;
  */
 class RedisCacheObserver extends LoggableServiceObserverAdapter
 {
+    /** @var string */
     const CACHE_IGNORE = 'IGNORE';
+
+    /** @var string */
     const CACHE_HIT = 'HIT';
+
+    /** @var string */
     const CACHE_MISS = 'MISS';
 
     /**
@@ -70,7 +75,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
 
         // Early return when this request does not have a matcher
         if (null === $requestMatcher) {
-            $this->callStack[] = [self::CACHE_IGNORE, null, null];
+            $this->callStack[] = ['type' => self::CACHE_IGNORE];
             return;
         }
 
@@ -82,7 +87,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
             // Cache miss
             //
 
-            $this->callStack[] = [self::CACHE_MISS, $key, $requestMatcher->getTtl($request)];
+            $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttl' => $requestMatcher->getTtl($request)];
             $this->addLogRecord(self::DEBUG, 'Cache miss', [$key]);
         } else {
             //
@@ -92,7 +97,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
             // Cancel the actual request
             $event->cancel($this);
             $event->getResponse()->setResponse($value);
-            $this->callStack[] = [self::CACHE_HIT, $key, null];
+            $this->callStack[] = ['type' => self::CACHE_HIT];
             $this->addLogRecord(self::DEBUG, 'Cache hit', [$key]);
         }
     }
@@ -107,9 +112,9 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
      */
     public function notifyAfter(ServiceCallInterface $event)
     {
-        list($cacheEvent, $key, $ttl) = array_pop($this->callStack);
+        $item = array_pop($this->callStack);
 
-        switch ($cacheEvent) {
+        switch ($item['type']) {
             case self::CACHE_IGNORE:
             case self::CACHE_HIT:
                 break;
@@ -118,8 +123,8 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
                 $response = $event->getResponse();
                 if (!$response->isError() && $response->isCachable()) {
                     $redis = $this->redisStorageFactory->getClient();
-                    $redis->setex($key, $ttl, $response->getResponse());
-                    $this->addLogRecord(self::DEBUG, 'Cache write', [$key, $ttl]);
+                    $redis->setex($item['key'], $item['ttl'], $response->getResponse());
+                    $this->addLogRecord(self::DEBUG, 'Cache write', $item);
                 }
                 break;
         }

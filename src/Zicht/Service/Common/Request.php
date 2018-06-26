@@ -37,7 +37,7 @@ class Request implements RequestInterface
      * @param array $parameters
      * @param array $attributes
      */
-    public function __construct($method, array $parameters = array(), $attributes = array())
+    public function __construct($method, array $parameters = [], $attributes = [])
     {
         $this->setMethod($method);
         $this->setParameters($parameters);

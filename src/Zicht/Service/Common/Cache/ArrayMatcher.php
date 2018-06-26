@@ -18,7 +18,7 @@ class ArrayMatcher implements RequestMatcher
      *
      * @var array
      */
-    protected $config = array();
+    protected $config = [];
 
     /**
      * Construct a basic array matcher that specifies methods as keys and TTL's as values. Each method call is
@@ -100,7 +100,7 @@ class ArrayMatcher implements RequestMatcher
     {
         $config = $this->config[strtolower($request->getMethod())];
 
-        $ttls = array($config['default']);
+        $ttls = [$config['default']];
         foreach ($config['attributes'] as $attribute => $ttl) {
             if ($request->hasAttribute($attribute)) {
                 $ttls [] = $ttl;

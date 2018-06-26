@@ -3,8 +3,8 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
-namespace Zicht\Service\Common;
 
+namespace Zicht\Service\Common;
 
 /**
  * Interface LoggerConstants
@@ -14,26 +14,26 @@ namespace Zicht\Service\Common;
 interface LoggerConstants
 {
     /** Debug log level */
-    const DEBUG         = 100;
+    const DEBUG = 100;
 
     /** Info log level */
-    const INFO          = 200;
+    const INFO = 200;
 
     /** Notice log level */
-    const NOTICE        = 250;
+    const NOTICE = 250;
 
     /** Warning log level */
-    const WARNING       = 300;
+    const WARNING = 300;
 
     /** Error log level */
-    const ERROR         = 400;
+    const ERROR = 400;
 
     /** Critical log level */
-    const CRITICAL      = 500;
+    const CRITICAL = 500;
 
     /** Alert log level */
-    const ALERT         = 550;
+    const ALERT = 550;
 
     /** Emergency log level */
-    const EMERGENCY     = 600;
+    const EMERGENCY = 600;
 }
