@@ -6,6 +6,7 @@
 
 namespace ZichtTest\Service\Common;
 
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\Observers\ServiceObserverAdapter;
 use Zicht\Service\Common\ServiceCallInterface;
 use Zicht\Service\Common\ServiceFactoryInterface;
@@ -14,8 +15,6 @@ use Zicht\Service\Common\ServiceWrapper;
 
 /**
  * Class CancellingObserver
- *
- * @package ZichtTest\Service\Common
  */
 class CancellingObserver extends ServiceObserverAdapter
 {
@@ -30,12 +29,8 @@ class CancellingObserver extends ServiceObserverAdapter
 
 /**
  * Class ServiceWrapperTest
- *
- * @covers \Zicht\Service\Common\ServiceWrapper
- *
- * @package ZichtTest\Service\Common
  */
-class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
+class ServiceWrapperTest extends TestCase
 {
     /**
      * @dataProvider exposedMethods
@@ -43,7 +38,7 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
      */
     function testExposedMethodsForwardToSoapClient($method)
     {
-        $mock = $this->getMockBuilder('\SoapClient')->setMethods([$method])->disableOriginalConstructor()->getMock();
+        $mock = $this->getMockBuilder(\SoapClient::class)->setMethods([$method])->disableOriginalConstructor()->getMock();
 
         $mock
             ->expects($this->once())
@@ -58,8 +53,8 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
 
     function testGetWrappedServiceReturnsSoapImplementation()
     {
-        $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
-        $soap = new ServiceWrapper($mock, []);
+        $mock = $this->getMockBuilder(\SoapClient::class)->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
+        $soap = new ServiceWrapper($mock);
         $this->assertEquals($mock, $soap->getWrappedService());
     }
 
@@ -70,9 +65,8 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
      */
     function testObserverWillBeNotifiedWithExpectedArguments()
     {
-
-        $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
-        $observer = $this->getMock('Zicht\Service\Common\ServiceObserver');
+        $mock = $this->getMockBuilder(\SoapClient::class)->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
+        $observer = $this->getMockBuilder('Zicht\Service\Common\ServiceObserver')->getMock();
 
         $soap = new ServiceWrapper($mock);
 
@@ -101,8 +95,8 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
      */
     function testPassingParametersAreImmutable()
     {
-        $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
-        $observer = $this->getMock('Zicht\Service\Common\ServiceObserver');
+        $mock = $this->getMockBuilder(\SoapClient::class)->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
+        $observer = $this->getMockBuilder('Zicht\Service\Common\ServiceObserver')->getMock();
 
         $soap = new ServiceWrapper($mock, []);
 
@@ -123,8 +117,8 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
 
     function testPassingParametersAreMutableInAlterRequest()
     {
-        $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
-        $observer = $this->getMock('Zicht\Service\Common\ServiceObserver');
+        $mock = $this->getMockBuilder(\SoapClient::class)->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
+        $observer = $this->getMockBuilder('Zicht\Service\Common\ServiceObserver')->getMock();
 
         $soap = new ServiceWrapper($mock, []);
 
@@ -147,14 +141,14 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
 
     function testResponseIsImmutableInNotifyAfter()
     {
-
+        $this->markTestSkipped('This should be tested');
     }
 
 
     function testCancellingEventWillCancelExecution()
     {
-        $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
-        $observer = $this->getMock('Zicht\Service\Common\ServiceObserver');
+        $mock = $this->getMockBuilder(\SoapClient::class)->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
+        $observer = $this->getMockBuilder('Zicht\Service\Common\ServiceObserver')->getMock();
         $soap = new ServiceWrapper($mock, []);
 
         $soap->registerObserver(new CancellingObserver());
@@ -166,8 +160,8 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
 
     function testSoapFaultIsDelegatedToObserver()
     {
-        $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
-        $observer = $this->getMock('Zicht\Service\Common\ServiceObserver');
+        $mock = $this->getMockBuilder(\SoapClient::class)->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
+        $observer = $this->getMockBuilder('Zicht\Service\Common\ServiceObserver')->getMock();
 
         $soap = new ServiceWrapper($mock, []);
 
@@ -203,10 +197,11 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
 
     function testObserversAreAllNotifiedEvenIfExceptionIsThrown()
     {
-        $mock = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
+        $mock = $this->getMockBuilder(\SoapClient::class)->disableOriginalConstructor()->setMethods(['testMethod'])->getMock();
+        $mock->method('testMethod')->will($this->returnValue('test'));
 
-        $observer = $this->getMock('\Zicht\Service\Common\ServiceObserver');
-        $observer2 = $this->getMock('\Zicht\Service\Common\ServiceObserver');
+        $observer = $this->getMockBuilder('\Zicht\Service\Common\ServiceObserver')->getMock();
+        $observer2 = $this->getMockBuilder('\Zicht\Service\Common\ServiceObserver')->getMock();
         $observer2->expects($this->once())->method('notifyBefore');
         $observer2->expects($this->once())->method('notifyAfter');
 
@@ -236,10 +231,11 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
 
     function testNestedCallsWillHaveEventParent()
     {
-        $mock = $this->getMock('Sro\Service\SoapClient', ['testMethod', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest']);
+        $mock = $this->getMockBuilder('Sro\Service\SoapClient', ['testMethod', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest'])->getMock();
+        $mock->method('testMethod')->will($this->returnValue('test'));
         $service = new ServiceWrapper($mock);
 
-        $observer = $this->getMock('Zicht\Service\Common\ServiceObserver');
+        $observer = $this->getMockBuilder('Zicht\Service\Common\ServiceObserver')->getMock();
 
         $calls = 0;
         $self = $this;
@@ -280,7 +276,7 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
     {
         $loggerInstance = $this->getMockBuilder('\Monolog\Logger')->disableOriginalConstructor()->getMock();
 
-        $observer = $this->getMock('Zicht\Service\Common\Observers\LoggableServiceObserverAdapter', ['setLogger']);
+        $observer = $this->getMockBuilder('Zicht\Service\Common\Observers\LoggableServiceObserverAdapter', ['setLogger'])->getMock();
         $observer->expects($this->once())->method('setLogger')->with($loggerInstance);
 
         $service = new ServiceWrapper($this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->getMock());
@@ -293,7 +289,7 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
     {
         $loggerInstance = $this->getMockBuilder('\Monolog\Logger')->disableOriginalConstructor()->getMock();
 
-        $observer = $this->getMock('Zicht\Service\Common\Observers\LoggableServiceObserverAdapter', ['setLogger']);
+        $observer = $this->getMockBuilder('Zicht\Service\Common\Observers\LoggableServiceObserverAdapter', ['setLogger'])->getMock();
         $observer->expects($this->once())->method('setLogger')->with($loggerInstance);
 
         $service = new ServiceWrapper($this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->getMock());
@@ -305,10 +301,12 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
 
     function testObserverOrder()
     {
-        $service = new ServiceWrapper($this->getMock('Sro\Service\SoapClient', ['method', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest']));
+        $mock = $this->getMockBuilder('Sro\Service\SoapClient', ['testMethod', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest'])->getMock();
+        $mock->method('testMethod')->will($this->returnValue('test'));
+        $service = new ServiceWrapper($mock);
 
-        $observer1 = $this->getMock('Zicht\Service\Common\Observers\ServiceObserverAdapter');
-        $observer2 = $this->getMock('Zicht\Service\Common\Observers\ServiceObserverAdapter');
+        $observer1 = $this->getMockBuilder('Zicht\Service\Common\Observers\ServiceObserverAdapter')->getMock();
+        $observer2 = $this->getMockBuilder('Zicht\Service\Common\Observers\ServiceObserverAdapter')->getMock();
 
         $order = [];
         $observer1->expects($this->once())->method('notifyBefore')->will($this->returnCallback(
@@ -336,7 +334,7 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
         $service->registerObserver($observer1);
         $service->registerObserver($observer2);
 
-        $service->method();
+        $service->testMethod();
         $this->assertEquals([
             'notifyBefore@1',
             'notifyBefore@2',
@@ -348,14 +346,14 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
 
     public function testServiceFactoryWillNotCreateServiceAtConstructionTime()
     {
-        $mock = $this->getMock(ServiceFactoryInterface::class);
+        $mock = $this->getMockBuilder(ServiceFactoryInterface::class)->getMock();
         $mock->expects($this->never())->method('createService');
         $wrapper = new ServiceWrapper($mock);
     }
 
     public function testServiceFactoryWillCreateServiceIfWrappedServiceIsRequested()
     {
-        $mock = $this->getMock(ServiceFactoryInterface::class);
+        $mock = $this->getMockBuilder(ServiceFactoryInterface::class)->getMock();
         $mock->expects($this->once())->method('createService');
         $wrapper = new ServiceWrapper($mock);
         $wrapper->getWrappedService();
@@ -363,7 +361,7 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
 
     public function testServiceFactoryWillCreateServiceOnceIfWrappedServiceIsRequestedMultipleTimes()
     {
-        $mock = $this->getMock(ServiceFactoryInterface::class);
+        $mock = $this->getMockBuilder(ServiceFactoryInterface::class)->getMock();
         $mock->expects($this->once())->method('createService');
         $wrapper = new ServiceWrapper($mock);
         $wrapper->getWrappedService();
@@ -374,22 +372,22 @@ class ServiceWrapperTest extends \PHPUnit_Framework_TestCase
     public function testRegisterObserverAtIndex()
     {
         $wrapper = new ServiceWrapper(new \stdClass());
-        $wrapper->registerObserver($first = $this->getMock(ServiceObserver::class));
+        $wrapper->registerObserver($first = $this->getMockBuilder(ServiceObserver::class)->getMock());
         $this->assertEquals([$first], $wrapper->getObservers());
-        $wrapper->registerObserver($second = $this->getMock(ServiceObserver::class));
+        $wrapper->registerObserver($second = $this->getMockBuilder(ServiceObserver::class)->getMock());
         $this->assertEquals([$first, $second], $wrapper->getObservers());
-        $wrapper->registerObserver($newSecond = $this->getMock(ServiceObserver::class), 1);
+        $wrapper->registerObserver($newSecond = $this->getMockBuilder(ServiceObserver::class)->getMock(), 1);
         $this->assertEquals([$first, $newSecond, $second], $wrapper->getObservers());
     }
 
     public function testUnregisterObserver()
     {
         $wrapper = new ServiceWrapper(new \stdClass());
-        $wrapper->registerObserver($first = $this->getMock(ServiceObserver::class));
+        $wrapper->registerObserver($first = $this->getMockBuilder(ServiceObserver::class)->getMock());
         $this->assertEquals([$first], $wrapper->getObservers());
-        $wrapper->registerObserver($second = $this->getMock(ServiceObserver::class));
+        $wrapper->registerObserver($second = $this->getMockBuilder(ServiceObserver::class)->getMock());
         $this->assertEquals([$first, $second], $wrapper->getObservers());
-        $wrapper->registerObserver($newSecond = $this->getMock(ServiceObserver::class), 1);
+        $wrapper->registerObserver($newSecond = $this->getMockBuilder(ServiceObserver::class)->getMock(), 1);
         $this->assertEquals([$first, $newSecond, $second], $wrapper->getObservers());
 
         $this->assertEquals([0, $first], $wrapper->unregisterObserver($first));

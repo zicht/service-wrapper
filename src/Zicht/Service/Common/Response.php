@@ -6,8 +6,6 @@
 
 namespace Zicht\Service\Common;
 
-use Zicht\Util\Debug;
-
 /**
  * SOAP Response wrapper
  */
@@ -131,7 +129,7 @@ class Response implements ResponseInterface
      */
     public function __toString()
     {
-        return Debug::dump($this->response, 4);
+        return json_encode($this->response, 0, 2);
     }
 
 

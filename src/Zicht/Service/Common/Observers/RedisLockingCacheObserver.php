@@ -65,7 +65,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
 
                 // Cancel the actual request
                 $event->cancel($this);
-                $event->getResponse()->setResponse($redis->get($key));
+                $event->getResponse()->setResponse($value);
                 $this->addLogRecord(self::DEBUG, 'Cache passive-hit', [$key]);
             }
         } else {

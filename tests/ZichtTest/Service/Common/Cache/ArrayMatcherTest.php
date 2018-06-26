@@ -6,15 +6,10 @@
 
 namespace Zicht\Service\Common;
 
-use \PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
+use Zicht\Service\Common\Cache\ArrayMatcher;
 
-use \Zicht\Service\Common\Response;
-use \Zicht\Service\Common\Cache\ArrayMatcher;
-
-/**
- * @covers Zicht\Service\Common\Cache\ArrayMatcher
- */
-class ArrayMatcherTest extends PHPUnit_Framework_TestCase
+class ArrayMatcherTest extends TestCase
 {
     /**
      * @var ArrayMatcher
@@ -23,10 +18,10 @@ class ArrayMatcherTest extends PHPUnit_Framework_TestCase
 
     function setUp()
     {
-        $config = array(
-            'methodA' => array('default' => 10, 'attributes' => array('five' => 5, 'three' => 3)),
-            'methodB' => array('default' => 15, 'attributes' => array('five' => 5, 'three' => 3)),
-        );
+        $config = [
+            'methodA' => ['default' => 10, 'attributes' => ['five' => 5, 'three' => 3]],
+            'methodB' => ['default' => 15, 'attributes' => ['five' => 5, 'three' => 3]],
+        ];
         $this->matcher = new ArrayMatcher($config);
     }
 
@@ -43,86 +38,86 @@ class ArrayMatcherTest extends PHPUnit_Framework_TestCase
     function testKeyIsDifferentIfParametersDiffer()
     {
         $this->assertNotEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'c')))
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'])),
+            $this->matcher->getKey(new Request('methodA', ['a' => 'c']))
         );
     }
 
     function testKeyIsDifferentIfMethodNamesDiffer()
     {
         $this->assertNotEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'))),
-            $this->matcher->getKey(new Request('methodB', array('a' => 'b')))
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'])),
+            $this->matcher->getKey(new Request('methodB', ['a' => 'b']))
         );
     }
 
     function testKeyIsMatchingIsCaseInsensitive()
     {
         $this->assertEquals(
-            $this->matcher->getKey(new Request('MeThOdA', array('a' => 'b'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b')))
+            $this->matcher->getKey(new Request('MeThOdA', ['a' => 'b'])),
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b']))
         );
     }
 
     function testKeyIsNotInfluencedByUnconfiguredAttributes()
     {
         $this->assertEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('unknown-attribute' => 'foo')))
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'])),
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'], ['unknown-attribute' => 'foo']))
         );
         $this->assertEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo', 'unknown-attribute' => 'foo')))
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'], ['five' => 'foo'])),
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'], ['five' => 'foo', 'unknown-attribute' => 'foo']))
         );
     }
 
     function testKeyIsDifferentWhenAttributesAreAvailable()
     {
         $this->assertNotEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo')))
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'])),
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'], ['five' => 'foo']))
         );
         $this->assertNotEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo', 'three' => 'foo')))
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'], ['five' => 'foo'])),
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'], ['five' => 'foo', 'three' => 'foo']))
         );
     }
 
     function testKeyIsDifferentWhenAttributeValuesAreDifferent()
     {
         $this->assertNotEquals(
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'foo'))),
-            $this->matcher->getKey(new Request('methodA', array('a' => 'b'), array('five' => 'bar')))
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'], ['five' => 'foo'])),
+            $this->matcher->getKey(new Request('methodA', ['a' => 'b'], ['five' => 'bar']))
         );
     }
 
     function testGetTtlReturnsSpecifiedTtlForMethodForAllParameters()
     {
-        $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'))));
-        $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', array('a' => 'c'))));
-        $this->assertEquals(15, $this->matcher->getTtl(new Request('methodB', array('a' => 'b'))));
-        $this->assertEquals(15, $this->matcher->getTtl(new Request('methodB', array('a' => 'c'))));
+        $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', ['a' => 'b'])));
+        $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', ['a' => 'c'])));
+        $this->assertEquals(15, $this->matcher->getTtl(new Request('methodB', ['a' => 'b'])));
+        $this->assertEquals(15, $this->matcher->getTtl(new Request('methodB', ['a' => 'c'])));
     }
 
     function testGetTtlReturnsSpecifiedTtlAndIgnoresCase()
     {
-        $this->assertEquals(10, $this->matcher->getTtl(new Request('MeThOdA', array('a' => 'b'))));
-        $this->assertEquals(15, $this->matcher->getTtl(new Request('MeThOdB', array('a' => 'b'))));
+        $this->assertEquals(10, $this->matcher->getTtl(new Request('MeThOdA', ['a' => 'b'])));
+        $this->assertEquals(15, $this->matcher->getTtl(new Request('MeThOdB', ['a' => 'b'])));
     }
 
     function testGetTtlReturnsLowestAttribute()
     {
         // default 10 is the lowest
-        $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'))));
+        $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', ['a' => 'b'])));
         // attribute five exists and has the lowest ttl
-        $this->assertEquals(5, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'), array('five' => 'foo'))));
+        $this->assertEquals(5, $this->matcher->getTtl(new Request('methodA', ['a' => 'b'], ['five' => 'foo'])));
         // attribute five and three exists, three has the lowest ttl
-        $this->assertEquals(3, $this->matcher->getTtl(new Request('methodA', array('a' => 'b'), array('five' => 'foo', 'three' => 'foo'))));
+        $this->assertEquals(3, $this->matcher->getTtl(new Request('methodA', ['a' => 'b'], ['five' => 'foo', 'three' => 'foo'])));
     }
 
 
     public function testIsExpunger()
     {
-        $this->assertFalse((new ArrayMatcher([]))->isExpunger($this->getMock(RequestInterface::class)));
+        $this->assertFalse((new ArrayMatcher([]))->isExpunger($this->getMockBuilder(RequestInterface::class)->getMock()));
     }
 }

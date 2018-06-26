@@ -2,110 +2,110 @@
 
 namespace ZichtTest\Service\Common;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\Response;
 
-class ResponseTest extends PHPUnit_Framework_TestCase
+class ResponseTest extends TestCase
 {
     function testGetPropertyDeep()
     {
         $value = rand(1, 9999);
-        $response = new Response(array(array('a' => array('b' => array('c' => $value)))));
-        $this->assertEquals($value, $response->getPropertyDeep(array(0, 'a', 'b', 'c')));
+        $response = new Response([['a' => ['b' => ['c' => $value]]]]);
+        $this->assertEquals($value, $response->getPropertyDeep([0, 'a', 'b', 'c']));
     }
 
     function testGetPropertyDeepObjects()
     {
         $value = rand(1, 9999);
-        $response = new Response(array((object)array('a' => (object)array('b' => (object)array('c' => $value)))));
-        $this->assertEquals($value, $response->getPropertyDeep(array(0, 'a', 'b', 'c')));
+        $response = new Response([(object)['a' => (object)['b' => (object)['c' => $value]]]]);
+        $this->assertEquals($value, $response->getPropertyDeep([0, 'a', 'b', 'c']));
     }
 
     function testGetPropertiesDeep()
     {
-        $expected = array(
-            array(array('a', 0, 'c'), rand(1, 9999)),
-            array(array('a', 1, 'c'), rand(1, 9999)),
-        );
+        $expected = [
+            [['a', 0, 'c'], rand(1, 9999)],
+            [['a', 1, 'c'], rand(1, 9999)],
+        ];
         $response = new Response(
-            (object)array(
-                'a' => array(
-                    (object)array('c' => $expected[0][1]),
-                    (object)array('c' => $expected[1][1]),
-                )
-            )
+            (object)[
+                'a' => [
+                    (object)['c' => $expected[0][1]],
+                    (object)['c' => $expected[1][1]],
+                ],
+            ]
         );
-        $this->assertEquals($expected, $response->getPropertiesDeep(array('a[]', 'c')));
+        $this->assertEquals($expected, $response->getPropertiesDeep(['a[]', 'c']));
     }
 
     function testGetPropertiesDeeper()
     {
-        $expected = array(
-            array(array('a', 0, 'b', 0, 'c'), rand(1, 9999)),
-            array(array('a', 0, 'b', 1, 'c'), rand(1, 9999)),
-            array(array('a', 1, 'b', 0, 'c'), rand(1, 9999)),
-            array(array('a', 1, 'b', 1, 'c'), rand(1, 9999)),
-        );
+        $expected = [
+            [['a', 0, 'b', 0, 'c'], rand(1, 9999)],
+            [['a', 0, 'b', 1, 'c'], rand(1, 9999)],
+            [['a', 1, 'b', 0, 'c'], rand(1, 9999)],
+            [['a', 1, 'b', 1, 'c'], rand(1, 9999)],
+        ];
         $response = new Response(
-            (object)array(
-                'a' => array(
-                    (object)array(
-                        'b' => array(
-                            (object)array('c' => $expected[0][1]),
-                            (object)array('c' => $expected[1][1]),
-                        )
-                    ),
-                    (object)array(
-                        'b' => array(
-                            (object)array('c' => $expected[2][1]),
-                            (object)array('c' => $expected[3][1]),
-                        )
-                    )
-                )
-            )
+            (object)[
+                'a' => [
+                    (object)[
+                        'b' => [
+                            (object)['c' => $expected[0][1]],
+                            (object)['c' => $expected[1][1]],
+                        ],
+                    ],
+                    (object)[
+                        'b' => [
+                            (object)['c' => $expected[2][1]],
+                            (object)['c' => $expected[3][1]],
+                        ],
+                    ],
+                ],
+            ]
         );
-        $this->assertEquals($expected, $response->getPropertiesDeep(array('a[]', 'b[]', 'c')));
+        $this->assertEquals($expected, $response->getPropertiesDeep(['a[]', 'b[]', 'c']));
     }
 
     function testGetPropertyDeepIfValueNotSet()
     {
         $response = new Response(
-            (object)array(
-                'a' => array(
-                    (object)array('c' => rand(1, 9999)),
-                    (object)array('c' => rand(1, 9999)),
-                ),
-            )
+            (object)[
+                'a' => [
+                    (object)['c' => rand(1, 9999)],
+                    (object)['c' => rand(1, 9999)],
+                ],
+            ]
         );
-        $this->assertEquals(array(), $response->getPropertiesDeep(array('a[]', 'x')));
-        $this->assertEquals(array(), $response->getPropertiesDeep(array('a[]', 'c[]')));
-        $this->assertEquals(array(), $response->getPropertiesDeep(array('x', 'a[]')));
-        $this->assertEquals(array(), $response->getPropertiesDeep(array('x[]', 'a')));
+        $this->assertEquals([], $response->getPropertiesDeep(['a[]', 'x']));
+        $this->assertEquals([], $response->getPropertiesDeep(['a[]', 'c[]']));
+        $this->assertEquals([], $response->getPropertiesDeep(['x', 'a[]']));
+        $this->assertEquals([], $response->getPropertiesDeep(['x[]', 'a']));
     }
 
     function testSetPropertyDeep()
     {
         $value = rand(1, 9999);
         $value2 = rand(10000, 19999);
-        $response = new Response(array(array('a' => array('b' => array('c' => $value)))));
-        $response->setPropertyDeep(array(0, 'a', 'b', 'c'), $value2);
-        $this->assertEquals($value2, $response->getPropertyDeep(array(0, 'a', 'b', 'c')));
+        $response = new Response([['a' => ['b' => ['c' => $value]]]]);
+        $response->setPropertyDeep([0, 'a', 'b', 'c'], $value2);
+        $this->assertEquals($value2, $response->getPropertyDeep([0, 'a', 'b', 'c']));
     }
 
     function testSetPropertyDeepIfValueNotPreviouslySet()
     {
         $value2 = rand(10000, 19999);
-        $response = new Response(array());
-        $response->setPropertyDeep(array(0, 'a', 'b', 'c'), $value2);
-        $this->assertEquals($value2, $response->getPropertyDeep(array(0, 'a', 'b', 'c')));
+        $response = new Response([]);
+        $response->setPropertyDeep([0, 'a', 'b', 'c'], $value2);
+        $this->assertEquals($value2, $response->getPropertyDeep([0, 'a', 'b', 'c']));
     }
 
     function testSetPropertyDeepIfValueNotPreviouslySetOnObject()
     {
         $value2 = rand(10000, 19999);
-        $response = new Response(array(['a' => (object) ['b' => 'foo']]));
-        $response->setPropertyDeep(array(0, 'a', 'c'), $value2);
-        $this->assertEquals($value2, $response->getPropertyDeep(array(0, 'a', 'c')));
+        $response = new Response([['a' => (object)['b' => 'foo']]]);
+        $response->setPropertyDeep([0, 'a', 'c'], $value2);
+        $this->assertEquals($value2, $response->getPropertyDeep([0, 'a', 'c']));
     }
 
     function testSetCachable()
@@ -134,11 +134,12 @@ class ResponseTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($error, $response->getError());
     }
+
     public function supportedErrors()
     {
         return [
             ["error as string"],
-            [new \Exception("error as exception")]
+            [new \Exception("error as exception")],
         ];
     }
 
@@ -159,8 +160,6 @@ class ResponseTest extends PHPUnit_Framework_TestCase
     {
         $response = new Response();
         $response->setResponse(['prop' => 'value']);
-
-        $this->assertRegExp('/prop/', (string)$response);
-        $this->assertRegExp('/value/', (string)$response);
+        $this->assertEquals('{"prop":"value"}', (string)$response);
     }
 }

@@ -7,6 +7,7 @@
 
 namespace ZichtTest\Service\Common;
 
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\Factory;
 
 class SomeService
@@ -18,10 +19,7 @@ class SomeService
     }
 }
 
-/**
- * @covers Zicht\Service\Common\Factory
- */
-class FactoryTest extends \PHPUnit_Framework_TestCase
+class FactoryTest extends TestCase
 {
     public function testFactory()
     {

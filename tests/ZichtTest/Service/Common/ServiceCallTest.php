@@ -6,22 +6,20 @@
 
 namespace ZichtTest\Service\Common;
 
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\RequestInterface;
 use Zicht\Service\Common\ResponseInterface;
 use Zicht\Service\Common\ServiceCall;
 use Zicht\Service\Common\ServiceWrapper;
 
-/**
- * @covers Zicht\Service\Common\ServiceCall
- */
-class ServiceCallTest extends \PHPUnit_Framework_TestCase
+class ServiceCallTest extends TestCase
 {
     protected function setUp()
     {
         $this->call = new ServiceCall(
             $this->service = $this->getMockBuilder(ServiceWrapper::class)->disableOriginalConstructor()->getMock(),
-            $this->request = $this->getMock(RequestInterface::class),
-            $this->response = $this->getMock(ResponseInterface::class),
+            $this->request = $this->getMockBuilder(RequestInterface::class)->getMock(),
+            $this->response = $this->getMockBuilder(ResponseInterface::class)->getMock(),
             $this->parent = $this->getMockBuilder(ServiceCallInterface::class)->disableOriginalConstructor()->getMock()
         );
     }
@@ -31,8 +29,8 @@ class ServiceCallTest extends \PHPUnit_Framework_TestCase
     {
         $call = new ServiceCall(
             $this->getMockBuilder(ServiceWrapper::class)->disableOriginalConstructor()->getMock(),
-            $this->getMock(RequestInterface::class),
-            $this->getMock(ResponseInterface::class)
+            $this->getMockBuilder(RequestInterface::class)->getMock(),
+            $this->getMockBuilder(ResponseInterface::class)->getMock()
         );
         $this->assertNull($call->getParent());
         $this->assertFalse($call->hasParent());

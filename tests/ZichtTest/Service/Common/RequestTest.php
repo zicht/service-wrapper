@@ -2,60 +2,57 @@
 
 namespace ZichtTest\Service\Common;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\Request;
 
-/**
- * @covers Zicht\Service\Common\Request
- */
-class RequestTest extends PHPUnit_Framework_TestCase
+class RequestTest extends TestCase
 {
     function testGetParameterDeep()
     {
         $value = rand(1, 9999);
-        $request = new Request('', array(array('a' => array('b' => array('c' => $value)))));
-        $this->assertEquals($value, $request->getParameterDeep(array(0, 'a', 'b', 'c')));
+        $request = new Request('', [['a' => ['b' => ['c' => $value]]]]);
+        $this->assertEquals($value, $request->getParameterDeep([0, 'a', 'b', 'c']));
     }
 
 
     function testGetParameterDeepReturnsNullOnInvalidPath()
     {
         $value = rand(1, 9999);
-        $request = new Request('', array(array('a' => array('b' => array('c' => $value)))));
-        $this->assertEquals(null, $request->getParameterDeep(array(0, 'a', 'b', 'qux')));
+        $request = new Request('', [['a' => ['b' => ['c' => $value]]]]);
+        $this->assertEquals(null, $request->getParameterDeep([0, 'a', 'b', 'qux']));
     }
 
     function testGetParameterDeepObjects()
     {
         $value = rand(1, 9999);
-        $request = new Request('', array((object)array('a' => (object)array('b' => (object)array('c' => $value)))));
-        $this->assertEquals($value, $request->getParameterDeep(array(0, 'a', 'b', 'c')));
+        $request = new Request('', [(object)['a' => (object)['b' => (object)['c' => $value]]]]);
+        $this->assertEquals($value, $request->getParameterDeep([0, 'a', 'b', 'c']));
     }
 
     function testSetParameterDeep()
     {
         $value = rand(1, 9999);
         $value2 = rand(10000, 19999);
-        $request = new Request('', array(array('a' => array('b' => array('c' => $value)))));
-        $request->setParameterDeep(array(0, 'a', 'b', 'c'), $value2);
-        $this->assertEquals($value2, $request->getParameterDeep(array(0, 'a', 'b', 'c')));
+        $request = new Request('', [['a' => ['b' => ['c' => $value]]]]);
+        $request->setParameterDeep([0, 'a', 'b', 'c'], $value2);
+        $this->assertEquals($value2, $request->getParameterDeep([0, 'a', 'b', 'c']));
     }
 
     function testSetParameterDeepIfValueNotPreviouslySet()
     {
         $value2 = rand(10000, 19999);
-        $request = new Request('', array());
-        $request->setParameterDeep(array(0, 'a', 'b', 'c'), $value2);
-        $this->assertEquals($value2, $request->getParameterDeep(array(0, 'a', 'b', 'c')));
+        $request = new Request('', []);
+        $request->setParameterDeep([0, 'a', 'b', 'c'], $value2);
+        $this->assertEquals($value2, $request->getParameterDeep([0, 'a', 'b', 'c']));
     }
 
 
     function testSetParameterDeepIfDeepValueNotPreviouslySet()
     {
         $value2 = rand(10000, 19999);
-        $request = new Request('', array(['a' => (object)['b' => null]]));
-        $request->setParameterDeep(array(0, 'a', 'b', 'c', 'd'), $value2);
-        $this->assertEquals($value2, $request->getParameterDeep(array(0, 'a', 'b', 'c', 'd')));
+        $request = new Request('', [['a' => (object)['b' => null]]]);
+        $request->setParameterDeep([0, 'a', 'b', 'c', 'd'], $value2);
+        $this->assertEquals($value2, $request->getParameterDeep([0, 'a', 'b', 'c', 'd']));
     }
 
 
@@ -74,11 +71,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
     public function testStringRepresentation()
     {
         $request = new Request('FOO', ['prop' => 'value']);
-        $s = (string)$request;
-
-        $this->assertRegExp('/FOO/', $s);
-        $this->assertRegExp('/prop/', $s);
-        $this->assertRegExp('/value/', $s);
+        $this->assertEquals('FOO(`{"prop":"value"}`)', (string)$request);
     }
 
 

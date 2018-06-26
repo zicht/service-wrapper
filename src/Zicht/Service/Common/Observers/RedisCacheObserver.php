@@ -91,7 +91,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
 
             // Cancel the actual request
             $event->cancel($this);
-            $event->getResponse()->setResponse($redis->get($key));
+            $event->getResponse()->setResponse($value);
             $this->callStack[] = [self::CACHE_HIT, $key, null];
             $this->addLogRecord(self::DEBUG, 'Cache hit', [$key]);
         }

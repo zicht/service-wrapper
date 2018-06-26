@@ -6,6 +6,7 @@
 
 namespace ZichtTest\Service\Common;
 
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\CurlStreamWrapper;
 use Zicht\Service\Common\Soap\SoapClient;
 
@@ -17,7 +18,7 @@ use Zicht\Service\Common\Soap\SoapClient;
  * @group integration
  * @package ZichtTest\Service\Common
  */
-class CurlStreamWrapperTest extends \PHPUnit_Framework_TestCase
+class CurlStreamWrapperTest extends TestCase
 {
     /**
      * Test soap integration
