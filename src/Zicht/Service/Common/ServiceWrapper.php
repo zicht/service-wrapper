@@ -18,12 +18,12 @@ class ServiceWrapper
      *
      * @var ServiceObserver[]
      */
-    private $observers = array();
+    private $observers = [];
 
     /**
      * @var array
      */
-    private $callStack = array();
+    private $callStack = [];
 
     /**
      * The logger instance to delegate to the observers (if they are LoggerAwareInterface instances)
@@ -132,7 +132,7 @@ class ServiceWrapper
     public function __call($methodName, $args)
     {
         if (count($this->callStack)) {
-            $parent = $this->callStack[count($this->callStack) -1];
+            $parent = $this->callStack[count($this->callStack) - 1];
         } else {
             $parent = null;
         }
@@ -182,7 +182,7 @@ class ServiceWrapper
      * @param array $raisedLogLevels
      * @return void
      */
-    public function setLogger($logger, $raisedLogLevels = array())
+    public function setLogger($logger, $raisedLogLevels = [])
     {
         $this->logger = $logger;
         // update the observer stack.
@@ -202,7 +202,7 @@ class ServiceWrapper
     protected function execute(ServiceCallInterface $call)
     {
         return call_user_func_array(
-            array($this->service, $call->getRequest()->getMethod()),
+            [$this->service, $call->getRequest()->getMethod()],
             $call->getRequest()->getParameters()
         );
     }

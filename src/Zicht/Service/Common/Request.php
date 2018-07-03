@@ -6,8 +6,6 @@
 
 namespace Zicht\Service\Common;
 
-use Zicht\Util\Debug;
-
 /**
  * A request wrapper class for any request that gets sent to the Soap backend
  */
@@ -39,7 +37,7 @@ class Request implements RequestInterface
      * @param array $parameters
      * @param array $attributes
      */
-    public function __construct($method, array $parameters = array(), $attributes = array())
+    public function __construct($method, array $parameters = [], $attributes = [])
     {
         $this->setMethod($method);
         $this->setParameters($parameters);
@@ -169,14 +167,7 @@ class Request implements RequestInterface
      */
     public function __toString()
     {
-        $ret = $this->getMethod() . '(' . "\n";
-        $ret .= preg_replace(
-            '/^/m',
-            '    ',
-            Debug::dump($this->getParameters(), 2)
-        );
-        $ret .= ')';
-        return $ret;
+        return sprintf('%s(`%s`)', $this->getMethod(), json_encode($this->getParameters(), 0, 2));
     }
 
     /**

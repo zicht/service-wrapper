@@ -35,7 +35,7 @@ class LoggableServiceObserverAdapter extends ServiceObserverAdapter implements L
      * @param array $context
      * @return void
      */
-    public function addLogRecord($level, $message, array $context = array())
+    public function addLogRecord($level, $message, array $context = [])
     {
         if ($this->logger) {
             $this->logger->addRecord($level, $message, $context);

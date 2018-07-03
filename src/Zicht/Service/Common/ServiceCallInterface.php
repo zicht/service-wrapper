@@ -6,7 +6,6 @@
 
 namespace Zicht\Service\Common;
 
-
 /**
  * Base interface for service calls initiated by the ServiceWrapper
  *

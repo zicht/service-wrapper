@@ -137,7 +137,7 @@ abstract class AbstractRest
 
 
     /**
-     * Create a request by formatting the parameters in the expected format (either as part 
+     * Create a request by formatting the parameters in the expected format (either as part
      * of the body (PUT, POST), or as part of the query string (DELETE, GET)
      *
      * @param string $method

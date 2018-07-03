@@ -6,7 +6,7 @@
 
 namespace ZichtTest\Service\Common\Observers;
 
-use Psr\Log\Test\LoggerInterfaceTest;
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\Observers\LoggableServiceObserverAdapter;
 
 class LoggerImpl extends LoggableServiceObserverAdapter
@@ -17,8 +17,7 @@ class LoggerImpl extends LoggableServiceObserverAdapter
     }
 }
 
-
-class LoggableServiceObserverAdapterTest extends \PHPUnit_Framework_TestCase
+class LoggableServiceObserverAdapterTest extends TestCase
 {
     public function testAddLogRecordWithLogger()
     {

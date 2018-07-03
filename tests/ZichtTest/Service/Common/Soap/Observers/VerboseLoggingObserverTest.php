@@ -6,11 +6,12 @@
 
 namespace ZichtTest\Service\Soap\Observers;
 
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\ServiceCallInterface;
 use Zicht\Service\Common\ServiceWrapper;
 use Zicht\Service\Common\Soap\Observer\VerboseLoggingObserver;
 
-class VerboseLoggingObserverTest extends \PHPUnit_Framework_TestCase
+class VerboseLoggingObserverTest extends TestCase
 {
     public function testRequestXmlIsAdded()
     {
@@ -19,12 +20,12 @@ class VerboseLoggingObserverTest extends \PHPUnit_Framework_TestCase
         $soap->expects($this->once())->method('__getLastResponse')->will($this->returnValue('response body'));
         $wrapper = $this->getMockBuilder(ServiceWrapper::class)->disableOriginalConstructor()->getMock();
         $wrapper->expects($this->once())->method('getWrappedService')->will($this->returnValue($soap));
-        $call = $this->getMock(ServiceCallInterface::class);
+        $call = $this->getMockBuilder(ServiceCallInterface::class)->getMock();
         $call->expects($this->once())->method('getService')->will($this->returnValue($wrapper));
         $call->expects($this->once())->method('addLogAttributes')->with(
             [
                 'request' => 'request body',
-                'response' => 'response body'
+                'response' => 'response body',
             ]
         );
 

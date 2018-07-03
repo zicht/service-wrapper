@@ -83,7 +83,7 @@ class CurlStreamWrapper
     // @codingStandardsIgnoreStart
     public function stream_open($path, $mode, $options, $opened_path)
     {
-    // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreEnd
         $this->path = $path;
         $this->mode = $mode;
         $this->options = $options;
@@ -102,7 +102,7 @@ class CurlStreamWrapper
     // @codingStandardsIgnoreStart
     public function stream_close()
     {
-    // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreEnd
         curl_close($this->ch);
     }
 
@@ -116,7 +116,7 @@ class CurlStreamWrapper
     // @codeCoverageIgnoreStart
     public function stream_read($count)
     {
-    // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreEnd
         if (strlen($this->buffer) == 0) {
             return false;
         }
@@ -139,7 +139,7 @@ class CurlStreamWrapper
     // @codeCoverageIgnoreStart
     public function stream_write($data)
     {
-    // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreEnd
         if (strlen($this->buffer) == 0) {
             return false;
         }
@@ -156,7 +156,7 @@ class CurlStreamWrapper
     // @codingStandardsIgnoreStart
     public function stream_eof()
     {
-    // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreEnd
         if ($this->pos > strlen($this->buffer)) {
             return true;
         }
@@ -171,7 +171,7 @@ class CurlStreamWrapper
     // @codeCoverageIgnoreStart
     public function stream_tell()
     {
-    // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreEnd
         return $this->pos;
     }
     // @codeCoverageIgnoreEnd
@@ -182,7 +182,7 @@ class CurlStreamWrapper
     // @codingStandardsIgnoreStart
     public function stream_flush()
     {
-    // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreEnd
         $this->buffer = null;
         $this->pos = null;
     }
@@ -195,11 +195,11 @@ class CurlStreamWrapper
     // @codingStandardsIgnoreStart
     public function stream_stat()
     {
-    // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreEnd
         $this->createBuffer($this->path);
-        $stat = array(
+        $stat = [
             'size' => strlen($this->buffer),
-        );
+        ];
 
         return $stat;
     }
@@ -212,11 +212,11 @@ class CurlStreamWrapper
     // @codingStandardsIgnoreStart
     public function url_stat($path, $flags)
     {
-    // @codingStandardsIgnoreEnd
+        // @codingStandardsIgnoreEnd
         $this->createBuffer($path);
-        $stat = array(
+        $stat = [
             'size' => strlen($this->buffer),
-        );
+        ];
 
         return $stat;
     }

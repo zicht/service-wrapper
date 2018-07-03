@@ -3,6 +3,7 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
+
 namespace Zicht\Service\Common;
 
 /**
@@ -20,11 +21,10 @@ trait FreezableTrait
     public function freeze()
     {
         if ($this->isFrozen) {
-            throw new \LogicException("You can not freeze an object that was already frozen");
+            throw new \LogicException('You can not freeze an object that was already frozen');
         }
         $this->isFrozen = true;
     }
-
 
     /**
      * Make sure the object is not frozen, otherwise throw an exception

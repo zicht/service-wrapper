@@ -15,7 +15,7 @@ class Logger extends LoggableServiceObserverAdapter
 {
     protected $timer = null;
 
-    protected $raisedLogLevels = array();
+    protected $raisedLogLevels = [];
 
     /**
      * Constructs the Logger observer
@@ -130,7 +130,7 @@ class Logger extends LoggableServiceObserverAdapter
     {
         foreach ($logLevels as $config) {
             if (!isset($this->raisedLogLevels[$config['level']])) {
-                $this->raisedLogLevels[$config['level']] = array();
+                $this->raisedLogLevels[$config['level']] = [];
             }
             $this->raisedLogLevels[$config['level']] = array_merge(
                 $this->raisedLogLevels[$config['level']],

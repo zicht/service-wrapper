@@ -6,18 +6,19 @@
 
 namespace ZichtTest\Service\Bridge\DataCollector;
 
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\Bridge\DataCollector\Observer;
 use Zicht\Service\Common\RequestInterface;
 use Zicht\Service\Common\ResponseInterface;
 use Zicht\Service\Common\ServiceCallInterface;
 
-class ObserverTest extends \PHPUnit_Framework_TestCase
+class ObserverTest extends TestCase
 {
     public function testCollection()
     {
-        $call = $this->getMock(ServiceCallInterface::class);
-        $call->expects($this->any())->method('getRequest')->will($this->returnValue($req = $this->getMock(RequestInterface::class)));
-        $call->expects($this->any())->method('getResponse')->will($this->returnValue($response = $this->getMock(ResponseInterface::class)));
+        $call = $this->getMockBuilder(ServiceCallInterface::class)->getMock();
+        $call->expects($this->any())->method('getRequest')->will($this->returnValue($req = $this->getMockBuilder(RequestInterface::class)->getMock()));
+        $call->expects($this->any())->method('getResponse')->will($this->returnValue($response = $this->getMockBuilder(ResponseInterface::class)->getMock()));
 
         $response->expects($this->any())->method('getResponse')->will($this->returnValue('The response'));
         $response->expects($this->any())->method('isError')->will($this->returnValue(false));
@@ -42,9 +43,9 @@ class ObserverTest extends \PHPUnit_Framework_TestCase
      */
     public function testErrorData($error, $message)
     {
-        $call = $this->getMock(ServiceCallInterface::class);
-        $call->expects($this->any())->method('getRequest')->will($this->returnValue($req = $this->getMock(RequestInterface::class)));
-        $call->expects($this->any())->method('getResponse')->will($this->returnValue($response = $this->getMock(ResponseInterface::class)));
+        $call = $this->getMockBuilder(ServiceCallInterface::class)->getMock();
+        $call->expects($this->any())->method('getRequest')->will($this->returnValue($req = $this->getMockBuilder(RequestInterface::class)->getMock()));
+        $call->expects($this->any())->method('getResponse')->will($this->returnValue($response = $this->getMockBuilder(ResponseInterface::class)->getMock()));
 
         $response->expects($this->any())->method('getResponse')->will($this->returnValue('The response'));
         $response->expects($this->any())->method('isError')->will($this->returnValue(true));
@@ -60,6 +61,7 @@ class ObserverTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($call['is_error']);
         $this->assertEquals($message, $call['error']);
     }
+
     public function supportedErrors()
     {
         return [

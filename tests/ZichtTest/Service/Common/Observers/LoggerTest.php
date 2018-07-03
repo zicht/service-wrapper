@@ -6,18 +6,16 @@
 
 namespace ZichtTest\Service\Common\Observers;
 
-use \PHPUnit_Framework_TestCase;
-use \Monolog\Logger as Monolog;
-
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\LoggerConstants;
-use \Zicht\Service\Common\Observers\Logger as LoggerObserver;
-use \Zicht\Service\Common\Observers\LoggableException;
+use Zicht\Service\Common\Observers\Logger as LoggerObserver;
+use Zicht\Service\Common\Observers\LoggableException;
 use Zicht\Service\Common\Observers\Timer;
 use Zicht\Service\Common\RequestInterface;
-use \Zicht\Service\Common\Response;
-use \Zicht\Service\Common\Request;
+use Zicht\Service\Common\Response;
+use Zicht\Service\Common\Request;
 use Zicht\Service\Common\ResponseInterface;
-use \Zicht\Service\Common\ServiceCall;
+use Zicht\Service\Common\ServiceCall;
 use Zicht\Service\Common\ServiceCallInterface;
 
 class LoggableExceptionStub extends \SoapFault implements LoggableException
@@ -37,7 +35,7 @@ class LoggableExceptionStub extends \SoapFault implements LoggableException
 /**
  * @covers Zicht\Service\Common\Observers\Logger
  */
-class LoggerTest extends PHPUnit_Framework_TestCase
+class LoggerTest extends TestCase
 {
     protected $loggerImpl;
     protected $soapImpl;
@@ -46,7 +44,7 @@ class LoggerTest extends PHPUnit_Framework_TestCase
     function setUp()
     {
         $this->service = $this->getMockBuilder('Zicht\Service\Common\ServiceWrapper')->disableOriginalConstructor()->getMock();
-        $this->loggerImpl = $this->getMock('\Monolog\Logger', array('addDebug', 'addInfo', 'addCritical', 'addError', 'addWarning', 'addRecord'), array());
+        $this->loggerImpl = $this->getMockBuilder('\Monolog\Logger', ['addDebug', 'addInfo', 'addCritical', 'addError', 'addWarning', 'addRecord'], [])->getMock();
         $this->soapImpl = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->getMock();
     }
 
@@ -87,12 +85,12 @@ class LoggerTest extends PHPUnit_Framework_TestCase
 
     public function testTimerIsNotifiedOfStartIfSet()
     {
-        $timer = $this->getMock(Timer::class);
+        $timer = $this->getMockBuilder(Timer::class)->getMock();
         $request = new Request('methodName');
 
         $timer->expects($this->once())->method('start')->with('methodName');
 
-        $call = $this->getMock(ServiceCallInterface::class);
+        $call = $this->getMockBuilder(ServiceCallInterface::class)->getMock();
         $call->expects($this->any())->method('getRequest')->will($this->returnValue($request));
 
         $logger = new LoggerObserver($timer);
@@ -106,12 +104,12 @@ class LoggerTest extends PHPUnit_Framework_TestCase
      */
     public function testTimerIsNotNotifiedIfLoggerNotSet()
     {
-        $timer = $this->getMock(Timer::class);
+        $timer = $this->getMockBuilder(Timer::class)->getMock();
         $request = new Request('methodName');
 
         $timer->expects($this->never())->method('start');
 
-        $call = $this->getMock(ServiceCallInterface::class);
+        $call = $this->getMockBuilder(ServiceCallInterface::class)->getMock();
         $call->expects($this->never())->method('getRequest')->will($this->returnValue($request));
 
         $logger = new LoggerObserver($timer);
@@ -138,11 +136,11 @@ class LoggerTest extends PHPUnit_Framework_TestCase
         $request = $this->getMockBuilder(RequestInterface::class)->getMock();
         $request->expects($this->any())->method('getMethod')->will($this->returnValue('foo'));
         $response = $this->getMockBuilder(ResponseInterface::class)->getMock();
-        $call1 = $this->getMock(ServiceCallInterface::class);
+        $call1 = $this->getMockBuilder(ServiceCallInterface::class)->getMock();
         $call1->expects($this->any())->method('getLogAttributes')->will($this->returnValue([]));
         $call1->expects($this->any())->method('getRequest')->will($this->returnValue($request));
         $call1->expects($this->any())->method('getResponse')->will($this->returnValue($response));
 
         $o->notifyAfter($call1);
-   }
+    }
 }

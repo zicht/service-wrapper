@@ -5,7 +5,28 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
+
+## 3.0.0 - 2018-06-26
+### Added
+- `RedisStorageFactory`: this can be loaded as a service that can provide one `\Redis`
+  instance by calling `getClient` or multiple by calling `createClient`.
+- Two simple caching observers: the `RedisCacheObserver` and `RedisLockingCacheObserver`.
+  Either one can be used.  They support the all existing matchers but only support the 
+  Redis storage engine.  Support for other storage engines will require the implementation
+  of their own specific observers.
+### Changed
+- Now only supports php 7.1
+- `phpunit/phpunit` was updated
+- The dependency on `zicht/util` was removed, it was only used for `Debug::dump`
+- The caching component was made less abstract.  Before there was a Cache observer
+  that could be configured to use any matchers and any storage engine, this
+  was held together using the CacheAdapter.
+### Removed
+- `CacheAdapter`, `Observers/Cache`
+- `FileStorage`, `MemoryStorage`, and `Storage`
+- `RedisBase` and `RedisStorage`
 
 ## 2.3.4 - 2018-03-21
 ### Changed

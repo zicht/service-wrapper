@@ -6,8 +6,6 @@
 
 namespace Zicht\Service\Common;
 
-use Zicht\Util\Debug;
-
 /**
  * SOAP Response wrapper
  */
@@ -131,7 +129,7 @@ class Response implements ResponseInterface
      */
     public function __toString()
     {
-        return Debug::dump($this->response, 4);
+        return json_encode($this->response, 0, 2);
     }
 
 
@@ -149,38 +147,38 @@ class Response implements ResponseInterface
     public function getPropertiesDeep(array $propertyPath)
     {
         // prepare a nested property path
-        $flatPropertyPath = array();
-        $nestedPropertyPath = array();
+        $flatPropertyPath = [];
+        $nestedPropertyPath = [];
         foreach ($propertyPath as $key) {
             if (is_string($key) && preg_match('/^(.+)\[\]$/', $key, $matches)) {
                 $flatPropertyPath [] = $matches[1];
-                $nestedPropertyPath [] = array($flatPropertyPath, true);
+                $nestedPropertyPath [] = [$flatPropertyPath, true];
                 $flatPropertyPath = [];
             } else {
                 $flatPropertyPath [] = $key;
             }
         }
         if (!empty($flatPropertyPath)) {
-            $nestedPropertyPath [] = array($flatPropertyPath, false);
+            $nestedPropertyPath [] = [$flatPropertyPath, false];
         }
 
         // create list with raw data and their absolute path
-        $pointers = array(array(array(), $this->response));
+        $pointers = [[[], $this->response]];
         foreach ($nestedPropertyPath as list($flatPropertyPath, $multiple)) {
-            $newPointers = array();
+            $newPointers = [];
             foreach ($pointers as list($basePath, $pointer)) {
                 $pointer = $this->getValueFromPath($flatPropertyPath, $pointer);
                 if (!is_null($pointer)) {
                     if ($multiple) {
                         if (is_array($pointer)) {
                             foreach ($pointer as $key => $value) {
-                                $absolutePath = array_merge($basePath, $flatPropertyPath, array($key));
-                                $newPointers [] = array($absolutePath, $value);
+                                $absolutePath = array_merge($basePath, $flatPropertyPath, [$key]);
+                                $newPointers [] = [$absolutePath, $value];
                             }
                         }
                     } else {
                         $absolutePath = array_merge($basePath, $flatPropertyPath);
-                        $newPointers [] = array($absolutePath, $pointer);
+                        $newPointers [] = [$absolutePath, $pointer];
                     }
                 }
             }
@@ -201,12 +199,12 @@ class Response implements ResponseInterface
         foreach ($path as $key) {
             if (is_object($ptr)) {
                 if (!isset($ptr->$key)) {
-                    $ptr->$key = array();
+                    $ptr->$key = [];
                 }
                 $ptr =& $ptr->$key;
             } elseif (is_array($ptr)) {
                 if (!isset($ptr[$key])) {
-                    $ptr[$key] = array();
+                    $ptr[$key] = [];
                 }
                 $ptr =& $ptr[$key];
             }

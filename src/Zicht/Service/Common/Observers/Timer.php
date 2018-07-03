@@ -19,11 +19,11 @@ class Timer
      *
      * @var array
      */
-    public static $defaults = array(
-        0       => LoggerConstants::DEBUG,
-        1500    => LoggerConstants::INFO,
-        4000    => LoggerConstants::WARNING
-    );
+    public static $defaults = [
+        0 => LoggerConstants::DEBUG,
+        1500 => LoggerConstants::INFO,
+        4000 => LoggerConstants::WARNING,
+    ];
 
     /**
      * When to log what; if the number of milliseconds is larger than the threshold (the key of the array), the
@@ -31,10 +31,10 @@ class Timer
      *
      * @var array
      */
-    protected $timings = array();
+    protected $timings = [];
 
 
-    protected $map = array();
+    protected $map = [];
 
 
     /**
@@ -66,7 +66,7 @@ class Timer
 
     /**
      * Record the elapsed time of the request.
-     * 
+     *
      * @param string $serviceMethod
      * @return mixed
      */

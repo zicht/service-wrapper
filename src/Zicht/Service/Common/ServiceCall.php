@@ -16,8 +16,8 @@ class ServiceCall implements ServiceCallInterface
     private $service = null;
     private $request = null;
     private $response = null;
-    private $cancelled = array();
-    private $logAttributes = array();
+    private $cancelled = [];
+    private $logAttributes = [];
 
     /**
      * Construct the service call
@@ -69,7 +69,7 @@ class ServiceCall implements ServiceCallInterface
      */
     public function cancel($by)
     {
-        $this->cancelled[]= (is_object($by) ? get_class($by) : (string)$by);
+        $this->cancelled[] = (is_object($by) ? get_class($by) : (string)$by);
     }
 
     /**

@@ -6,19 +6,17 @@
 
 namespace ZichtTest\Service\Bridge\DataCollector;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Zicht\Service\Common\Bridge\DataCollector\DataCollector;
 use Zicht\Service\Common\Bridge\DataCollector\Observer;
 
-/**
- * @covers Zicht\Service\Common\Bridge\DataCollector\DataCollector
- */
-class DataCollectorTest extends \PHPUnit_Framework_TestCase
+class DataCollectorTest extends TestCase
 {
     public function testConstruct()
     {
-        $observer = $this->getMock(Observer::class);
+        $observer = $this->getMockBuilder(Observer::class)->getMock();
         $observer->expects($this->never())->method('getCalls');
         $collector = new DataCollector($observer);
 
@@ -27,31 +25,31 @@ class DataCollectorTest extends \PHPUnit_Framework_TestCase
 
     public function testCollectFetchesCallsFromObserver()
     {
-        $observer = $this->getMock(Observer::class);
+        $observer = $this->getMockBuilder(Observer::class)->getMock();
         $collector = new DataCollector($observer);
         $observer->expects($this->once())->method('getCalls')->will($this->returnValue([]));
-        $collector->collect($this->getMock(Request::class), $this->getMock(Response::class), null);
+        $collector->collect($this->getMockBuilder(Request::class)->getMock(), $this->getMockBuilder(Response::class)->getMock(), null);
         $this->assertEquals(0, $collector->getCallCount());
     }
 
     public function testGetErrorCount()
     {
-        $observer = $this->getMock(Observer::class);
+        $observer = $this->getMockBuilder(Observer::class)->getMock();
         $collector = new DataCollector($observer);
         $observer->expects($this->once())->method('getCalls')->will($this->returnValue(
             [
                 ['is_error' => true],
-                ['is_error' => false]
+                ['is_error' => false],
             ]
         ));
-        $collector->collect($this->getMock(Request::class), $this->getMock(Response::class), null);
+        $collector->collect($this->getMockBuilder(Request::class)->getMock(), $this->getMockBuilder(Response::class)->getMock(), null);
         $this->assertEquals(2, $collector->getCallCount());
         $this->assertEquals(1, $collector->getErrorCount());
     }
 
     public function testGetCallsCalculatesDeltas()
     {
-        $observer = $this->getMock(Observer::class);
+        $observer = $this->getMockBuilder(Observer::class)->getMock();
         $collector = new DataCollector($observer);
         $observer->expects($this->once())->method('getCalls')->will(
             $this->returnValue(
@@ -62,7 +60,7 @@ class DataCollectorTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $collector->collect($this->getMock(Request::class), $this->getMock(Response::class), null);
+        $collector->collect($this->getMockBuilder(Request::class)->getMock(), $this->getMockBuilder(Response::class)->getMock(), null);
 
         $this->assertEquals(1, $collector->getCalls()[0]['t_delta']);
         $this->assertEquals(2, $collector->getCalls()[1]['t_delta']);
@@ -72,7 +70,7 @@ class DataCollectorTest extends \PHPUnit_Framework_TestCase
 
     public function testGetTimeSpentCalculatesSumOfDeltasInSeconds()
     {
-        $observer = $this->getMock(Observer::class);
+        $observer = $this->getMockBuilder(Observer::class)->getMock();
         $collector = new DataCollector($observer);
         $observer->expects($this->once())->method('getCalls')->will(
             $this->returnValue(
@@ -83,13 +81,13 @@ class DataCollectorTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $collector->collect($this->getMock(Request::class), $this->getMock(Response::class), null);
+        $collector->collect($this->getMockBuilder(Request::class)->getMock(), $this->getMockBuilder(Response::class)->getMock(), null);
         $this->assertEquals(3000.0, $collector->getTimeSpent());
     }
 
     public function testGetSummary()
     {
-        $observer = $this->getMock(Observer::class);
+        $observer = $this->getMockBuilder(Observer::class)->getMock();
         $collector = new DataCollector($observer);
         $observer->expects($this->once())->method('getCalls')->will(
             $this->returnValue(
@@ -100,14 +98,14 @@ class DataCollectorTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $collector->collect($this->getMock(Request::class), $this->getMock(Response::class), null);
+        $collector->collect($this->getMockBuilder(Request::class)->getMock(), $this->getMockBuilder(Response::class)->getMock(), null);
         $this->assertEquals("2 call(s) in 3000 ms\n1 cached\n1 error(s)", $collector->getSummary());
     }
 
 
     public function get()
     {
-        $observer = $this->getMock(Observer::class);
+        $observer = $this->getMockBuilder(Observer::class)->getMock();
         $collector = new DataCollector($observer);
         $observer->expects($this->once())->method('getCalls')->will(
             $this->returnValue(
@@ -118,7 +116,7 @@ class DataCollectorTest extends \PHPUnit_Framework_TestCase
             )
         );
 
-        $collector->collect($this->getMock(Request::class), $this->getMock(Response::class), null);
+        $collector->collect($this->getMockBuilder(Request::class)->getMock(), $this->getMockBuilder(Response::class)->getMock(), null);
 
         $this->assertEquals(1, $collector->getCalls()[0]['t_delta']);
         $this->assertEquals(2, $collector->getCalls()[1]['t_delta']);

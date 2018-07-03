@@ -3,11 +3,13 @@
  * @author Gerard van Helden <gerard@zicht.nl>
  * @copyright Zicht Online <http://zicht.nl>
  */
+
 namespace ZichtTest\Service\Common\Caching;
 
+use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\Cache\CacheKey;
 
-class CacheKeyTest extends \PHPUnit_Framework_TestCase
+class CacheKeyTest extends TestCase
 {
     public function testCacheKeyContainsName()
     {
