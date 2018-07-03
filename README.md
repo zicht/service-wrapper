@@ -59,6 +59,5 @@ You can implement observer that:
 - Add sanity checks and such that are costly in development, but can now easily be isolated in one object.
 - Add caching
 
-# Maintainers
-* Philip Bergman <philip@zicht.nl> 
+# Maintainer
 * Boudewijn Schoon <boudewijn@zicht.nl> 
