@@ -61,6 +61,11 @@ class RedisStorageFactory
      */
     public function createClient()
     {
+        $redisCluster = new \RedisCluster('rediscluster');
+        $redisCluster->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
+        $redisCluster->setOption(\Redis::OPT_PREFIX, sprintf('%s::', $this->redisPrefix));
+        return $redisCluster;
+
         $redisClient = new \Redis();
         $redisClient->connect($this->redisHost, $this->redisPort);
         $redisClient->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
