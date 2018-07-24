@@ -129,12 +129,12 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      *
      * https://github.com/ronnylt/redlock-php/blob/master/src/RedLock.php
      *
-     * @param \Redis $redis
+     * @param \Redis|\RedisCluster $redis
      * @param string $lockKey
      * @param string $token
      * @param integer $ttl
      */
-    protected function lock(\Redis $redis, $lockKey, $token, $ttl)
+    protected function lock($redis, $lockKey, $token, $ttl)
     {
         $attemptCounter = 1;
         while (!($res = $redis->set($lockKey, $token, ['nx', 'ex' => $ttl]))) {
@@ -152,11 +152,11 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      *
      * https://github.com/ronnylt/redlock-php/blob/master/src/RedLock.php
      *
-     * @param \Redis $redis
+     * @param \Redis|\RedisCluster $redis
      * @param $lockKey
      * @param $token
      */
-    protected function unlock(\Redis $redis, $lockKey, $token)
+    protected function unlock($redis, $lockKey, $token)
     {
         $script = '
             if redis.call("GET", KEYS[1]) == ARGV[1] then
