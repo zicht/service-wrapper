@@ -23,7 +23,7 @@ class RedisStorage extends RedisBase implements Storage
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function read($key)
     {
@@ -33,7 +33,7 @@ class RedisStorage extends RedisBase implements Storage
 
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function write($key, $data, $ttl)
     {

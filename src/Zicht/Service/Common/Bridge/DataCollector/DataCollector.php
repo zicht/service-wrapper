@@ -15,7 +15,7 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollector as BaseCollector;
 class DataCollector extends BaseCollector
 {
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function __construct(Observer $observer)
     {
@@ -23,7 +23,7 @@ class DataCollector extends BaseCollector
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function collect(Request $request, Response $response, \Exception $exception = null)
     {
@@ -142,7 +142,7 @@ class DataCollector extends BaseCollector
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function getName()
     {

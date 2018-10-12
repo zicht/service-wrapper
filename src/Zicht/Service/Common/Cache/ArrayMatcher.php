@@ -82,7 +82,7 @@ class ArrayMatcher implements RequestMatcher
 
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function isExpunger(RequestInterface $request)
     {

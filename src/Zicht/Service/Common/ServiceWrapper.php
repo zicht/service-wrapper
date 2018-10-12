@@ -197,7 +197,7 @@ class ServiceWrapper
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     protected function execute(ServiceCallInterface $call)
     {

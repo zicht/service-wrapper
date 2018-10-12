@@ -97,7 +97,7 @@ class ServiceCall implements ServiceCallInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function hasParent()
     {
@@ -105,7 +105,7 @@ class ServiceCall implements ServiceCallInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function getParent()
     {
@@ -121,7 +121,7 @@ class ServiceCall implements ServiceCallInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function addLogAttributes(array $attributes)
     {

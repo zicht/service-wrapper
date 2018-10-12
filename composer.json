@@ -3,7 +3,8 @@
     "description": "Service Wrapper classes",
     "require": {
         "php": ">=5.3",
-        "zicht/util": ">=1.4"
+        "zicht/util": ">=1.4",
+        "guzzlehttp/guzzle": "^4 | ^5"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",
