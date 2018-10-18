@@ -54,7 +54,7 @@ class CacheAdapter implements CacheConfiguration
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function isCachable(RequestInterface $request)
     {
@@ -81,7 +81,7 @@ class CacheAdapter implements CacheConfiguration
 
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function expunge($callback = true)
     {

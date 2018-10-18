@@ -19,7 +19,7 @@ class LoggableServiceObserverAdapter extends ServiceObserverAdapter implements L
     protected $logger = null;
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function setLogger($logger)
     {
