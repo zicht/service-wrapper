@@ -17,7 +17,7 @@ use Zicht\Service\Common\ServiceCallInterface;
 class VerboseLoggingObserver extends ServiceObserverAdapter
 {
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function notifyAfter(ServiceCallInterface $call)
     {
