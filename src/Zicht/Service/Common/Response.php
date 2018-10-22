@@ -134,7 +134,7 @@ class Response implements ResponseInterface
 
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function getPropertyDeep(array $path)
     {
@@ -142,7 +142,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function getPropertiesDeep(array $propertyPath)
     {
@@ -189,7 +189,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function setPropertyDeep(array $path, $value)
     {

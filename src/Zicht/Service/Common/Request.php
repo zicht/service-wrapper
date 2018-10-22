@@ -65,7 +65,7 @@ class Request implements RequestInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function setMethod($method)
     {
@@ -75,7 +75,7 @@ class Request implements RequestInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function setParameters($parameters)
     {
@@ -85,7 +85,7 @@ class Request implements RequestInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function getParameterDeep(array $path)
     {
@@ -94,7 +94,7 @@ class Request implements RequestInterface
 
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function setParameterDeep(array $path, $value)
     {
@@ -138,7 +138,7 @@ class Request implements RequestInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function isMethod($method)
     {
@@ -146,7 +146,7 @@ class Request implements RequestInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function isAnyMethod(array $methods)
     {
@@ -219,7 +219,7 @@ class Request implements RequestInterface
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function getAttributeDeep(array $path)
     {

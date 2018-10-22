@@ -19,7 +19,7 @@ use Zicht\Service\Common\ServiceWrapper;
 class CancellingObserver extends ServiceObserverAdapter
 {
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function notifyBefore(ServiceCallInterface $message)
     {

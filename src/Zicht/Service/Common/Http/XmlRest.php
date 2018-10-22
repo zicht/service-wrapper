@@ -14,7 +14,7 @@ use GuzzleHttp\Message\ResponseInterface;
 class XmlRest extends AbstractRest
 {
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     protected function parseResponse(ResponseInterface $response)
     {

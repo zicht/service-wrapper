@@ -18,7 +18,7 @@ use Zicht\Service\Common\ServiceObserver;
 class ServiceObserverAdapter implements ServiceObserver
 {
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function alterRequest(ServiceCallInterface $call)
     {
@@ -26,21 +26,21 @@ class ServiceObserverAdapter implements ServiceObserver
 
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function alterResponse(ServiceCallInterface $call)
     {
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function notifyBefore(ServiceCallInterface $call)
     {
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function notifyAfter(ServiceCallInterface $call)
     {

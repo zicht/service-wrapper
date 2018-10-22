@@ -84,7 +84,7 @@ class SoapClient extends \SoapClient
 
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     // @codingStandardsIgnoreStart
     public function __doRequest($request, $location, $action, $version, $one_way = 0)

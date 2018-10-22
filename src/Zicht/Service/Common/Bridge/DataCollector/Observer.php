@@ -21,7 +21,7 @@ class Observer extends ServiceObserverAdapter
     protected $calls = [];
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function notifyBefore(ServiceCallInterface $call)
     {
@@ -34,7 +34,7 @@ class Observer extends ServiceObserverAdapter
     }
 
     /**
-     * @{inheritDoc}
+     * {@inheritdoc}
      */
     public function notifyAfter(ServiceCallInterface $call)
     {
