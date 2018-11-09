@@ -6,6 +6,7 @@
 
 namespace ZichtTest\Service\Common\Observers;
 
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\LoggerConstants;
 use Zicht\Service\Common\Observers\Logger as LoggerObserver;
@@ -17,6 +18,7 @@ use Zicht\Service\Common\Request;
 use Zicht\Service\Common\ResponseInterface;
 use Zicht\Service\Common\ServiceCall;
 use Zicht\Service\Common\ServiceCallInterface;
+use Zicht\Service\Common\ServiceWrapper;
 
 class LoggableExceptionStub extends \SoapFault implements LoggableException
 {
@@ -43,9 +45,9 @@ class LoggerTest extends TestCase
 
     function setUp()
     {
-        $this->service = $this->getMockBuilder('Zicht\Service\Common\ServiceWrapper')->disableOriginalConstructor()->getMock();
-        $this->loggerImpl = $this->getMockBuilder('\Monolog\Logger', ['addDebug', 'addInfo', 'addCritical', 'addError', 'addWarning', 'addRecord'], [])->getMock();
-        $this->soapImpl = $this->getMockBuilder('\SoapClient')->disableOriginalConstructor()->getMock();
+        $this->service = $this->getMockBuilder(ServiceWrapper::class)->disableOriginalConstructor()->getMock();
+        $this->loggerImpl = $this->getMockBuilder(Logger::class)->disableOriginalConstructor()->setMethods(['addDebug', 'addInfo', 'addCritical', 'addError', 'addWarning', 'addRecord'])->getMock();
+        $this->soapImpl = $this->getMockBuilder(\SoapClient::class)->disableOriginalConstructor()->getMock();
     }
 
     function testFaultNotificationWillLogError()
