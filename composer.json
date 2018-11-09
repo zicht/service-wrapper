@@ -1,6 +1,24 @@
 {
     "name": "zicht/service-wrapper",
     "description": "Service Wrapper classes",
+    "license": "MIT",
+    "scripts": {
+        "lint": [
+            "phpcs -s src/Zicht/ --standard=vendor/zicht/standards-php/Zicht --extensions=php -p --parallel=$(nproc)"
+        ],
+        "lint-fix": [
+            "phpcbf -s src/Zicht/ --standard=vendor/zicht/standards-php/Zicht --extensions=php --parallel=$(nproc)"
+        ],
+        "test": [
+            "phpunit -c phpunit.xml.dist"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Gerard van Helden",
+            "email": "gerard@zicht.nl"
+        }
+    ],
     "require": {
         "php": "^7.1",
         "guzzlehttp/guzzle": "^4 | ^5"
@@ -10,19 +28,18 @@
         "symfony/http-kernel": "^2||^3",
         "zicht/standards-php": "^3.2"
     },
-    "authors": [
-        {
-            "name": "Gerard van Helden",
-            "email": "gerard@zicht.nl"
-        }
-    ],
     "autoload": {
         "psr-0": {
-            "": [
-                "src/",
-                "tests/"
+            "Zicht": [
+                "src/"
             ]
         }
     },
-    "license": "MIT"
+    "autoload-dev": {
+        "psr-0": {
+            "Zicht": [
+                "tests/"
+            ]
+        }
+    }
 }
