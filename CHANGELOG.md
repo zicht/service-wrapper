@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 3.0.1 - 2018-11-09
+### Fixed
+- Now using composer scripts for phpunit and linter
+- Fixed several unit tests
+- Removed test files from autoload
+
 ## 3.0.0 - 2018-06-26
 ### Added
 - `RedisStorageFactory`: this can be loaded as a service that can provide one `\Redis`
