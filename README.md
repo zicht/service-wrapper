@@ -3,6 +3,10 @@
 Provides a wrapper to easily allow for an aspect-oriented approach of influencing response 
 and requests to the service.
 
+## Scripts
+- unit test: `composer test`
+- lint test: `composer lint`
+
 ## General approach ##
 
 All calls to the service are wrapped in a call that notifies all _observers_ of the call. 

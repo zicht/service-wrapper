@@ -8,12 +8,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 3.0.1 - 2018-11-09
+### Fixed
+- Now using composer scripts for phpunit and linter
+- Fixed several unit tests
+- Removed test files from autoload
+
 ## 3.0.0 - 2018-06-26
 ### Added
 - `RedisStorageFactory`: this can be loaded as a service that can provide one `\Redis`
   instance by calling `getClient` or multiple by calling `createClient`.
 - Two simple caching observers: the `RedisCacheObserver` and `RedisLockingCacheObserver`.
-  Either one can be used.  They support the all existing matchers but only support the 
+  Either one can be used.  They support the all existing matchers but only support the
   Redis storage engine.  Support for other storage engines will require the implementation
   of their own specific observers.
 ### Changed
@@ -49,7 +55,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 2.3.1 - 2017-09-19
 ### Fixed
-- The Redis host can now be either a hostname, or a hostname:port combination 
+- The Redis host can now be either a hostname, or a hostname:port combination
 
 ## 2.3.0 - 2017-05-09
 ### Added
@@ -73,6 +79,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - ServiceObserver was renamed to ServiceObserverInterface
 - This release contains a fix related to caching which has a breaking change. See RELEASE-2.0.md for more information
+
+The 2.0 release introduces two new methods as part of the ServiceObserverInterface: `alterRequest` and `alterResponse`. These may change request parameters and response contents.
+In previous versions this was typically implemented in `notifyBefore` and `notifyAfter`.
+
+To make sure that the logic is implemented in the correct methods, it is now forbidden to alter the request in the `notifyBefore` and alter the response in the `notifyAfter`. This way, the cache observer can be sure that it may write the cache within the `notifyAfter` and compose the cache key within the `notifyBefore`.
+
+Usually it is safe to say that all `notifyBefore` can be replaced by `alterRequest` and all `notifyAfter` can be replaced by `alterResponse`, though _logic dictates_ that the alter-methods should only be used for actually altering the request or response respectively.
 
 ## 1.6.0 - 2016-08-12
 ### Added

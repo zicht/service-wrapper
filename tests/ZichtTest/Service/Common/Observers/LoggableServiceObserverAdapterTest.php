@@ -6,6 +6,7 @@
 
 namespace ZichtTest\Service\Common\Observers;
 
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Zicht\Service\Common\Observers\LoggableServiceObserverAdapter;
 
@@ -22,7 +23,7 @@ class LoggableServiceObserverAdapterTest extends TestCase
     public function testAddLogRecordWithLogger()
     {
         $observer = new LoggerImpl();
-        $logger = $this->getMockBuilder('Monolog\Logger')->setMethods(['addRecord'])->getMock();
+        $logger = $this->getMockBuilder(Logger::class)->disableOriginalConstructor()->setMethods(['addRecord'])->getMock();
         $logger->expects($this->once())->method('addRecord')->with('level', 'message', ['the' => 'context']);
         $observer->setLogger($logger);
         $observer->doLog('level', 'message', ['the' => 'context']);

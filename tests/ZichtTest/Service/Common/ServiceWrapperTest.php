@@ -12,6 +12,7 @@ use Zicht\Service\Common\ServiceCallInterface;
 use Zicht\Service\Common\ServiceFactoryInterface;
 use Zicht\Service\Common\ServiceObserver;
 use Zicht\Service\Common\ServiceWrapper;
+use Zicht\Service\Common\Soap\SoapClient as ZichtSoapClient;
 
 /**
  * Class CancellingObserver
@@ -231,7 +232,7 @@ class ServiceWrapperTest extends TestCase
 
     function testNestedCallsWillHaveEventParent()
     {
-        $mock = $this->getMockBuilder('Sro\Service\SoapClient', ['testMethod', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest'])->getMock();
+        $mock = $this->getMockBuilder(ZichtSoapClient::class)->disableOriginalConstructor()->setMethods(['testMethod', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest'])->getMock();
         $mock->method('testMethod')->will($this->returnValue('test'));
         $service = new ServiceWrapper($mock);
 
@@ -301,7 +302,7 @@ class ServiceWrapperTest extends TestCase
 
     function testObserverOrder()
     {
-        $mock = $this->getMockBuilder('Sro\Service\SoapClient', ['testMethod', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest'])->getMock();
+        $mock = $this->getMockBuilder(ZichtSoapClient::class)->disableOriginalConstructor()->setMethods(['testMethod', 'resetSoapInputHeaders', 'getLastResponse', 'getLastRequest'])->getMock();
         $mock->method('testMethod')->will($this->returnValue('test'));
         $service = new ServiceWrapper($mock);
 
