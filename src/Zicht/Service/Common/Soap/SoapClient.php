@@ -59,22 +59,7 @@ class SoapClient extends \SoapClient
         $this->rewriteContent = $rewriteContent;
 
         try {
-            parent::SoapClient(
-                $wsdl,
-                array_merge(
-                    $options,
-                    [
-                        'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
-                        'features' => SOAP_SINGLE_ELEMENT_ARRAYS,
-                        'trace' => 0,
-                        // We use only DISK cache.  Unfortunately there is a bug in the SoapClient
-                        // that causes problems when WSDL_CACHE_MEMORY or WSDL_CACHE_BOTH are used,
-                        // resulting in a segmentation fault, after exit, i.e. in a registered shutdown function.
-                        // see: https://bugs.php.net/bug.php?id=71931
-                        'cache_wsdl' => WSDL_CACHE_DISK,
-                    ]
-                )
-            );
+            parent::SoapClient($wsdl, $options + $this->getDefaultOptions());
         } finally {
             if ($needRewrite) {
                 CurlStreamWrapper::unregister();
@@ -82,6 +67,22 @@ class SoapClient extends \SoapClient
         }
     }
 
+    /**
+     * @return array
+     */
+    protected function getDefaultOptions()
+    {
+        return [
+            'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
+            'features' => SOAP_SINGLE_ELEMENT_ARRAYS,
+            'trace' => 0,
+            // We use only DISK cache.  Unfortunately there is a bug in the SoapClient
+            // that causes problems when WSDL_CACHE_MEMORY or WSDL_CACHE_BOTH are used,
+            // resulting in a segmentation fault, after exit, i.e. in a registered shutdown function.
+            // see: https://bugs.php.net/bug.php?id=71931
+            'cache_wsdl' => WSDL_CACHE_DISK,
+        ];
+    }
 
     /**
      * {@inheritdoc}
