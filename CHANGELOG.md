@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 3.0.2 - 2018-12-07
+### Fixed
+- Merged from 2.3.6.
+
 ## 3.0.1 - 2018-11-09
 ### Fixed
 - Now using composer scripts for phpunit and linter
