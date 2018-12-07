@@ -8,7 +8,6 @@ namespace Zicht\Service\Common;
 /**
  * Base interface for service calls initiated by the ServiceWrapper
  *
- * @package Zicht\Service\Common
  */
 interface ServiceCallInterface
 {

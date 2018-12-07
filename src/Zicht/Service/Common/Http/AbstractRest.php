@@ -18,8 +18,6 @@ use Zicht\Itertools\lib\ChainIterator;
 abstract class AbstractRest
 {
     /**
-     * Constructor
-     *
      * @param string $baseUrl
      * @param Client|null $client
      */

@@ -10,7 +10,6 @@ namespace Zicht\Service\Common;
  *
  * This serves as a means of lazy loading services.
  *
- * @package Zicht\Service\Common
  */
 interface ServiceFactoryInterface
 {

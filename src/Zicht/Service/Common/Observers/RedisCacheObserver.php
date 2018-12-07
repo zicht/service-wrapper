@@ -10,9 +10,6 @@ use Zicht\Service\Common\RequestInterface;
 use Zicht\Service\Common\ServiceCallInterface;
 use Zicht\Service\Common\Storage\RedisStorageFactory;
 
-/**
- * Class RedisCacheObserver
- */
 class RedisCacheObserver extends LoggableServiceObserverAdapter
 {
     /** @var string */

@@ -7,11 +7,6 @@ namespace Zicht\Service\Common\Observers;
 
 use Zicht\Service\Common\LoggerConstants;
 
-/**
- * Interface LoggerAwareInterface
- *
- * @package Zicht\Service\Common\Observers
- */
 interface LoggerAwareInterface extends LoggerConstants
 {
     /**

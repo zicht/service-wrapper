@@ -11,7 +11,6 @@ use Zicht\Service\Common\ServiceCallInterface;
 /**
  * Adds SOAP request logging to the service call
  *
- * @package Zicht\Service\Common\Soap\Observer
  */
 class VerboseLoggingObserver extends ServiceObserverAdapter
 {

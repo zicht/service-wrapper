@@ -9,11 +9,6 @@ use Zicht\Service\Common\Observers\Cache;
 use Zicht\Service\Common\Observers\ServiceObserverAdapter;
 use Zicht\Service\Common\ServiceCallInterface;
 
-/**
- * Class Observer
- *
- * @package Zicht\Bundle\SroBundle\Controller
- */
 class Observer extends ServiceObserverAdapter
 {
     protected $i = 0;
@@ -24,7 +19,7 @@ class Observer extends ServiceObserverAdapter
      */
     public function notifyBefore(ServiceCallInterface $call)
     {
-        $this->calls[spl_object_hash($call)]= [
+        $this->calls[spl_object_hash($call)] = [
             'method' => $call->getRequest()->getMethod(),
             'params' => $call->getRequest()->getParameters(),
             't_start' => microtime(true),

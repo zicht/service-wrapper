@@ -7,9 +7,6 @@ namespace Zicht\Service\Common\Observers;
 
 use Zicht\Service\Common\ServiceCallInterface;
 
-/**
- * Class RedisLockingCacheObserver
- */
 class RedisLockingCacheObserver extends RedisCacheObserver
 {
     /** @var integer */
@@ -153,8 +150,8 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      * https://github.com/ronnylt/redlock-php/blob/master/src/RedLock.php
      *
      * @param \Redis $redis
-     * @param $lockKey
-     * @param $token
+     * @param string $lockKey
+     * @param string $token
      */
     protected function unlock(\Redis $redis, $lockKey, $token)
     {

@@ -37,8 +37,6 @@ class Timer
 
 
     /**
-     * Construct the timer
-     *
      * @param array $map
      */
     public function __construct(array $map = null)
