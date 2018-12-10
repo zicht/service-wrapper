@@ -5,11 +5,6 @@
 
 namespace Zicht\Service\Common;
 
-/**
- * Interface LoggerConstants
- *
- * @package Zicht\Service\Common
- */
 interface LoggerConstants
 {
     /** Debug log level */

@@ -8,7 +8,6 @@ namespace Zicht\Service\Common;
 /**
  * Interface for the response
  *
- * @package Zicht\Service\Common
  */
 interface ResponseInterface
 {

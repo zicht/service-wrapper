@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 3.0.3 - 2018-12-07
+### Fixed
+- Update `composer.lock`.
+- Update code to conform with `zicht/standards-php` 3.4.0.
+
 ## 3.0.2 - 2018-12-07
 ### Fixed
 - Merged from 2.3.6.

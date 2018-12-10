@@ -30,8 +30,6 @@ class Request implements RequestInterface
     protected $attributes;
 
     /**
-     * Constructor.
-     *
      * @param string $method
      * @param array $parameters
      * @param array $attributes

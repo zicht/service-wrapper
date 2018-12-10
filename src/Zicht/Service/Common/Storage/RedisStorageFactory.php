@@ -5,9 +5,6 @@
 
 namespace Zicht\Service\Common\Storage;
 
-/**
- * Class RedisStorageFactory
- */
 class RedisStorageFactory
 {
     /**

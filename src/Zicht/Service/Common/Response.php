@@ -24,8 +24,6 @@ class Response implements ResponseInterface
     private $isCachable = true;
 
     /**
-     * Constructor.
-     *
      * @param mixed $response
      * @param mixed $error
      */

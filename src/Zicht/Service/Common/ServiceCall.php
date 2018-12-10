@@ -8,7 +8,6 @@ namespace Zicht\Service\Common;
 /**
  * Represents a service call.
  *
- * @package Zicht\Service\Common
  */
 class ServiceCall implements ServiceCallInterface
 {
@@ -19,8 +18,6 @@ class ServiceCall implements ServiceCallInterface
     private $logAttributes = [];
 
     /**
-     * Construct the service call
-     *
      * @param ServiceWrapper $service
      * @param RequestInterface $request
      * @param ResponseInterface $response

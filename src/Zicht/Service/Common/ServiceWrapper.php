@@ -5,11 +5,6 @@
 
 namespace Zicht\Service\Common;
 
-/**
- * Class ServiceWrapper
- *
- * @package Zicht\Service\Common
- */
 class ServiceWrapper
 {
     /**

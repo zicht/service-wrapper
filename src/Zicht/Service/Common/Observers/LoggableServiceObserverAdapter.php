@@ -8,7 +8,6 @@ namespace Zicht\Service\Common\Observers;
 /**
  * Base class for observers that do logging.
  *
- * @package Zicht\Service\Common\Observers
  */
 class LoggableServiceObserverAdapter extends ServiceObserverAdapter implements LoggerAwareInterface
 {

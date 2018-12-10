@@ -10,7 +10,6 @@ use Zicht\Service\Common\CurlStreamWrapper;
 /**
  * Base class for SOAP implementations
  *
- * @package Zicht\Service\Common\Soap
  */
 class SoapClient extends \SoapClient
 {

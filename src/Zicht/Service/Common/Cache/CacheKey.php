@@ -36,7 +36,7 @@ final class CacheKey implements CacheKeyInterface
             function ($v, $m) use ($allowDepth) {
                 return $v && (
                     is_scalar($m)
-                    || ($allowDepth > 1 && self::isAllScalar($m, $allowDepth -1))
+                    || ($allowDepth > 1 && self::isAllScalar($m, $allowDepth - 1))
                 );
             },
             true
@@ -67,7 +67,7 @@ final class CacheKey implements CacheKeyInterface
      */
     public function addAttribute($name, $value)
     {
-        $this->attributes[$name]= $value;
+        $this->attributes[$name] = $value;
     }
 
 

@@ -11,7 +11,6 @@ use Zicht\Service\Common\ServiceObserver;
 /**
  * Adapter for the ServiceObserver interface
  *
- * @package Zicht\Service\Common\Observers
  * @codeCoverageIgnore
  */
 class ServiceObserverAdapter implements ServiceObserver

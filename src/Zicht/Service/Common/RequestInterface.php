@@ -8,7 +8,6 @@ namespace Zicht\Service\Common;
 /**
  * Base interface for the Requests
  *
- * @package Zicht\Service\Common
  */
 interface RequestInterface
 {
