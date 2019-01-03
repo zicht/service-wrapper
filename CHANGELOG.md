@@ -8,6 +8,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## [to be determined]
+### Fixed
+- The cache observers `RedisCacheObserver` and `RedisLockingCacheObserver` were using
+  the `notifyBefore` callback to try to cache.  However, the SRO `ContextManager` uses
+  the `alterRequest` callback to create a connection (if needed).  Since the `alterRequest`
+  is called before the `notifyBefore`, the connection would be made, even when the request
+  was served from the cache.
+
+  We can not change the `ContextManager` to use the `notifyBefore` callback (because it changes the
+  request parameters).  Therefore, we need to make the `RedisCacheObserver` and `RedisLockingCacheObserver`
+  use the `alterRequest` callback, resulting in the cache being used and the connection not being made
+  unnecessarily.
+
 ## 3.0.3 - 2018-12-07
 ### Fixed
 - Update `composer.lock`.

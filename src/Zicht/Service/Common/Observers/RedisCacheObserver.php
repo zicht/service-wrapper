@@ -65,7 +65,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
      * @param \Zicht\Service\Common\ServiceCallInterface $event
      * @return void
      */
-    public function notifyBefore(ServiceCallInterface $event)
+    public function alterRequest(ServiceCallInterface $event)
     {
         $request = $event->getRequest();
         $requestMatcher = $this->getRequestMatcher($request);
