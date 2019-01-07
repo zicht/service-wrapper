@@ -9,7 +9,7 @@ use Zicht\Service\Common\ServiceCallInterface;
 
 class RedisLockingCacheObserver extends RedisCacheObserver
 {
-    const LOCK_ATTEMPT_WARNING_THRESHOLD = 1;
+    const LOCK_ATTEMPT_WARNING_THRESHOLD = 10;
 
     /** @var integer */
     protected $minLockTTLSeconds = 5;
