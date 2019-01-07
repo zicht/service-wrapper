@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 - Nothing so far
 
+## 3.0.4 - 2019-01-07
+### Fixed
+- Changes to the debug output strings to more easily `| grep CacheObserver`.
+
 ## 3.0.3 - 2018-12-07
 ### Fixed
 - Update `composer.lock`.
