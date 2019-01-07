@@ -39,7 +39,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      * @param \Zicht\Service\Common\ServiceCallInterface $event
      * @return void
      */
-    public function alterRequest(ServiceCallInterface $event)
+    public function notifyBefore(ServiceCallInterface $event)
     {
         $request = $event->getRequest();
         $requestMatcher = $this->getRequestMatcher($request);
