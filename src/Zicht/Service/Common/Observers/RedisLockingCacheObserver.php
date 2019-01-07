@@ -9,6 +9,8 @@ use Zicht\Service\Common\ServiceCallInterface;
 
 class RedisLockingCacheObserver extends RedisCacheObserver
 {
+    const LOCK_ATTEMPT_WARNING_THRESHOLD = 10;
+
     /** @var integer */
     protected $minLockTTLSeconds = 5;
 
@@ -70,7 +72,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
                 // Redis did not receive the data while we were waiting to obtain the lock, therefore,
                 // we will let the call though to the service
                 $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttl' => $ttl, 'lockKey' => $lockKey, 'token' => $token];
-                $this->addLogRecord(self::DEBUG, 'Cache miss', [$key]);
+                $this->addLogRecord(self::DEBUG, 'CacheObserver miss', [$key]);
                 return;
             } else {
                 // Redis received the data while we were waiting to obtain the lock, therefore,
@@ -87,7 +89,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
         $event->cancel($this);
         $event->getResponse()->setResponse($value);
         $this->callStack[] = ['type' => self::CACHE_HIT];
-        $this->addLogRecord(self::DEBUG, 'Cache hit', [$key]);
+        $this->addLogRecord(self::DEBUG, 'CacheObserver hit', [$key]);
     }
 
     /**
@@ -113,7 +115,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
 
                 if (!$response->isError() && $response->isCachable()) {
                     $redis->setex($item['key'], $item['ttl'], $response->getResponse());
-                    $this->addLogRecord(self::DEBUG, 'Cache write', $item);
+                    $this->addLogRecord(self::DEBUG, 'CacheObserver write', $item);
                 }
 
                 $this->unlock($redis, $item['lockKey'], $item['token']);
@@ -139,8 +141,8 @@ class RedisLockingCacheObserver extends RedisCacheObserver
             $attemptCounter++;
         }
 
-        if ($attemptCounter > 10) {
-            $this->addLogRecord(self::WARNING, 'Cache locked', ['lockKey' => $lockKey, 'attemptCounter' => $attemptCounter, 'ttl' => $ttl]);
+        if ($attemptCounter > self::LOCK_ATTEMPT_WARNING_THRESHOLD) {
+            $this->addLogRecord(self::WARNING, 'CacheObserver locked', ['lockKey' => $lockKey, 'attemptCounter' => $attemptCounter, 'ttl' => $ttl, 'minLockSleepMicroSeconds' => $this->minLockSleepMicroSeconds, 'maxLockSleepMicroSeconds' => $this->maxLockSleepMicroSeconds]);
         }
     }
 
@@ -165,7 +167,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
 
         // Note: we  serialize the $token because it is still serialized when using eval
         if (!$redis->eval($script, [$lockKey, $redis->_serialize($token)], 1)) {
-            $this->addLogRecord(self::WARNING, 'Cache unlock fail', [$lockKey, $token]);
+            $this->addLogRecord(self::WARNING, 'CacheObserver unlock fail', [$lockKey, $token]);
         }
     }
 }
