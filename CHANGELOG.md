@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
-- Nothing so far
+### Added
+- `reset` method in `DataCollector`
 
 ## 3.0.4 - 2019-01-07
 ### Fixed

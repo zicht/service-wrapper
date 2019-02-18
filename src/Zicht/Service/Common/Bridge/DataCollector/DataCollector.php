@@ -2,6 +2,7 @@
 /**
  * @copyright Zicht Online <http://zicht.nl>
  */
+
 namespace Zicht\Service\Common\Bridge\DataCollector;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -138,6 +139,11 @@ class DataCollector extends BaseCollector
             },
             0
         );
+    }
+
+    public function reset()
+    {
+        $this->data = [];
     }
 
     /**
