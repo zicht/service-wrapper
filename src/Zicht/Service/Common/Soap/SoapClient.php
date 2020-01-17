@@ -85,6 +85,28 @@ class SoapClient extends \SoapClient
     /**
      * {@inheritdoc}
      */
+    public function __call($function_name, $arguments)
+    {
+        $retry = 3;
+        while ($retry > 0) {
+            $retry -= 1;
+            try {
+                return parent::__call($function_name, $arguments);
+            } catch (\SoapFault $soapFault) {
+                $message = $soapFault->getMessage();
+                if ($message === 'Could not connect to host' || $message === 'Error Fetching http headers') {
+                    // Retry until $retry limit is reached
+                    continue;
+                }
+
+                throw $soapFault;
+            }
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     // @codingStandardsIgnoreStart
     public function __doRequest($request, $location, $action, $version, $one_way = 0)
     {
