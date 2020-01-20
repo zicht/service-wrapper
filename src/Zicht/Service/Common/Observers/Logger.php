@@ -12,8 +12,10 @@ use Zicht\Service\Common\ServiceCallInterface;
  */
 class Logger extends LoggableServiceObserverAdapter
 {
+    /** @var Timer|null */
     protected $timer = null;
 
+    /** @var array */
     protected $raisedLogLevels = [];
 
     /**
@@ -29,7 +31,6 @@ class Logger extends LoggableServiceObserverAdapter
         $this->timer = $timer;
     }
 
-
     /**
      * Record the start time of the request.
      *
@@ -44,7 +45,6 @@ class Logger extends LoggableServiceObserverAdapter
 
         $this->timer && $this->timer->start($event->getRequest()->getMethod());
     }
-
 
     /**
      * After performing the request the following info is logged:
@@ -99,7 +99,6 @@ class Logger extends LoggableServiceObserverAdapter
         }
     }
 
-
     /**
      * Returns the default log level for the given event.
      *
@@ -117,7 +116,6 @@ class Logger extends LoggableServiceObserverAdapter
         }
         return $ret;
     }
-
 
     /**
      * Set some methods to be raised in log level, e.g. set a specific method to INFO

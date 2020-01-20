@@ -9,13 +9,10 @@ namespace Zicht\Service\Common;
  * This interface provides a hint to use the service as a factory.
  *
  * This serves as a means of lazy loading services.
- *
  */
 interface ServiceFactoryInterface
 {
     /**
-     * Create the service
-     *
      * @return object
      */
     public function createService();

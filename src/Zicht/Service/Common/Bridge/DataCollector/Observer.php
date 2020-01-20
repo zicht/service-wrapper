@@ -11,7 +11,10 @@ use Zicht\Service\Common\ServiceCallInterface;
 
 class Observer extends ServiceObserverAdapter
 {
+    /** @var int */
     protected $i = 0;
+
+    /** @var array */
     protected $calls = [];
 
     /**

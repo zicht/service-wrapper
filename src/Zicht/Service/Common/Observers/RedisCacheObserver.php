@@ -21,16 +21,10 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
     /** @var string */
     const CACHE_MISS = 'MISS';
 
-    /**
-     * @var RedisStorageFactory
-     */
+    /** @var RedisStorageFactory */
     protected $redisStorageFactory;
 
-    /**
-     * Contains a stack of cached responses
-     *
-     * @var array
-     */
+    /** @var array Contains a stack of cached responses */
     protected $callStack;
 
     /**

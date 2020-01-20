@@ -11,10 +11,19 @@ namespace Zicht\Service\Common;
  */
 class ServiceCall implements ServiceCallInterface
 {
+    /** @var ServiceWrapper|null */
     private $service = null;
+
+    /** @var RequestInterface|null */
     private $request = null;
+
+    /** @var ResponseInterface|null */
     private $response = null;
+
+    /** @var array */
     private $cancelled = [];
+
+    /** @var array */
     private $logAttributes = [];
 
     /**

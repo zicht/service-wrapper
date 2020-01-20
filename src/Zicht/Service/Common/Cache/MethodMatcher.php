@@ -52,7 +52,6 @@ class MethodMatcher extends ArrayMatcher
         parent::__construct($config);
     }
 
-
     /**
      * Return if the current request matcher is a candidate for the specified request
      *

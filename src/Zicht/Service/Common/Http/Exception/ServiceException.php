@@ -12,6 +12,7 @@ use GuzzleHttp\Message\ResponseInterface;
  */
 class ServiceException extends \UnexpectedValueException
 {
+    /** @var ResponseInterface */
     private $response;
 
     /**
@@ -24,7 +25,6 @@ class ServiceException extends \UnexpectedValueException
     {
         $this->response = $response;
     }
-
 
     /**
      * @return ResponseInterface

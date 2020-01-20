@@ -10,12 +10,35 @@ namespace Zicht\Service\Common;
  */
 class CurlStreamWrapper
 {
-    /**
-     * @var array
-     */
+    /** @var array */
     private static $urlRewrites = [];
+
+    /** @var array */
     private static $contentRewrites = [];
+
+    /** @var array */
     private static $protocols = [];
+
+    /** @var string */
+    private $path;
+
+    /** @var mixed */
+    private $mode;
+
+    /** @var mixed */
+    private $options;
+
+    /** @var string */
+    private $opened_path;
+
+    /** @var string|null */
+    private $buffer;
+
+    /** @var int|null */
+    private $pos;
+
+    /** @var int|resource */
+    private $ch;
 
     /**
      * Register the wrapper.
@@ -42,7 +65,6 @@ class CurlStreamWrapper
         }
     }
 
-
     /**
      * Unregisters the stream wrapper.
      *
@@ -60,15 +82,6 @@ class CurlStreamWrapper
         self::$contentRewrites = [];
         self::$protocols = [];
     }
-
-
-    private $path;
-    private $mode;
-    private $options;
-    private $opened_path;
-    private $buffer;
-    private $pos;
-    private $ch;
 
     /**
      * Open the stream
@@ -145,7 +158,6 @@ class CurlStreamWrapper
         return true;
     }
     // @codeCoverageIgnoreEnd
-
 
     /**
      * true if eof else false

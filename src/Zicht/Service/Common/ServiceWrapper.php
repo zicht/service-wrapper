@@ -7,31 +7,16 @@ namespace Zicht\Service\Common;
 
 class ServiceWrapper
 {
-    /**
-     * The set of observers notified of any call to the Soap service
-     *
-     * @var ServiceObserver[]
-     */
+    /** @var ServiceObserver[] The set of observers notified of any call to the Soap service */
     private $observers = [];
 
-    /**
-     * @var array
-     */
+    /** @var array */
     private $callStack = [];
 
-    /**
-     * The logger instance to delegate to the observers (if they are LoggerAwareInterface instances)
-     *
-     * @var \Psr\Log\LoggerInterface
-     */
+    /** @var \Psr\Log\LoggerInterface The logger instance to delegate to the observers (if they are LoggerAwareInterface instances) */
     private $logger = null;
 
-
-    /**
-     * The wrapped service
-     *
-     * @var mixed
-     */
+    /** @var mixed The wrapped service */
     private $service;
 
     /**
@@ -49,7 +34,6 @@ class ServiceWrapper
             $this->service = $service;
         }
     }
-
 
     /**
      * Returns the wrapped service
@@ -101,7 +85,6 @@ class ServiceWrapper
         return null;
     }
 
-
     /**
      * @return ServiceObserver[]
      */
@@ -109,7 +92,6 @@ class ServiceWrapper
     {
         return $this->observers;
     }
-
 
     /**
      * Call a service, and notify all of the observers of the service being called. Each of the observers
@@ -218,7 +200,6 @@ class ServiceWrapper
             $parent
         );
     }
-
 
     /**
      * Calls the factory to initialize the service if applicable.

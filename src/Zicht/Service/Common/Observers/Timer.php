@@ -13,28 +13,18 @@ use Zicht\Service\Common\LoggerConstants;
  */
 class Timer
 {
-    /**
-     * Default timings => loglevel mappings
-     *
-     * @var array
-     */
+    /** @var array Default timings => loglevel mappings */
     public static $defaults = [
         0 => LoggerConstants::DEBUG,
         1500 => LoggerConstants::INFO,
         4000 => LoggerConstants::WARNING,
     ];
 
-    /**
-     * When to log what; if the number of milliseconds is larger than the threshold (the key of the array), the
-     * loglevel as specified in the value of the array is used.
-     *
-     * @var array
-     */
+    /** @var array When to log what; if the number of milliseconds is larger than the threshold (the key of the array), the loglevel as specified in the value of the array is used */
     protected $timings = [];
 
-
+    /** @var array */
     protected $map = [];
-
 
     /**
      * @param array $map
@@ -48,7 +38,6 @@ class Timer
         ksort($this->map);
     }
 
-
     /**
      * Record the start time of the request.
      *
@@ -59,7 +48,6 @@ class Timer
     {
         $this->timings[$serviceMethod] = $this->getCurrentTime();
     }
-
 
     /**
      * Record the elapsed time of the request.
@@ -78,7 +66,6 @@ class Timer
         return -1;
     }
 
-
     /**
      * Returns the log level based on the timing.
      *
@@ -94,7 +81,6 @@ class Timer
         }
         return LoggerConstants::DEBUG;
     }
-
 
     /**
      * Returns the current time.
