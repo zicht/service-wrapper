@@ -7,7 +7,6 @@ namespace Zicht\Service\Common\Observers;
 
 /**
  * Base class for observers that do logging.
- *
  */
 class LoggableServiceObserverAdapter extends ServiceObserverAdapter implements LoggerAwareInterface
 {
@@ -23,7 +22,6 @@ class LoggableServiceObserverAdapter extends ServiceObserverAdapter implements L
     {
         $this->logger = $logger;
     }
-
 
     /**
      * Add a log record to the logger, if the logger was initialized

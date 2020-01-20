@@ -12,11 +12,7 @@ use Zicht\Service\Common\RequestInterface;
  */
 class ArrayMatcher implements RequestMatcher
 {
-    /**
-     * The methods with their default time to live and optionally attribute specific time to lives
-     *
-     * @var array
-     */
+    /** @var array The methods with their default time to live and optionally attribute specific time to lives */
     protected $config = [];
 
     /**
@@ -46,7 +42,6 @@ class ArrayMatcher implements RequestMatcher
         }
     }
 
-
     /**
      * Generates a cache storage key for the current request
      *
@@ -67,7 +62,6 @@ class ArrayMatcher implements RequestMatcher
         return $key->getKey();
     }
 
-
     /**
      * Return if the current request matcher is a candidate for the specified request
      *
@@ -79,7 +73,6 @@ class ArrayMatcher implements RequestMatcher
         return array_key_exists(strtolower($request->getMethod()), $this->config);
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -87,7 +80,6 @@ class ArrayMatcher implements RequestMatcher
     {
         return false;
     }
-
 
     /**
      * Return the time to live (in seconds) for the specified request

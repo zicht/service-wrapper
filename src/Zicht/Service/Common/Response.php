@@ -12,15 +12,13 @@ class Response implements ResponseInterface
 {
     use FreezableTrait, NestedValueTrait;
 
+    /** @var mixed */
     private $response;
+
+    /** @var mixed */
     private $error;
 
-    /**
-     * By default, a response is cachable, but if any observer fails to add data that is needed in the cache,
-     * it may mark a response as 'uncachable', so it does not put incomplete or invalid data in the cache.
-     *
-     * @var bool
-     */
+    /** @var bool By default, a response is cachable, but if any observer fails to add data that is needed in the cache, it may mark a response as 'uncachable', so it does not put incomplete or invalid data in the cache */
     private $isCachable = true;
 
     /**
@@ -33,7 +31,6 @@ class Response implements ResponseInterface
         $this->setError($error);
     }
 
-
     /**
      * Returns whether this object is (still) cachable
      *
@@ -43,7 +40,6 @@ class Response implements ResponseInterface
     {
         return $this->isCachable;
     }
-
 
     /**
      * Mark the response as (un)cachable. Use with care: don't set an object to 'cachable' when it's not, because
@@ -56,7 +52,6 @@ class Response implements ResponseInterface
     {
         $this->isCachable = (bool)$cachable;
     }
-
 
     /**
      * Set the response object
@@ -71,7 +66,6 @@ class Response implements ResponseInterface
         $this->response = $response;
     }
 
-
     /**
      * Set a response error
      *
@@ -85,7 +79,6 @@ class Response implements ResponseInterface
         $this->error = $error;
     }
 
-
     /**
      * Checks if the response is a error
      *
@@ -95,7 +88,6 @@ class Response implements ResponseInterface
     {
         return $this->error !== null;
     }
-
 
     /**
      * Returns the error, or null if not set.
@@ -107,7 +99,6 @@ class Response implements ResponseInterface
         return $this->error;
     }
 
-
     /**
      * Returns the response object
      *
@@ -118,7 +109,6 @@ class Response implements ResponseInterface
         return $this->response;
     }
 
-
     /**
      * Converts the response to a string
      *
@@ -128,7 +118,6 @@ class Response implements ResponseInterface
     {
         return json_encode($this->response, 0, 2);
     }
-
 
     /**
      * {@inheritdoc}

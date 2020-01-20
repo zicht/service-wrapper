@@ -12,21 +12,13 @@ class Request implements RequestInterface
 {
     use FreezableTrait, NestedValueTrait;
 
-    /**
-     * The service method name
-     *
-     * @var string
-     */
+    /** @var string The service method name */
     protected $method;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $parameters;
 
-    /**
-     * @var array
-     */
+    /** @var array */
     protected $attributes;
 
     /**
@@ -155,7 +147,6 @@ class Request implements RequestInterface
         }
         return $ret;
     }
-
 
     /**
      * Returns a string representation of the request.

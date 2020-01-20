@@ -11,13 +11,13 @@ class RedisLockingCacheObserver extends RedisCacheObserver
 {
     const LOCK_ATTEMPT_WARNING_THRESHOLD = 10;
 
-    /** @var integer */
+    /** @var int */
     protected $minLockTTLSeconds = 5;
 
-    /** @var integer */
+    /** @var int */
     protected $minLockSleepMicroSeconds = 50;
 
-    /** @var integer */
+    /** @var int */
     protected $maxLockSleepMicroSeconds = 100;
 
     /**

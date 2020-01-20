@@ -13,8 +13,13 @@ namespace Zicht\Service\Common\Cache;
  */
 final class CacheKey implements CacheKeyInterface
 {
+    /** @var int */
     private $readableDepth;
+
+    /** @var string */
     private $name;
+
+    /** @var array */
     private $attributes;
 
     /**
@@ -53,10 +58,8 @@ final class CacheKey implements CacheKeyInterface
     {
         $this->name = strtolower($name);
         $this->readableDepth = $readableDepth;
-
         $this->attributes = [];
     }
-
 
     /**
      * Add an attribute to the key. Attributes distinct the key, i.e. adding an attribute will ultimately
@@ -69,7 +72,6 @@ final class CacheKey implements CacheKeyInterface
     {
         $this->attributes[$name] = $value;
     }
-
 
     /**
      * Return the string key representation.
@@ -104,7 +106,6 @@ final class CacheKey implements CacheKeyInterface
             $this->name
         );
     }
-
 
     /**
      * Returns a string version of the key. Quotes are removed to get rid of

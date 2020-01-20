@@ -4,7 +4,7 @@
     "license": "MIT",
     "scripts": {
         "lint": [
-            "phpcs -s src/Zicht/ --standard=vendor/zicht/standards-php/Zicht --extensions=php -p --parallel=$(nproc)"
+            "phpcs -n -s src/Zicht/ --standard=vendor/zicht/standards-php/Zicht --extensions=php -p --parallel=$(nproc)"
         ],
         "lint-fix": [
             "phpcbf -s src/Zicht/ --standard=vendor/zicht/standards-php/Zicht --extensions=php --parallel=$(nproc)"

@@ -54,7 +54,6 @@ class DataCollector extends BaseCollector
         );
     }
 
-
     /**
      * Get a summary for collected data
      *
@@ -72,7 +71,6 @@ class DataCollector extends BaseCollector
 
         return $ret;
     }
-
 
     /**
      * Get the total time spent inside the service call.

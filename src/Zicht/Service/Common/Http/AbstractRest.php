@@ -28,7 +28,6 @@ abstract class AbstractRest
         $this->client = ($client ?: new Client(['defaults' => ['timeout' => 9]]));
     }
 
-
     /**
      * Do a GET request
      *
@@ -104,7 +103,6 @@ abstract class AbstractRest
         return $this->send('DELETE', $path, $parameters);
     }
 
-
     /**
      * Send the request to the backend and parse it's response. HTTP exceptions are caught and responses
      * returned as-is
@@ -131,7 +129,6 @@ abstract class AbstractRest
 
         return $this->parseResponse($response);
     }
-
 
     /**
      * Create a request by formatting the parameters in the expected format (either as part

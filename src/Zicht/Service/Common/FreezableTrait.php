@@ -10,6 +10,7 @@ namespace Zicht\Service\Common;
  */
 trait FreezableTrait
 {
+    /** @var bool */
     protected $isFrozen;
 
     /**

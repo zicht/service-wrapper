@@ -6,8 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
+
+## 3.1.1 - 2020-01-20
+### Fixed
+- CS lint cleanup
+
+## 3.1.0 - 2020-01-17
 ### Added
-- `reset` method in `DataCollector`
+- `SoapClient::__call` provides a 3-attempts retry for
+  'Could not connect to host' and 'Error Fetching http headers' errors.
+- `reset` method in `DataCollector`.
 
 ## 3.0.4 - 2019-01-07
 ### Fixed

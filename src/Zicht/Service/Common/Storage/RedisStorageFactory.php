@@ -7,31 +7,23 @@ namespace Zicht\Service\Common\Storage;
 
 class RedisStorageFactory
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $redisHost;
 
-    /**
-     * @var integer
-     */
+    /** @var int */
     protected $redisPort;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $redisPrefix;
 
-    /**
-     * @var null|\Redis
-     */
+    /** @var null|\Redis */
     protected $redisClient;
 
     /**
      * Construct the cache, and use $cache as the cache container object.
      *
      * @param string $redisHost
-     * @param integer $redisPort
+     * @param int $redisPort
      * @param string $redisPrefix
      */
     public function __construct($redisHost, $redisPort, $redisPrefix)
