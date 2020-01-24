@@ -67,16 +67,20 @@ class RedisLockingCacheObserver extends RedisCacheObserver
             $this->lock($redis, $lockKey, $token, min($this->minLockTTLSeconds, $ttl));
 
             // Check if the value has already been set by another process
-            $value = $redis->get($key);
-            if (false === $value) {
-                // Redis did not receive the data while we were waiting to obtain the lock, therefore,
-                // we will let the call though to the service
-                $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttl' => $ttl, 'lockKey' => $lockKey, 'token' => $token];
-                $this->addLogRecord(self::DEBUG, 'CacheObserver miss', [$key]);
-                return;
-            } else {
-                // Redis received the data while we were waiting to obtain the lock, therefore,
-                // we will use the data that is already there
+            try {
+                $value = $redis->get($key);
+                if (false === $value) {
+                    // Redis did not receive the data while we were waiting to obtain the lock, therefore,
+                    // we will let the call though to the service
+                    $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttl' => $ttl, 'lockKey' => $lockKey, 'token' => $token];
+                    $this->addLogRecord(self::DEBUG, 'CacheObserver miss', [$key]);
+                    return;
+                } else {
+                    // Redis received the data while we were waiting to obtain the lock, therefore,
+                    // we will use the data that is already there
+                    $this->unlock($redis, $lockKey, $token);
+                }
+            } finally {
                 $this->unlock($redis, $lockKey, $token);
             }
         }
@@ -114,11 +118,13 @@ class RedisLockingCacheObserver extends RedisCacheObserver
                 $redis = $this->redisStorageFactory->getClient();
 
                 if (!$response->isError() && $response->isCachable()) {
-                    $redis->setex($item['key'], $item['ttl'], $response->getResponse());
-                    $this->addLogRecord(self::DEBUG, 'CacheObserver write', $item);
+                    try {
+                        $redis->setex($item['key'], $item['ttl'], $response->getResponse());
+                        $this->addLogRecord(self::DEBUG, 'CacheObserver write', $item);
+                    } finally {
+                        $this->unlock($redis, $item['lockKey'], $item['token']);
+                    }
                 }
-
-                $this->unlock($redis, $item['lockKey'], $item['token']);
                 break;
         }
     }

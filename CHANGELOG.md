@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 3.1.2 - 2020-01-28
+### Fixed
+- Made sure the `RedisLockingCacheObserver` always unlocks to prevent unwanted side-effects.
+
 ## 3.1.1 - 2020-01-20
 ### Fixed
 - CS lint cleanup
