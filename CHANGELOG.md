@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 3.2.1 - 2020-05-20
+### Fixed
+- This library is also compatible with Guzzle version 6.
+
 ## 3.2.0 - 2020-05-20
 ### Added
 - The `ResponseInterface` now has a `isFrozen` method to check if `freeze` has been called.
