@@ -93,4 +93,11 @@ interface ResponseInterface
      * Freeze the response, i.e. forbid any further changes.
      */
     public function freeze();
+
+    /**
+     * Returns true once `freeze` has been called.
+     *
+     * @return bool
+     */
+    public function isFrozen();
 }

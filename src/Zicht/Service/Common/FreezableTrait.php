@@ -14,9 +14,7 @@ trait FreezableTrait
     protected $isFrozen;
 
     /**
-     * Freeze the object.
-     *
-     * @return void
+     * {@inheritdoc}
      */
     public function freeze()
     {
@@ -24,6 +22,14 @@ trait FreezableTrait
             throw new \LogicException('You can not freeze an object that was already frozen');
         }
         $this->isFrozen = true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isFrozen()
+    {
+        return $this->isFrozen === true;
     }
 
     /**

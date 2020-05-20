@@ -7,13 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 3.2.0 - 2020-05-20
+### Added
+- The `ResponseInterface` now has a `isFrozen` method to check if `freeze` has been called.
+
 ## 3.1.2 - 2020-01-28
 ### Fixed
 - Made sure the `RedisLockingCacheObserver` always unlocks to prevent unwanted side-effects.
 
 ## 3.1.1 - 2020-01-20
 ### Fixed
-- CS lint cleanup
+- CS lint cleanup.
 
 ## 3.1.0 - 2020-01-17
 ### Added
