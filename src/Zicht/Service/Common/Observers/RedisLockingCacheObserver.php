@@ -22,7 +22,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
 ';
 
     /** @var int */
-    protected $minLockTTLSeconds = 5;
+    protected $minLockTTLSeconds = 3;
 
     /** @var int */
     protected $minLockSleepMicroSeconds = 100;

@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   maintained.  This fixes a bug introduced in version 3.1.2.
 - To reduce CPU and traffic usage during busy-wait, the `RedisLockingCacheObserver` will has
   increased the default `$minLockSleepMicroSeconds` and `$maxLockSleepMicroSeconds` times.
+- To reduce the maximum time a process will busy-wait, the `$minLockTTLSeconds` was reduced. 
 - Rename variables to clearly indicate whether their values are in seconds or microseconds.
 - Add unit tests to verify the behavior of the `RedisLockingCacheObserver`.
 

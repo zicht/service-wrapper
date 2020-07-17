@@ -94,7 +94,7 @@ class RedisLockingCacheObserverTest extends TestCase
     {
         $this->redisLockingCacheObserver->expects($this->exactly(1))->method('createToken')->with()->willReturn('token-12345');
         $this->redis->expects($this->exactly(2))->method('get')->with('cachable')->willReturn(false);
-        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::cachable', 'token-12345', ['nx', 'ex' => 5])->willReturn(true);
+        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::cachable', 'token-12345', ['nx', 'ex' => 3])->willReturn(true);
         $this->redis->expects($this->exactly(1))->method('setex')->with('cachable', 123, 'data-response')->willReturn(true);
         $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::cachable', 'token-12345'], 1)->willReturn(1);
 
@@ -127,7 +127,7 @@ class RedisLockingCacheObserverTest extends TestCase
     {
         $this->redisLockingCacheObserver->expects($this->exactly(1))->method('createToken')->with()->willReturn('token-12345');
         $this->redis->expects($this->exactly(2))->method('get')->with('cachable')->willReturnOnConsecutiveCalls(false, 'data-response');
-        $this->redis->expects($this->exactly(4))->method('set')->with('LOCK::cachable', 'token-12345', ['nx', 'ex' => 5])->willReturnOnConsecutiveCalls(false, false, false, true);
+        $this->redis->expects($this->exactly(4))->method('set')->with('LOCK::cachable', 'token-12345', ['nx', 'ex' => 3])->willReturnOnConsecutiveCalls(false, false, false, true);
         $this->redis->expects($this->exactly(0))->method('setex');
         $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::cachable', 'token-12345'], 1)->willReturn(1);
 
