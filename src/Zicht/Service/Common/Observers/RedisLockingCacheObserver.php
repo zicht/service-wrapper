@@ -9,27 +9,37 @@ use Zicht\Service\Common\ServiceCallInterface;
 
 class RedisLockingCacheObserver extends RedisCacheObserver
 {
+    /** @var int */
     const LOCK_ATTEMPT_WARNING_THRESHOLD = 10;
+
+    /** @var string */
+    const UNLOCK_SCRIPT = '
+    if redis.call("GET", KEYS[1]) == ARGV[1] then
+        return redis.call("DEL", KEYS[1])
+    else
+        return 0
+    end
+';
 
     /** @var int */
     protected $minLockTTLSeconds = 5;
 
     /** @var int */
-    protected $minLockSleepMicroSeconds = 50;
+    protected $minLockSleepMicroSeconds = 100;
 
     /** @var int */
-    protected $maxLockSleepMicroSeconds = 100;
+    protected $maxLockSleepMicroSeconds = 200;
 
     /**
      * @param integer $minLockTTL in seconds
-     * @param integer $minLockSleep in seconds
-     * @param integer $maxLockSleep in seconds
+     * @param integer $minLockSleepSeconds in seconds
+     * @param integer $maxLockSleepSeconds in seconds
      */
-    public function configure($minLockTTL, $minLockSleep, $maxLockSleep)
+    public function configure($minLockTTL, $minLockSleepSeconds, $maxLockSleepSeconds)
     {
         $this->minLockTTLSeconds = $minLockTTL;
-        $this->minLockSleepMicroSeconds = $minLockSleep * 1000;
-        $this->maxLockSleepMicroSeconds = $maxLockSleep * 1000;
+        $this->minLockSleepMicroSeconds = $minLockSleepSeconds * 1000;
+        $this->maxLockSleepMicroSeconds = $maxLockSleepSeconds * 1000;
     }
 
     /**
@@ -59,28 +69,24 @@ class RedisLockingCacheObserver extends RedisCacheObserver
             //
 
             // Claim exclusive write access
-            $ttl = $requestMatcher->getTtl($request);
-            $token = uniqid('token-');
+            $ttlSeconds = $requestMatcher->getTtl($request);
+            $token = $this->createToken();
             $lockKey = sprintf('LOCK::%s', $key);
 
             // Obtain a lock.  The lock will timeout after 5 seconds by Redis when we fail to clear it
-            $this->lock($redis, $lockKey, $token, min($this->minLockTTLSeconds, $ttl));
+            $this->lock($redis, $lockKey, $token, min($this->minLockTTLSeconds, $ttlSeconds));
 
             // Check if the value has already been set by another process
-            try {
-                $value = $redis->get($key);
-                if (false === $value) {
-                    // Redis did not receive the data while we were waiting to obtain the lock, therefore,
-                    // we will let the call though to the service
-                    $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttl' => $ttl, 'lockKey' => $lockKey, 'token' => $token];
-                    $this->addLogRecord(self::DEBUG, 'CacheObserver miss', [$key]);
-                    return;
-                } else {
-                    // Redis received the data while we were waiting to obtain the lock, therefore,
-                    // we will use the data that is already there
-                    $this->unlock($redis, $lockKey, $token);
-                }
-            } finally {
+            $value = $redis->get($key);
+            if (false === $value) {
+                // Redis did not receive the data while we were waiting to obtain the lock, therefore,
+                // we will let the call though to the service
+                $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttlSeconds' => $ttlSeconds, 'lockKey' => $lockKey, 'token' => $token];
+                $this->addLogRecord(self::DEBUG, 'CacheObserver miss', [$key]);
+                return;
+            } else {
+                // Redis received the data while we were waiting to obtain the lock, therefore,
+                // we will use the data that is already there
                 $this->unlock($redis, $lockKey, $token);
             }
         }
@@ -116,17 +122,26 @@ class RedisLockingCacheObserver extends RedisCacheObserver
             case self::CACHE_MISS:
                 $response = $event->getResponse();
                 $redis = $this->redisStorageFactory->getClient();
-
-                if (!$response->isError() && $response->isCachable()) {
-                    try {
-                        $redis->setex($item['key'], $item['ttl'], $response->getResponse());
+                try {
+                    if (!$response->isError() && $response->isCachable()) {
+                        $redis->setex($item['key'], $item['ttlSeconds'], $response->getResponse());
                         $this->addLogRecord(self::DEBUG, 'CacheObserver write', $item);
-                    } finally {
-                        $this->unlock($redis, $item['lockKey'], $item['token']);
                     }
+                } finally {
+                    $this->unlock($redis, $item['lockKey'], $item['token']);
                 }
                 break;
         }
+    }
+
+    /**
+     * Returns a new and unique token string
+     *
+     * @return string
+     */
+    protected function createToken()
+    {
+        return uniqid('token-');
     }
 
     /**
@@ -137,18 +152,18 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      * @param \Redis $redis
      * @param string $lockKey
      * @param string $token
-     * @param integer $ttl
+     * @param integer $ttlSeconds
      */
-    protected function lock(\Redis $redis, $lockKey, $token, $ttl)
+    protected function lock(\Redis $redis, $lockKey, $token, $ttlSeconds)
     {
         $attemptCounter = 1;
-        while (!($res = $redis->set($lockKey, $token, ['nx', 'ex' => $ttl]))) {
+        while (!($res = $redis->set($lockKey, $token, ['nx', 'ex' => $ttlSeconds]))) {
             usleep(mt_rand($this->minLockSleepMicroSeconds, $this->maxLockSleepMicroSeconds));
             $attemptCounter++;
         }
 
         if ($attemptCounter > self::LOCK_ATTEMPT_WARNING_THRESHOLD) {
-            $this->addLogRecord(self::WARNING, 'CacheObserver locked', ['lockKey' => $lockKey, 'attemptCounter' => $attemptCounter, 'ttl' => $ttl, 'minLockSleepMicroSeconds' => $this->minLockSleepMicroSeconds, 'maxLockSleepMicroSeconds' => $this->maxLockSleepMicroSeconds]);
+            $this->addLogRecord(self::WARNING, 'CacheObserver locked', ['lockKey' => $lockKey, 'attemptCounter' => $attemptCounter, 'ttlSeconds' => $ttlSeconds, 'minLockSleepMicroSeconds' => $this->minLockSleepMicroSeconds, 'maxLockSleepMicroSeconds' => $this->maxLockSleepMicroSeconds]);
         }
     }
 
@@ -163,16 +178,8 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      */
     protected function unlock(\Redis $redis, $lockKey, $token)
     {
-        $script = '
-            if redis.call("GET", KEYS[1]) == ARGV[1] then
-                return redis.call("DEL", KEYS[1])
-            else
-                return 0
-            end
-        ';
-
-        // Note: we  serialize the $token because it is still serialized when using eval
-        if (!$redis->eval($script, [$lockKey, $redis->_serialize($token)], 1)) {
+        // Note: we serialize the $token because it is still serialized when using eval
+        if (!$redis->eval(self::UNLOCK_SCRIPT, [$lockKey, $redis->_serialize($token)], 1)) {
             $this->addLogRecord(self::WARNING, 'CacheObserver unlock fail', [$lockKey, $token]);
         }
     }
