@@ -78,7 +78,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
             // Cache miss
             //
 
-            $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttl' => $requestMatcher->getTtl($request)];
+            $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttlSeconds' => $requestMatcher->getTtl($request)];
             $this->addLogRecord(self::DEBUG, 'CacheObserver miss', [$key]);
         } else {
             //
@@ -114,7 +114,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
                 $response = $event->getResponse();
                 if (!$response->isError() && $response->isCachable()) {
                     $redis = $this->redisStorageFactory->getClient();
-                    $redis->setex($item['key'], $item['ttl'], $response->getResponse());
+                    $redis->setex($item['key'], $item['ttlSeconds'], $response->getResponse());
                     $this->addLogRecord(self::DEBUG, 'CacheObserver write', $item);
                 }
                 break;

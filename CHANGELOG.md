@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 3.2.2 - 2020-07-17
+### Fixed
+- The `RedisLockingCacheObserver` would always unlock, even when the lock should have been
+  maintained.  This fixes a bug introduced in version 3.1.2.
+- To reduce CPU and traffic usage during busy-wait, the `RedisLockingCacheObserver` will has
+  increased the default `$minLockSleepMicroSeconds` and `$maxLockSleepMicroSeconds` times.
+- To reduce the maximum time a process will busy-wait, the `$minLockTTLSeconds` was reduced. 
+- Rename variables to clearly indicate whether their values are in seconds or microseconds.
+- Add unit tests to verify the behavior of the `RedisLockingCacheObserver`.
+
 ## 3.2.1 - 2020-05-20
 ### Fixed
 - This library is also compatible with Guzzle version 6.

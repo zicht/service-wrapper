@@ -39,11 +39,9 @@ class RedisCacheObserverTest extends TestCase
     {
         $this->redis = $this->getMockBuilder(\Redis::class)
             ->disableOriginalConstructor()
-            ->setMethods(['get', 'setex'])
             ->getMock();
         $this->redisStorageFactory = $this->getMockBuilder(RedisStorageFactory::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getClient'])
             ->getMock();
         $this->redisStorageFactory->method('getClient')->willReturn($this->redis);
         $this->serviceWrapper = $this->getMockBuilder(ServiceWrapper::class)
@@ -59,8 +57,8 @@ class RedisCacheObserverTest extends TestCase
      */
     function testCachableResponseIsCancelledSecondTime()
     {
-        $this->redis->expects($this->exactly(2))->method('get')->willReturnOnConsecutiveCalls(false, 'data-response');
-        $this->redis->expects($this->exactly(1))->method('setex')->with('cachable', 123, 'data-response')->willReturnOnConsecutiveCalls(true);
+        $this->redis->expects($this->exactly(2))->method('get')->with('cachable')->willReturnOnConsecutiveCalls(false, 'data-response');
+        $this->redis->expects($this->exactly(1))->method('setex')->with('cachable', 123, 'data-response')->willReturn(true);
 
         // first call will be executed
         $event = new ServiceCall($this->serviceWrapper, new Request('cachable'), new Response());
