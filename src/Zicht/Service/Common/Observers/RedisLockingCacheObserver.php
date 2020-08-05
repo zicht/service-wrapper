@@ -5,12 +5,15 @@
 
 namespace Zicht\Service\Common\Observers;
 
+use Zicht\Service\Common\RequestInterface;
 use Zicht\Service\Common\ServiceCallInterface;
+use Zicht\Service\Common\ServiceWrapper;
+use Zicht\Service\Common\Storage\RedisStorageFactory;
 
 class RedisLockingCacheObserver extends RedisCacheObserver
 {
     /** @var int */
-    const LOCK_ATTEMPT_WARNING_THRESHOLD = 10;
+    const LOCK_FAILURE_WARNING_THRESHOLD = 3;
 
     /** @var string */
     const UNLOCK_SCRIPT = '
@@ -30,6 +33,24 @@ class RedisLockingCacheObserver extends RedisCacheObserver
     /** @var int */
     protected $maxLockSleepMicroSeconds = 200;
 
+    /** @var array Contains a mapping with caches that need to have their cache TTL checked */
+    protected $graceChecks = [];
+
+    /** @var int[] */
+    protected $statistics = [
+        'grace-ignore' => 0,        // The TTL is stil valid, no need to refresh cache (after serving http response)
+        'grace-invalid' => 0,       // Determined that cache refresh is needed (after serving http response)
+        'grace-late-ignore' => 0,   // Attempted to refresh the cache but another process already did so.  Slight Redis and CPU overhead (after serving http response)
+        'grace-refresh' => 0,       // Calling service to refresh the cache (after serving http response)
+        'grace-valid' => 0,         // Determined that cache refresh is *not* needed (after serving http response)
+        'hit' => 0,                 // The TTL and/or grace is still valid, data served from cache, no service call is made
+        'lock-failure' => 0,        // Attempt to lock a key beforce calling service has failed, *no* service call is made
+        'lock-success' => 0,        // Attempt to lock a key beforce calling service has succeeded, service call is made
+        'miss' => 0,                // Calling service to refresh the cache
+        'unlock-failure' => 0,      // Attempt to unlock a key has failed
+        'unlock-success' => 0,      // Attempt to unlock a key has succeeded
+    ];
+
     /**
      * @param integer $minLockTTL in seconds
      * @param integer $minLockSleepSeconds in seconds
@@ -46,13 +67,14 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      * Notifies the Cache of a service method that is about to be executed. If the Cache has a response in the cache
      * container, the request is cancelled and the response is overwritten with the cached response.
      *
-     * @param \Zicht\Service\Common\ServiceCallInterface $event
+     * @param \Zicht\Service\Common\ServiceCallInterface $call
      * @return void
      */
-    public function notifyBefore(ServiceCallInterface $event)
+    public function notifyBefore(ServiceCallInterface $call)
     {
-        $request = $event->getRequest();
+        $request = $call->getRequest();
         $requestMatcher = $this->getRequestMatcher($request);
+        $isTerminating = $call->isTerminating();
 
         // Early return when this request does not have a matcher
         if (null === $requestMatcher) {
@@ -62,44 +84,97 @@ class RedisLockingCacheObserver extends RedisCacheObserver
 
         $key = $requestMatcher->getKey($request);
         $redis = $this->redisStorageFactory->getClient();
-        $value = $redis->get($key);
-        if (false === $value) {
-            //
-            // Cache miss
-            //
 
+        if ($isTerminating) {
             // Claim exclusive write access
             $ttlSeconds = $requestMatcher->getTtl($request);
+            $graceSeconds = $requestMatcher->getGrace($request);
             $token = $this->createToken();
             $lockKey = sprintf('LOCK::%s', $key);
 
             // Obtain a lock.  The lock will timeout after 5 seconds by Redis when we fail to clear it
-            $this->lock($redis, $lockKey, $token, min($this->minLockTTLSeconds, $ttlSeconds));
+            if ($this->lock($redis, $lockKey, $token, min($this->minLockTTLSeconds, $ttlSeconds), false)) {
+                // Check if the value has already been set by another process
+                $ttlRemaining = $redis->ttl($key);
+                if ($ttlRemaining === false || $ttlRemaining < $graceSeconds) {
+                    // Redis did not receive the data while we were waiting to obtain the lock, therefore,
+                    // we will let the call though to the service
+                    $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttlSeconds' => $ttlSeconds, 'graceSeconds' => $graceSeconds, 'lockKey' => $lockKey, 'token' => $token];
+                    $this->statistics['grace-refresh'] += 1;
+                    $this->addLogRecord(self::DEBUG, 'CacheObserver grace-refresh', ['key' => $key]);
+                    return;
+                } else {
+                    // Redis received the data while we were waiting to obtain the lock, therefore,
+                    // we will use the data that is already there
+                    $this->unlock($redis, $lockKey, $token);
+                    $this->statistics['grace-late-ignore'] += 1;
+                    $this->addLogRecord(self::DEBUG, 'CacheObserver grace-late-ignore', ['key' => $key]);
+                }
+            } else {
+                $this->statistics['grace-ignore'] += 1;
+                $this->addLogRecord(self::DEBUG, 'CacheObserver grace-ignore', ['key' => $key]);
+            }
 
-            // Check if the value has already been set by another process
+            // We did not obtain the lock or redis received the data while we were waiting to obtain
+            // the lock, therefore, we do not want to continue with this request, since another process
+            // is already doing so
+            // Note that we can not simply `$call->cancel($this)` because that should still run
+            // other observers, which expect data to exist, which we haven't.  Therefore,
+            // we will throw an exception instead
+            throw new RedisLockingCacheTerminateException('Terminate service call because other process is doing or did the work');
+        } else {
             $value = $redis->get($key);
             if (false === $value) {
-                // Redis did not receive the data while we were waiting to obtain the lock, therefore,
-                // we will let the call though to the service
-                $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttlSeconds' => $ttlSeconds, 'lockKey' => $lockKey, 'token' => $token];
-                $this->addLogRecord(self::DEBUG, 'CacheObserver miss', [$key]);
-                return;
+                //
+                // Cache miss
+                //
+
+                // Claim exclusive write access
+                $ttlSeconds = $requestMatcher->getTtl($request);
+                $graceSeconds = $requestMatcher->getGrace($request);
+                $token = $this->createToken();
+                $lockKey = sprintf('LOCK::%s', $key);
+
+                // Obtain a lock.  The lock will timeout after 5 seconds by Redis when we fail to clear it
+                $this->lock($redis, $lockKey, $token, min($this->minLockTTLSeconds, $ttlSeconds + $graceSeconds), true);
+
+                // Check if the value has already been set by another process
+                $value = $redis->get($key);
+                if (false === $value) {
+                    // Redis did not receive the data while we were waiting to obtain the lock, therefore,
+                    // we will let the call though to the service
+                    $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttlSeconds' => $ttlSeconds, 'graceSeconds' => $graceSeconds, 'lockKey' => $lockKey, 'token' => $token];
+                    $this->statistics['miss'] += 1;
+                    $this->addLogRecord(self::DEBUG, 'CacheObserver miss', ['key' => $key]);
+                    return;
+                } else {
+                    // Redis received the data while we were waiting to obtain the lock, therefore,
+                    // we will use the data that is already there
+                    $this->unlock($redis, $lockKey, $token);
+                }
             } else {
-                // Redis received the data while we were waiting to obtain the lock, therefore,
-                // we will use the data that is already there
-                $this->unlock($redis, $lockKey, $token);
+                //
+                // Cache hit
+                //
+
+                $graceSeconds = $requestMatcher->getGrace($request);
+                if ($graceSeconds > 0) {
+                    // Ensure that, on terminate, we check if the cache is in its grace period
+                    $this->graceChecks[$key] = ['graceSeconds' => $graceSeconds, 'method' => $request->getMethod(), 'parameters' => $request->getParameters(), 'service' => $call->getService()];
+                }
             }
         }
 
         //
-        // Cache hit
+        // Cache hit (possibly after busy-wait)
         //
 
         // Cancel the actual request
-        $event->cancel($this);
-        $event->getResponse()->setResponse($value);
+        $call->cancel($this);
+        $call->getResponse()->setResponse($value);
         $this->callStack[] = ['type' => self::CACHE_HIT];
-        $this->addLogRecord(self::DEBUG, 'CacheObserver hit', [$key]);
+        $this->statistics['hit'] += 1;
+        $this->addLogRecord(self::DEBUG, 'CacheObserver hit', ['key' => $key]);
     }
 
     /**
@@ -107,30 +182,91 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      * If there is a response and no fault, and the response is cachable by this observer, it is stored in the cache
      * for future reuse.
      *
-     * @param \Zicht\Service\Common\ServiceCallInterface $event
+     * @param \Zicht\Service\Common\ServiceCallInterface $call
      * @return void
      */
-    public function notifyAfter(ServiceCallInterface $event)
+    public function notifyAfter(ServiceCallInterface $call)
     {
-        $item = array_pop($this->callStack);
+        $request = $call->getRequest();
+        if (null === ($requestMatcher = $this->getRequestMatcher($request))) {
+            return;
+        }
+        $key = $requestMatcher->getKey($request);
 
-        switch ($item['type']) {
-            case self::CACHE_IGNORE:
-            case self::CACHE_HIT:
-                break;
+        // It is possible that one or more entries should be skipped when an exception is thrown,
+        // possibly in another observer, between running $this->notifyBefore and $this->notifyAfter.
+        while ($item = array_pop($this->callStack)) {
+            switch ($item['type']) {
+                case self::CACHE_IGNORE:
+                case self::CACHE_HIT:
+                    break;
 
-            case self::CACHE_MISS:
-                $response = $event->getResponse();
-                $redis = $this->redisStorageFactory->getClient();
-                try {
-                    if (!$response->isError() && $response->isCachable()) {
-                        $redis->setex($item['key'], $item['ttlSeconds'], $response->getResponse());
-                        $this->addLogRecord(self::DEBUG, 'CacheObserver write', $item);
+                case self::CACHE_MISS:
+                    $redis = $this->redisStorageFactory->getClient();
+                    try {
+                        if ($item['key'] === $key) {
+                            $response = $call->getResponse();
+                            if (!$response->isError() && $response->isCachable()) {
+                                $redis->setex($item['key'], $item['ttlSeconds'] + $item['graceSeconds'], $response->getResponse());
+                                $this->addLogRecord(self::DEBUG, 'CacheObserver write', ['key' => $item['key']]);
+                            }
+
+                            // todo: add unit test to test that a previously crashed request is unlocked and also the actual request
+                            return;
+                        } else {
+                            $this->addLogRecord(self::DEBUG, 'CacheObserver detected stack corruption', ['key' => $item['key'], 'expectedKey' => $key]);
+                            // Unlock this key and try the next item in $this->callStack
+                        }
+                    } finally {
+                        $this->unlock($redis, $item['lockKey'], $item['token']);
                     }
-                } finally {
+                    break;
+            }
+        }
+    }
+
+    /**
+     * If a cache hit has occurred for a key that has a grace-period, the cache will be refreshed if needed.
+     *
+     * @return void
+     */
+    public function terminate()
+    {
+        // Very rarely a lock may remain, free them to prevent processes blocking untilthe lock timeout occurs
+        while ($item = array_pop($this->callStack)) {
+            switch ($item['type']) {
+                case self::CACHE_IGNORE:
+                case self::CACHE_HIT:
+                    break;
+
+                case self::CACHE_MISS:
+                    $this->addLogRecord(self::DEBUG, 'CacheObserver detected stack corruption during terminate', ['key' => $item['key']]);
+                    $redis = $this->redisStorageFactory->getClient();
                     $this->unlock($redis, $item['lockKey'], $item['token']);
+                    break;
+            }
+        }
+
+        foreach ($this->graceChecks as $key => $item) {
+            $redis = $this->redisStorageFactory->getClient();
+            $ttlRemaining = $redis->ttl($key);
+            if ($ttlRemaining === false || $ttlRemaining < $item['graceSeconds']) {
+                // Perform the request again in 'terminate' mode
+                $this->statistics['grace-invalid'] += 1;
+                $this->addLogRecord(self::DEBUG, 'CacheObserver grace-invalid refreshing cache', ['key' => $key]);
+                try {
+                    $item['service']->__call($item['method'], $item['parameters']);
+                } catch (RedisLockingCacheTerminateException $exception) {
+                    // pass
                 }
-                break;
+            } else {
+                $this->statistics['grace-valid'] += 1;
+                $this->addLogRecord(self::DEBUG, 'CacheObserver grace-valid', ['key' => $key]);
+            }
+        }
+
+        if (array_sum($this->statistics)) {
+            $this->addLogRecord(self::INFO, 'CacheObserver', $this->statistics);
         }
     }
 
@@ -153,17 +289,33 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      * @param string $lockKey
      * @param string $token
      * @param integer $ttlSeconds
+     * @param bool $wait
+     * @return bool
      */
-    protected function lock(\Redis $redis, $lockKey, $token, $ttlSeconds)
+    protected function lock(\Redis $redis, $lockKey, $token, $ttlSeconds, $wait)
     {
-        $attemptCounter = 1;
-        while (!($res = $redis->set($lockKey, $token, ['nx', 'ex' => $ttlSeconds]))) {
-            usleep(mt_rand($this->minLockSleepMicroSeconds, $this->maxLockSleepMicroSeconds));
-            $attemptCounter++;
-        }
+        if ($wait) {
+            $failureCounter = 0;
+            while (!$redis->set($lockKey, $token, ['nx', 'ex' => $ttlSeconds])) {
+                usleep(mt_rand($this->minLockSleepMicroSeconds, $this->maxLockSleepMicroSeconds));
+                $failureCounter += 1;
+            }
 
-        if ($attemptCounter > self::LOCK_ATTEMPT_WARNING_THRESHOLD) {
-            $this->addLogRecord(self::WARNING, 'CacheObserver locked', ['lockKey' => $lockKey, 'attemptCounter' => $attemptCounter, 'ttlSeconds' => $ttlSeconds, 'minLockSleepMicroSeconds' => $this->minLockSleepMicroSeconds, 'maxLockSleepMicroSeconds' => $this->maxLockSleepMicroSeconds]);
+            if ($failureCounter > self::LOCK_FAILURE_WARNING_THRESHOLD) {
+                $this->addLogRecord(self::WARNING, 'CacheObserver locked', ['key' => $lockKey, 'failureCounter' => $failureCounter, 'ttlSeconds' => $ttlSeconds, 'minLockSleepMicroSeconds' => $this->minLockSleepMicroSeconds, 'maxLockSleepMicroSeconds' => $this->maxLockSleepMicroSeconds]);
+            }
+
+            $this->statistics['lock-success'] += 1;
+            $this->statistics['lock-failure'] += $failureCounter;
+            return true;
+        } else {
+            if ($redis->set($lockKey, $token, ['nx', 'ex' => $ttlSeconds])) {
+                $this->statistics['lock-success'] += 1;
+                return true;
+            } else {
+                $this->statistics['lock-failure'] += 1;
+                return false;
+            }
         }
     }
 
@@ -179,8 +331,11 @@ class RedisLockingCacheObserver extends RedisCacheObserver
     protected function unlock(\Redis $redis, $lockKey, $token)
     {
         // Note: we serialize the $token because it is still serialized when using eval
-        if (!$redis->eval(self::UNLOCK_SCRIPT, [$lockKey, $redis->_serialize($token)], 1)) {
-            $this->addLogRecord(self::WARNING, 'CacheObserver unlock fail', [$lockKey, $token]);
+        if ($redis->eval(self::UNLOCK_SCRIPT, [$lockKey, $redis->_serialize($token)], 1)) {
+            $this->statistics['unlock-success'] += 1;
+        } else {
+            $this->statistics['unlock-failure'] += 1;
+            $this->addLogRecord(self::WARNING, 'CacheObserver unlock fail', ['key' => $lockKey, 'token' => $token]);
         }
     }
 }

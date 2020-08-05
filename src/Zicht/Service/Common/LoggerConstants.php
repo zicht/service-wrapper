@@ -5,6 +5,9 @@
 
 namespace Zicht\Service\Common;
 
+/**
+ * @deprecated Remove in next major version
+ */
 interface LoggerConstants
 {
     /** Debug log level */

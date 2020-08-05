@@ -43,4 +43,11 @@ class ServiceObserverAdapter implements ServiceObserver
     public function notifyAfter(ServiceCallInterface $call)
     {
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function terminate()
+    {
+    }
 }

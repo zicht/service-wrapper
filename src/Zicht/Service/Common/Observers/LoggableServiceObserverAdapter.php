@@ -7,6 +7,7 @@ namespace Zicht\Service\Common\Observers;
 
 /**
  * Base class for observers that do logging.
+ * @deprecated Remove in next major version
  */
 class LoggableServiceObserverAdapter extends ServiceObserverAdapter implements LoggerAwareInterface
 {

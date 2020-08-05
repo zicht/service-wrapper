@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 3.3.0 - 2020-08-21
+### Added
+- The `RedisLockingCacheObserver` now supports a grace-period.
+  This requires `ServiceWrapper::terminate` to be called on application termination and
+  grace ttl to be configured.
+- The `RedisLockingCacheObserver` now logs statistics using INFO level.
+### Fixed
+- The `RedisLockingCacheObserver` now handles exceptions thrown during observer code better
+  by unlocking the redis cache key when this is detected.
+### Deprecated
+- LoggerConstants
+- VerboseLoggingObserver
+- LoggableException
+- LoggableServiceObserverAdapter
+- Logger
+- LoggerAwareInterface
+
+All this custom logger code should be replaces by a logger that can be enabled or
+disabled per observer using `Psr\Log\LoggerAwareInterface` and `Psr\Log\LoggerAwareTrait`.
+
 ## 3.2.2 - 2020-07-17
 ### Fixed
 - The `RedisLockingCacheObserver` would always unlock, even when the lock should have been

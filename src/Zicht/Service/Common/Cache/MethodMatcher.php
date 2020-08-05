@@ -29,6 +29,11 @@ class MethodMatcher extends ArrayMatcher
      *                 (
      *                     [five] => 5
      *                 )
+     *             [grace_default] => 10
+     *             [grace_attributes] => Array
+     *                 (
+     *                     [five] => 5
+     *                 )
      *             [parameters] => Array
      *                 (
      *

@@ -7,7 +7,7 @@ namespace Zicht\Service\Common;
 
 class ServiceWrapper
 {
-    /** @var ServiceObserver[] The set of observers notified of any call to the Soap service */
+    /** @var ServiceObserverInterface[] The set of observers notified of any call to the Soap service */
     private $observers = [];
 
     /** @var array */
@@ -15,6 +15,9 @@ class ServiceWrapper
 
     /** @var \Psr\Log\LoggerInterface The logger instance to delegate to the observers (if they are LoggerAwareInterface instances) */
     private $logger = null;
+
+    /** @var bool */
+    private $terminating = false;
 
     /** @var mixed The wrapped service */
     private $service;
@@ -102,20 +105,21 @@ class ServiceWrapper
      * @param string $methodName
      * @param array $args
      * @return mixed
-     *
      * @throws \Exception
      */
     public function __call($methodName, $args)
     {
+        // todo: note that when a alterRequest() or notifyBefore() throws an exception,
+        // that the callStack is corrupted and the associated alterResponse() and notifyAfter()
+        // calls are not made (causing problems in the RedisLockingCacheObserver in particular)
         if (count($this->callStack)) {
             $parent = $this->callStack[count($this->callStack) - 1];
         } else {
             $parent = null;
         }
-        $call = $this->createServiceCall($methodName, $args, $parent);
+        $call = $this->createServiceCall($methodName, $args, $parent, $this->terminating);
         $this->callStack[] = $call;
 
-        /** @var ServiceObserverInterface[] $observers */
         foreach ($this->observers as $observer) {
             $observer->alterRequest($call);
         }
@@ -149,6 +153,14 @@ class ServiceWrapper
         }
 
         return $call->getResponse()->getResponse();
+    }
+
+    public function terminate()
+    {
+        $this->terminating = true;
+        foreach ($this->observers as $observer) {
+            $observer->terminate($this);
+        }
     }
 
     /**
@@ -189,16 +201,12 @@ class ServiceWrapper
      * @param string $methodName
      * @param array $args
      * @param ServiceCall $parent
+     * @param bool $terminating
      * @return ServiceCall
      */
-    protected function createServiceCall($methodName, $args, $parent = null)
+    protected function createServiceCall($methodName, $args, $parent = null, $terminating = false)
     {
-        return new ServiceCall(
-            $this,
-            new Request($methodName, $args),
-            new Response(),
-            $parent
-        );
+        return new ServiceCall($this, new Request($methodName, $args), new Response(), $parent, $terminating);
     }
 
     /**

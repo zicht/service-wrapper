@@ -9,6 +9,7 @@ use Zicht\Service\Common\ServiceCallInterface;
 
 /**
  * The Logger is a logger utility to have request and response information logged in a Monolog\Logger implementation.
+ * @deprecated Remove in next major version
  */
 class Logger extends LoggableServiceObserverAdapter
 {
@@ -34,16 +35,16 @@ class Logger extends LoggableServiceObserverAdapter
     /**
      * Record the start time of the request.
      *
-     * @param \Zicht\Service\Common\ServiceCallInterface $event
+     * @param \Zicht\Service\Common\ServiceCallInterface $call
      * @return void
      */
-    public function notifyBefore(ServiceCallInterface $event)
+    public function notifyBefore(ServiceCallInterface $call)
     {
         if (!$this->logger) {
             return;
         }
 
-        $this->timer && $this->timer->start($event->getRequest()->getMethod());
+        $this->timer && $this->timer->start($call->getRequest()->getMethod());
     }
 
     /**

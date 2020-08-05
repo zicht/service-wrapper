@@ -11,6 +11,7 @@ use Zicht\Service\Common\ServiceCallInterface;
 /**
  * Adds REST request logging to the service call
  *
+ * @deprecated Remove in next major version
  */
 class VerboseLoggingObserver extends ServiceObserverAdapter
 {

@@ -46,4 +46,12 @@ interface RequestMatcher
      * @return int
      */
     public function getTtl(RequestInterface $request);
+
+    /**
+     * Return the grace time (in seconds) for the specified request
+     *
+     * @param RequestInterface $request
+     * @return int
+     */
+    public function getGrace(RequestInterface $request);
 }

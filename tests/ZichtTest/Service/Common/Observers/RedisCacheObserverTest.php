@@ -61,21 +61,21 @@ class RedisCacheObserverTest extends TestCase
         $this->redis->expects($this->exactly(1))->method('setex')->with('cachable', 123, 'data-response')->willReturn(true);
 
         // first call will be executed
-        $event = new ServiceCall($this->serviceWrapper, new Request('cachable'), new Response());
-        $this->redisCacheObserver->notifyBefore($event);
-        $event->getResponse()->setResponse('data-response');
-        $this->redisCacheObserver->notifyAfter($event);
+        $call = new ServiceCall($this->serviceWrapper, new Request('cachable'), new Response());
+        $this->redisCacheObserver->notifyBefore($call);
+        $call->getResponse()->setResponse('data-response');
+        $this->redisCacheObserver->notifyAfter($call);
 
         // so the cache must be populated
-        $this->assertEquals('data-response', $event->getResponse()->getResponse());
+        $this->assertEquals('data-response', $call->getResponse()->getResponse());
 
         // and the next call will be cancelled
-        $event = new ServiceCall($this->serviceWrapper, new Request('cachable'), new Response());
-        $this->redisCacheObserver->notifyBefore($event);
-        $this->assertTrue($event->isCancelled());
+        $call = new ServiceCall($this->serviceWrapper, new Request('cachable'), new Response());
+        $this->redisCacheObserver->notifyBefore($call);
+        $this->assertTrue($call->isCancelled());
 
         // which will yield the correct response after executing
-        $this->redisCacheObserver->notifyAfter($event);
-        $this->assertEquals('data-response', $event->getResponse()->getResponse());
+        $this->redisCacheObserver->notifyAfter($call);
+        $this->assertEquals('data-response', $call->getResponse()->getResponse());
     }
 }

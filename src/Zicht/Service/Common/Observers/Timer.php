@@ -10,6 +10,7 @@ use Zicht\Service\Common\LoggerConstants;
 /**
  * Times requests and logs them according to a map that specifies the log levels to use per threshold of execution
  * time in milliseconds.
+ * @deprecated Remove in next major version
  */
 class Timer
 {

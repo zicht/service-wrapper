@@ -22,26 +22,17 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
     const CACHE_MISS = 'MISS';
 
     /** @var RedisStorageFactory */
-    protected $redisStorageFactory;
+    protected $redisStorageFactory = null;
 
     /** @var array Contains a stack of cached responses */
-    protected $callStack;
+    protected $callStack = [];
 
-    /**
-     * @var RequestMatcher[]
-     */
-    protected $requestMatchers;
+    /** @var RequestMatcher[] */
+    protected $requestMatchers = [];
 
-    /**
-     * Construct the cache, and use $cache as the cache container object.
-     *
-     * @param RedisStorageFactory $redisStorageFactory
-     */
     public function __construct(RedisStorageFactory $redisStorageFactory)
     {
         $this->redisStorageFactory = $redisStorageFactory;
-        $this->requestMatchers = [];
-        $this->callStack = [];
     }
 
     /**
@@ -56,12 +47,12 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
      * Notifies the Cache of a service method that is about to be executed. If the Cache has a response in the cache
      * container, the request is cancelled and the response is overwritten with the cached response.
      *
-     * @param \Zicht\Service\Common\ServiceCallInterface $event
+     * @param \Zicht\Service\Common\ServiceCallInterface $call
      * @return void
      */
-    public function notifyBefore(ServiceCallInterface $event)
+    public function notifyBefore(ServiceCallInterface $call)
     {
-        $request = $event->getRequest();
+        $request = $call->getRequest();
         $requestMatcher = $this->getRequestMatcher($request);
 
         // Early return when this request does not have a matcher
@@ -86,8 +77,8 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
             //
 
             // Cancel the actual request
-            $event->cancel($this);
-            $event->getResponse()->setResponse($value);
+            $call->cancel($this);
+            $call->getResponse()->setResponse($value);
             $this->callStack[] = ['type' => self::CACHE_HIT];
             $this->addLogRecord(self::DEBUG, 'CacheObserver hit', [$key]);
         }
@@ -98,10 +89,10 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
      * If there is a response and no fault, and the response is cachable by this observer, it is stored in the cache
      * for future reuse.
      *
-     * @param \Zicht\Service\Common\ServiceCallInterface $event
+     * @param \Zicht\Service\Common\ServiceCallInterface $call
      * @return void
      */
-    public function notifyAfter(ServiceCallInterface $event)
+    public function notifyAfter(ServiceCallInterface $call)
     {
         $item = array_pop($this->callStack);
 
@@ -111,7 +102,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
                 break;
 
             case self::CACHE_MISS:
-                $response = $event->getResponse();
+                $response = $call->getResponse();
                 if (!$response->isError() && $response->isCachable()) {
                     $redis = $this->redisStorageFactory->getClient();
                     $redis->setex($item['key'], $item['ttlSeconds'], $response->getResponse());

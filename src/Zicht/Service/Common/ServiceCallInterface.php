@@ -27,7 +27,10 @@ interface ServiceCallInterface
     public function getResponse();
 
     /**
-     * Cancel the event
+     * Cancel the call
+     *
+     * The service request is not performed and Observers may alter their behavior by checking $call->isCancelled().
+     * This only has effect in the notifyBefore() call.
      *
      * @param mixed $by
      * @return void
@@ -50,6 +53,15 @@ interface ServiceCallInterface
     public function getCancelledBy();
 
     /**
+     * Returns true when the call is made in terminate mode.
+     *
+     * @return bool
+     */
+    public function isTerminating();
+
+    /**
+     * Attributes to store in the log.
+     *
      * @return array
      */
     public function getLogAttributes();
