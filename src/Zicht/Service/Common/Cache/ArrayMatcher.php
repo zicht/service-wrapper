@@ -22,12 +22,12 @@ class ArrayMatcher implements RequestMatcher
      * The configuration must take the structure as seen below
      * Array
      * (
-     *     [methodA] => Array
+     *     [method] => Array
      *         (
-     *             [default] => 10
+     *             [fallback] => [value => 10, error => 10, grace => 10],
      *             [attributes] => Array
      *                 (
-     *                     [five] => 5
+     *                     [attribute] => [value => 10, error => 10, grace => 10],
      *                 )
      *         )
      * )
@@ -37,16 +37,11 @@ class ArrayMatcher implements RequestMatcher
      */
     public function __construct(array $config)
     {
-        foreach ($config as $method => $properties) {
-            $this->config[strtolower($method)] = $properties;
-        }
+        $this->config = $config;
     }
 
     /**
-     * Generates a cache storage key for the current request
-     *
-     * @param RequestInterface $request
-     * @return string
+     * {@inheritdoc}
      */
     public function getKey(RequestInterface $request)
     {
@@ -54,8 +49,8 @@ class ArrayMatcher implements RequestMatcher
         foreach ($request->getParameters() as $paramName => $paramValue) {
             $key->addAttribute($paramName, $paramValue);
         }
-        foreach ($this->config[strtolower($request->getMethod())]['attributes'] as $attrName => $ttl) {
-            if ($attrValue = $request->getAttributeDeep(explode('.', $attrName))) {
+        foreach ($this->config[$request->getMethod()]['attributes'] as $attrName => $_) {
+            if (($attrValue = $request->getAttributeDeep(explode('.', $attrName))) !== null) {
                 $key->addAttribute($attrName, $attrValue);
             }
         }
@@ -63,14 +58,11 @@ class ArrayMatcher implements RequestMatcher
     }
 
     /**
-     * Return if the current request matcher is a candidate for the specified request
-     *
-     * @param RequestInterface $request
-     * @return bool
+     * {@inheritdoc}
      */
     public function isMatch(RequestInterface $request)
     {
-        return array_key_exists(strtolower($request->getMethod()), $this->config);
+        return array_key_exists($request->getMethod(), $this->config);
     }
 
     /**
@@ -82,21 +74,29 @@ class ArrayMatcher implements RequestMatcher
     }
 
     /**
-     * Return the time to live (in seconds) for the specified request
-     *
-     * @param RequestInterface $request
-     * @return int
+     * {@inheritdoc}
      */
-    public function getTtl(RequestInterface $request)
+    public function getTtlConfig(RequestInterface $request)
     {
-        $config = $this->config[strtolower($request->getMethod())];
+        $config = $this->config[$request->getMethod()];
 
-        $ttls = [$config['default']];
-        foreach ($config['attributes'] as $attribute => $ttl) {
+        // Compute base TTL for storing a value
+        $valueTtls = [];
+        $errorTtls = [];
+        $graceTtls = [];
+        foreach ($config['attributes'] as $attribute => $ttlConfig) {
             if ($request->hasAttribute($attribute)) {
-                $ttls [] = $ttl;
+                $valueTtls [] = $ttlConfig['value'];
+                $errorTtls [] = $ttlConfig['error'];
+                $graceTtls [] = $ttlConfig['grace'];
             }
         }
-        return min($ttls);
+
+        $fallback = $config['fallback'];
+        return [
+            'value' => empty($valueTtls) ? $fallback['value'] : min($valueTtls),
+            'error' => empty($errorTtls) ? $fallback['error'] : min($errorTtls),
+            'grace' => empty($graceTtls) ? $fallback['grace'] : min($graceTtls),
+        ];
     }
 }

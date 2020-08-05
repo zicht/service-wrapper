@@ -13,16 +13,29 @@ use Zicht\Service\Common\ServiceWrapper;
 
 class ServiceCallTest extends TestCase
 {
+    /** @var ServiceCall */
+    protected $call;
+
     protected function setUp()
     {
         $this->call = new ServiceCall(
             $this->service = $this->getMockBuilder(ServiceWrapper::class)->disableOriginalConstructor()->getMock(),
             $this->request = $this->getMockBuilder(RequestInterface::class)->getMock(),
             $this->response = $this->getMockBuilder(ResponseInterface::class)->getMock(),
-            $this->parent = $this->getMockBuilder(ServiceCallInterface::class)->disableOriginalConstructor()->getMock()
+            $this->parent = $this->getMockBuilder(ServiceCallInterface::class)->disableOriginalConstructor()->getMock(),
+            false
         );
     }
 
+    public function testConstructWithoutTerminating()
+    {
+        $call = new ServiceCall(
+            $this->getMockBuilder(ServiceWrapper::class)->disableOriginalConstructor()->getMock(),
+            $this->getMockBuilder(RequestInterface::class)->getMock(),
+            $this->getMockBuilder(ResponseInterface::class)->getMock()
+        );
+        $this->assertFalse($call->isTerminating());
+    }
 
     public function testConstructWithoutParent()
     {
@@ -42,6 +55,7 @@ class ServiceCallTest extends TestCase
         $this->assertEquals($this->response, $this->call->getResponse());
         $this->assertEquals($this->parent, $this->call->getParent());
         $this->assertTrue($this->call->hasParent());
+        $this->assertFalse($this->call->isTerminating());
     }
 
     public function testCancel()
@@ -50,7 +64,6 @@ class ServiceCallTest extends TestCase
         $this->assertTrue($this->call->isCancelled());
         $this->assertTrue($this->call->isCancelled('foo'));
         $this->assertFalse($this->call->isCancelled('bar'));
-
         $this->assertEquals(['foo'], $this->call->getCancelledBy());
     }
 
@@ -63,13 +76,14 @@ class ServiceCallTest extends TestCase
         $this->assertFalse($this->call->isCancelled($obj));
     }
 
-
-    public function testLogAttributes()
+    public function testSetAndGetInfo()
     {
-        $this->call->addLogAttributes(['a' => 'b']);
-        $this->assertEquals(['a' => 'b'], $this->call->getLogAttributes());
+        $this->call->setInfo('foo', 'Foo');
+        $this->assertEquals('Foo', $this->call->getInfo('foo'));
+    }
 
-        $this->call->addLogAttributes(['x' => 'y']);
-        $this->assertEquals(['a' => 'b', 'x' => 'y'], $this->call->getLogAttributes());
+    public function testGetInfoFallback()
+    {
+        $this->assertEquals('Fallback', $this->call->getInfo('foo', 'Fallback'));
     }
 }

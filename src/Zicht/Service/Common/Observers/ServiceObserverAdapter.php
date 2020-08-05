@@ -6,14 +6,14 @@
 namespace Zicht\Service\Common\Observers;
 
 use Zicht\Service\Common\ServiceCallInterface;
-use Zicht\Service\Common\ServiceObserver;
+use Zicht\Service\Common\ServiceObserverInterface;
 
 /**
  * Adapter for the ServiceObserver interface
  *
  * @codeCoverageIgnore
  */
-class ServiceObserverAdapter implements ServiceObserver
+class ServiceObserverAdapter implements ServiceObserverInterface
 {
     /**
      * {@inheritdoc}
@@ -41,6 +41,13 @@ class ServiceObserverAdapter implements ServiceObserver
      * {@inheritdoc}
      */
     public function notifyAfter(ServiceCallInterface $call)
+    {
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function terminate()
     {
     }
 }

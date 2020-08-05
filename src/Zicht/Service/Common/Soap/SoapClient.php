@@ -5,19 +5,23 @@
 
 namespace Zicht\Service\Common\Soap;
 
+use Zicht\Service\Common\ClientStatisticsInterface;
 use Zicht\Service\Common\CurlStreamWrapper;
 
 /**
  * Base class for SOAP implementations
  *
  */
-class SoapClient extends \SoapClient
+class SoapClient extends \SoapClient implements ClientStatisticsInterface
 {
     /** @var array */
     private $rewriteUrls;
 
     /** @var array */
     private $rewriteContent;
+
+    /** @var array */
+    private $lastStatistics;
 
     /**
      * Constructor override, adds some sane defaults
@@ -55,6 +59,7 @@ class SoapClient extends \SoapClient
 
         $this->rewriteUrls = $rewriteUrls;
         $this->rewriteContent = $rewriteContent;
+        $this->lastStatistics = ['requestSize' => 0, 'responseSize' => 0];
 
         try {
             parent::SoapClient($wsdl, $options + $this->getDefaultOptions());
@@ -114,6 +119,19 @@ class SoapClient extends \SoapClient
         foreach ($this->rewriteUrls as $pattern => $replacement) {
             $location = preg_replace($pattern, $replacement, $location);
         }
-        return parent::__doRequest($request, $location, $action, $version, $one_way);
+        $response = parent::__doRequest($request, $location, $action, $version, $one_way);
+        $this->lastStatistics['requestSize'] = strlen($request);
+        $this->lastStatistics['responseSize'] = strlen($response);
+        return $response;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    // @codingStandardsIgnoreStart
+    public function __getLastStatistics()
+    {
+        // @codingStandardsIgnoreEnd
+        return $this->lastStatistics;
     }
 }

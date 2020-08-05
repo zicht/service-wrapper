@@ -11,33 +11,41 @@ namespace Zicht\Service\Common;
  */
 class ServiceCall implements ServiceCallInterface
 {
-    /** @var ServiceWrapper|null */
-    private $service = null;
+    /** @var ServiceWrapper */
+    private $service;
 
-    /** @var RequestInterface|null */
-    private $request = null;
+    /** @var RequestInterface */
+    private $request;
 
-    /** @var ResponseInterface|null */
-    private $response = null;
+    /** @var ResponseInterface */
+    private $response;
+
+    /** @var ServiceCallInterface|null */
+    private $parent;
+
+    /** @var bool */
+    private $terminating = false;
 
     /** @var array */
     private $cancelled = [];
 
     /** @var array */
-    private $logAttributes = [];
+    private $info = [];
 
     /**
      * @param ServiceWrapper $service
      * @param RequestInterface $request
      * @param ResponseInterface $response
      * @param ServiceCallInterface|null $parent
+     * @param bool $terminating
      */
-    public function __construct(ServiceWrapper $service, RequestInterface $request, ResponseInterface $response, $parent = null)
+    public function __construct(ServiceWrapper $service, RequestInterface $request, ResponseInterface $response, $parent = null, $terminating = false)
     {
         $this->service = $service;
         $this->request = $request;
         $this->response = $response;
         $this->parent = $parent;
+        $this->terminating = $terminating;
     }
 
     /**
@@ -57,17 +65,10 @@ class ServiceCall implements ServiceCallInterface
     }
 
     /**
-     * Attributes to store in the log.
+     * Cancel the call
      *
-     * @return array
-     */
-    public function getLogAttributes()
-    {
-        return $this->logAttributes;
-    }
-
-    /**
-     * Cancel the call, i.e. don't do the request. Only has effect in the notifyBefore() call.
+     * The service request is not performed and Observers may alter their behavior by checking $call->isCancelled().
+     * This only has effect in the notifyBefore() call.
      *
      * @param mixed $by
      * @return void
@@ -78,7 +79,7 @@ class ServiceCall implements ServiceCallInterface
     }
 
     /**
-     * Checks if the event was cancelled.
+     * Check if the event was cancelled
      *
      * @param null $by
      * @return bool
@@ -92,13 +93,39 @@ class ServiceCall implements ServiceCallInterface
     }
 
     /**
-     * Returns an array of what classes were responsible for cancelling the request
+     * Returns an array of classes responsible for cancelling the event.
      *
      * @return array
      */
     public function getCancelledBy()
     {
         return $this->cancelled;
+    }
+
+    /**
+     * Returns true when the call is made in terminate mode.
+     *
+     * @return bool
+     */
+    public function isTerminating()
+    {
+        return $this->terminating;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getInfo(string $key, $fallback = null)
+    {
+        return $this->info[$key] ?? $fallback;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setInfo(string $key, $info)
+    {
+        return $this->info[$key] = $info;
     }
 
     /**
@@ -118,18 +145,10 @@ class ServiceCall implements ServiceCallInterface
     }
 
     /**
-     * @return null|\Zicht\Service\Common\ServiceWrapper
+     * @return ServiceWrapper
      */
     public function getService()
     {
         return $this->service;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function addLogAttributes(array $attributes)
-    {
-        $this->logAttributes = array_merge_recursive($this->logAttributes, $attributes);
     }
 }

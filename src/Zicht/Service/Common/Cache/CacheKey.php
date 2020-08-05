@@ -14,7 +14,7 @@ namespace Zicht\Service\Common\Cache;
 final class CacheKey implements CacheKeyInterface
 {
     /** @var int */
-    private $readableDepth;
+    const MAX_KEY_LENGTH = 512;
 
     /** @var string */
     private $name;
@@ -23,41 +23,13 @@ final class CacheKey implements CacheKeyInterface
     private $attributes;
 
     /**
-     * Helper function to construct a readable string out of an array:
-     *
-     * If all items are either:
-     * - Scalar, or
-     * - Recursively if allowdepth > 1s
-     *
-     * @param array $array
-     * @param int $allowDepth
-     *
-     * @return bool
-     */
-    private static function isAllScalar($array, $allowDepth)
-    {
-        return is_array($array) && array_reduce(
-            $array,
-            function ($v, $m) use ($allowDepth) {
-                return $v && (
-                    is_scalar($m)
-                    || ($allowDepth > 1 && self::isAllScalar($m, $allowDepth - 1))
-                );
-            },
-            true
-        );
-    }
-
-    /**
      * Construct the key with the passed name as a namespace (such as service method name)
      *
      * @param string $name
-     * @param int $readableDepth
      */
-    public function __construct($name, $readableDepth = 1)
+    public function __construct($name)
     {
-        $this->name = strtolower($name);
-        $this->readableDepth = $readableDepth;
+        $this->name = $name;
         $this->attributes = [];
     }
 
@@ -76,35 +48,15 @@ final class CacheKey implements CacheKeyInterface
     /**
      * Return the string key representation.
      *
-     * The implementation works as follows:
-     *
-     * Use the name as a prefix. Then,
+     * The key consists of $this->name and $this->attributes, however,
+     * if the key is too long, it will consist of $this->name and a hash.
      *
      * @return string
      */
     public function getKey()
     {
-        $keys = array_keys($this->attributes);
-        $i = 0;
-        return array_reduce(
-            array_values($this->attributes),
-            function ($ret, $attribute) use ($keys, &$i) {
-                // sort array by key, to ensure that the cache key is the same for all similar requests
-                if (is_array($attribute)) {
-                    ksort($attribute);
-                }
-                if (self::isAllScalar($attribute, $this->readableDepth)) {
-                    $strAttribute = str_replace(['"', "\n"], '', json_encode($attribute));
-                } elseif (!is_scalar($attribute)) {
-                    $strAttribute = sha1(json_encode($attribute));
-                } else {
-                    $strAttribute = (string)$attribute;
-                }
-
-                return sprintf('%s::%s', $ret, sprintf('%s:%s', $keys[$i ++], $strAttribute));
-            },
-            $this->name
-        );
+        $key = sprintf('%s:%s', $this->name, json_encode($this->attributes));
+        return strlen($key) < self::MAX_KEY_LENGTH ? $key : sprintf('%s:%s', $this->name, sha1($key));
     }
 
     /**
