@@ -55,11 +55,11 @@ class ServiceWrapper
     /**
      * Add an observer to the list of observers
      *
-     * @param ServiceObserver $observer
+     * @param ServiceObserverInterface $observer
      * @param int $index
      * @return void
      */
-    public function registerObserver(ServiceObserver $observer, $index = null)
+    public function registerObserver(ServiceObserverInterface $observer, $index = null)
     {
         if ($this->logger && $observer instanceof Observers\LoggerAwareInterface) {
             $observer->setLogger($this->logger);
@@ -89,7 +89,7 @@ class ServiceWrapper
     }
 
     /**
-     * @return ServiceObserver[]
+     * @return ServiceObserverInterface[]
      */
     public function getObservers()
     {

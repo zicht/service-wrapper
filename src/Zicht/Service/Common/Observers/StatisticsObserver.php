@@ -5,17 +5,22 @@
 
 namespace Zicht\Service\Common\Observers;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
 use Zicht\Service\Common\RequestInterface;
 use Zicht\Service\Common\ServiceCallInterface;
 use Zicht\Service\Common\ServiceWrapper;
 
-class StatisticsObserver extends LoggableServiceObserverAdapter
+class StatisticsObserver extends ServiceObserverAdapter implements LoggerAwareInterface
 {
-    /** @var string[] */
-    protected $statistics = [
-        'completed' => [],
-        'cancelled' => [],
-    ];
+    use LoggerAwareTrait;
+
+    public function __construct()
+    {
+        $this->logger = new NullLogger();
+    }
 
     /**
      * @param ServiceCallInterface $call
@@ -23,18 +28,18 @@ class StatisticsObserver extends LoggableServiceObserverAdapter
      */
     public function notifyAfter(ServiceCallInterface $call)
     {
-        $this->statistics[$call->isCancelled() ? 'cancelled' : 'completed'] [] = $call->getRequest()->getMethod();
-    }
-
-    /**
-     * If a cache hit has occurred for a key that has a grace-period, the cache will be refreshed if needed.
-     *
-     * @return void
-     */
-    public function terminate()
-    {
-        if (!empty($this->statistics['completed']) || !empty($this->statistics['cancelled'])) {
-            $this->addLogRecord(self::INFO, 'StatisticsObserver', $this->statistics);
-        }
+        $request = $call->getRequest();
+        $response = $call->getResponse();
+        $this->logger->log(
+            LogLevel::DEBUG,
+            'Stats',
+            [
+                'method' => $request->getMethod(),
+                'parameters' => $request->getParameters(),
+                'cancelled' => (int)$call->isCancelled(),
+                'cachable' => (int)$response->isCachable(),
+                'error' => (int)$response->isError(),
+            ]
+        );
     }
 }

@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   This requires `ServiceWrapper::terminate` to be called on application termination and
   grace ttl to be configured.
 - The `RedisLockingCacheObserver` now logs statistics using INFO level.
+### Changed
+- The `RedisCacheObserver`, `RedisLockingCacheObserver`, and `StatisticsObserver` now implement
+  `Psr\Log\LoggerAwareInterface` instead of the deprecated `LoggableServiceObserverAdapter`.
+  This requires changes to `zicht/sro` and `zicht/sro-bundle` to configure the logger separately
+  from the deprecated `zicht/service-wrapper` logging configuration.
 ### Fixed
 - The `RedisLockingCacheObserver` now handles exceptions thrown during observer code better
   by unlocking the redis cache key when this is detected.

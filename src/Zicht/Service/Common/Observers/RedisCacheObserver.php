@@ -5,13 +5,19 @@
 
 namespace Zicht\Service\Common\Observers;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
 use Zicht\Service\Common\Cache\RequestMatcher;
 use Zicht\Service\Common\RequestInterface;
 use Zicht\Service\Common\ServiceCallInterface;
 use Zicht\Service\Common\Storage\RedisStorageFactory;
 
-class RedisCacheObserver extends LoggableServiceObserverAdapter
+class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /** @var string */
     const CACHE_IGNORE = 'IGNORE';
 
@@ -33,6 +39,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
     public function __construct(RedisStorageFactory $redisStorageFactory)
     {
         $this->redisStorageFactory = $redisStorageFactory;
+        $this->logger = new NullLogger();
     }
 
     /**
@@ -70,7 +77,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
             //
 
             $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttlSeconds' => $requestMatcher->getTtl($request)];
-            $this->addLogRecord(self::DEBUG, 'CacheObserver miss', [$key]);
+            $this->logger->log(LogLevel::DEBUG, 'Cache' , ['type' => 'miss', 'key' => $key]);
         } else {
             //
             // Cache hit
@@ -80,7 +87,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
             $call->cancel($this);
             $call->getResponse()->setResponse($value);
             $this->callStack[] = ['type' => self::CACHE_HIT];
-            $this->addLogRecord(self::DEBUG, 'CacheObserver hit', [$key]);
+            $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'hit', 'key' => $key]);
         }
     }
 
@@ -106,7 +113,7 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
                 if (!$response->isError() && $response->isCachable()) {
                     $redis = $this->redisStorageFactory->getClient();
                     $redis->setex($item['key'], $item['ttlSeconds'], $response->getResponse());
-                    $this->addLogRecord(self::DEBUG, 'CacheObserver write', $item);
+                    $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'write', 'key' => $item['key']]);
                 }
                 break;
         }
@@ -125,7 +132,6 @@ class RedisCacheObserver extends LoggableServiceObserverAdapter
                 return $requestMatcher;
             }
         }
-
         return null;
     }
 }
