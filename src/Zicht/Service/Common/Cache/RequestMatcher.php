@@ -40,18 +40,15 @@ interface RequestMatcher
     public function getKey(RequestInterface $request);
 
     /**
-     * Return the time to live (in seconds) for the specified request
+     * Return an [value, error, grace] array containing the TTL values
+     *
+     * Where:
+     * - value is the base TTL for storing a value
+     * - error is the base TTL for storing an exception
+     * - grace is the additional grace TTL for both $value and $error to remain usable
      *
      * @param RequestInterface $request
-     * @return int
+     * @return int[]
      */
-    public function getTtl(RequestInterface $request);
-
-    /**
-     * Return the grace time (in seconds) for the specified request
-     *
-     * @param RequestInterface $request
-     * @return int
-     */
-    public function getGrace(RequestInterface $request);
+    public function getTtlConfig(RequestInterface $request);
 }

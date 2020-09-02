@@ -72,27 +72,6 @@ class ServiceWrapper
     }
 
     /**
-     * Returns a tuple of `index` and observer `instance`. The index can be used to pass to `registerObserver` to
-     * put it back at the index where it was.
-     *
-     * The use case is that some implementation knows about an observer being incompatible with some kind of
-     * situation, so the observer needs to be temporarily unregistered and restored.
-     *
-     * @param string $className
-     * @return array
-     */
-    public function unregisterObserver($className)
-    {
-        foreach ($this->observers as $idx => $observer) {
-            if ($observer instanceof $className) {
-                array_splice($this->observers, $idx, 1, []);
-                return [$idx, $observer];
-            }
-        }
-        return null;
-    }
-
-    /**
      * @return ServiceObserverInterface[]
      */
     public function getObservers()
@@ -169,7 +148,10 @@ class ServiceWrapper
     }
 
     /**
-     * {@inheritdoc}
+     * Perform the service call
+     *
+     * @param ServiceCallInterface $call
+     * @return mixed
      */
     protected function execute(ServiceCallInterface $call)
     {

@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 4.0.0 - 2020-08-28
 ### Added
-- The `RedisLockingCacheObserver` now supports a grace-period.
+- `RedisLockingCacheObserver` now supports a grace-period and exception caching.
   This requires `ServiceWrapper::terminate` to be called on application termination and
   grace ttl to be configured.
 - `StatisticsObserver` can be enabled to log all calls made to the service.
@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   This can be used to store values between callbacks.
 - `ServiceWrapper::registerObservers` allows adding multiple observers in a single call.
 ### Changed
+- `ArrayMatcher` and `MethodMatcher` are now configured very differently (see their constructor docs).
+- `ArrayMatcher` and `MethodMatcher` will now match case-sensitive.
+- `CacheKey::getKey` now returns a longer but much more readable key.
 - All logging related logic was removed.  Any logging should be done on a observer-by-observer
   basis, preferably using `Psr\Log\LoggerAwareInterface`.
 - The `RedisCacheObserver`, `RedisLockingCacheObserver`, and `StatisticsObserver` implement
@@ -24,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   This requires changes to `zicht/sro` and `zicht/sro-bundle` to configure the logger separately
   from the deprecated `zicht/service-wrapper` logging configuration.
 ### Removed
+Files
 - DataCollector/DataCollector
 - DataCollector/Observer
 - Http/Observer/VerboseLoggingObserver
@@ -35,14 +39,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Observers/Timer
 - ServiceObserver
 - Soap/Observer/VerboseLoggingObserver
+Methods
+- ServiceWrapper::unregisterObserver
 ### Fixed
 - The `RedisLockingCacheObserver` now handles exceptions thrown during observer code better
   by unlocking the redis cache key when this is detected.
 - The `ServiceWrapper` now handles exceptions thrown during observer code better, i.e. the
   internal `$this->callStack` will no longer corrupt, thereby preserving the `$parent` value.
-
-All this custom logger code should be replaces by a logger that can be enabled or
-disabled per observer using `Psr\Log\LoggerAwareInterface` and `Psr\Log\LoggerAwareTrait`.
 
 ## 3.2.2 - 2020-07-17
 ### Fixed

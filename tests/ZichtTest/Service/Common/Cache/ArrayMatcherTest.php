@@ -10,16 +10,34 @@ use Zicht\Service\Common\Cache\ArrayMatcher;
 
 class ArrayMatcherTest extends TestCase
 {
-    /**
-     * @var ArrayMatcher
-     */
+    /** @var ArrayMatcher */
     public $matcher;
 
     function setUp()
     {
         $config = [
-            'methodA' => ['default' => 10, 'attributes' => ['five' => 5, 'three' => 3]],
-            'methodB' => ['default' => 15, 'attributes' => ['five' => 5, 'three' => 3]],
+            'methodA' => [
+                'fallback' => ['value' => 10, 'error' => 15, 'grace' => 30],
+                'attributes' => [
+                    'five' => ['value' => 5, 'error' => 5, 'grace' => 5],
+                    'three' => ['value' => 3, 'error' => 3, 'grace' => 3],
+                ],
+            ],
+            'methodB' => [
+                'fallback' => ['value' => 15, 'error' => 20, 'grace' => 35],
+                'attributes' => [
+                    'five' => ['value' => 5, 'error' => 5, 'grace' => 5],
+                    'three' => ['value' => 3, 'error' => 3, 'grace' => 3],
+                ],
+            ],
+            'case' => [
+                'fallback' => ['value' => 1, 'error' => 1, 'grace' => 1],
+                'attributes' => [],
+            ],
+            'CASE' => [
+                'fallback' => ['value' => 1, 'error' => 1, 'grace' => 1],
+                'attributes' => [],
+            ],
         ];
         $this->matcher = new ArrayMatcher($config);
     }
@@ -29,9 +47,11 @@ class ArrayMatcherTest extends TestCase
         $this->assertTrue($this->matcher->isMatch(new Request('methodA')));
     }
 
-    function testIsMatchIgnoresCase()
+    function testIsMatchCaseSensitive()
     {
-        $this->assertTrue($this->matcher->isMatch(new Request('MeThoDA')));
+        $this->assertFalse($this->matcher->isMatch(new Request('MethodA')));
+        $this->assertFalse($this->matcher->isMatch(new Request('methoda')));
+        $this->assertFalse($this->matcher->isMatch(new Request('MeThoDA')));
     }
 
     function testKeyIsDifferentIfParametersDiffer()
@@ -50,11 +70,11 @@ class ArrayMatcherTest extends TestCase
         );
     }
 
-    function testKeyIsMatchingIsCaseInsensitive()
+    function testKeyIsMatchingIsCaseSensitive()
     {
-        $this->assertEquals(
-            $this->matcher->getKey(new Request('MeThOdA', ['a' => 'b'])),
-            $this->matcher->getKey(new Request('methodA', ['a' => 'b']))
+        $this->assertNotEquals(
+            $this->matcher->getKey(new Request('case', ['a' => 'b'])),
+            $this->matcher->getKey(new Request('CASE', ['a' => 'b']))
         );
     }
 
@@ -90,30 +110,23 @@ class ArrayMatcherTest extends TestCase
         );
     }
 
-    function testGetTtlReturnsSpecifiedTtlForMethodForAllParameters()
+    function testGetTtlReturnsSpecifiedFallbackTtlForMethodForAllParameters()
     {
-        $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', ['a' => 'b'])));
-        $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', ['a' => 'c'])));
-        $this->assertEquals(15, $this->matcher->getTtl(new Request('methodB', ['a' => 'b'])));
-        $this->assertEquals(15, $this->matcher->getTtl(new Request('methodB', ['a' => 'c'])));
-    }
-
-    function testGetTtlReturnsSpecifiedTtlAndIgnoresCase()
-    {
-        $this->assertEquals(10, $this->matcher->getTtl(new Request('MeThOdA', ['a' => 'b'])));
-        $this->assertEquals(15, $this->matcher->getTtl(new Request('MeThOdB', ['a' => 'b'])));
+        $this->assertEquals(['value' => 10, 'error' => 15, 'grace' => 30], $this->matcher->getTtlConfig(new Request('methodA', ['a' => 'b'])));
+        $this->assertEquals(['value' => 10, 'error' => 15, 'grace' => 30], $this->matcher->getTtlConfig(new Request('methodA', ['a' => 'c'])));
+        $this->assertEquals(['value' => 15, 'error' => 20, 'grace' => 35], $this->matcher->getTtlConfig(new Request('methodB', ['a' => 'b'])));
+        $this->assertEquals(['value' => 15, 'error' => 20, 'grace' => 35], $this->matcher->getTtlConfig(new Request('methodB', ['a' => 'c'])));
     }
 
     function testGetTtlReturnsLowestAttribute()
     {
-        // default 10 is the lowest
-        $this->assertEquals(10, $this->matcher->getTtl(new Request('methodA', ['a' => 'b'])));
-        // attribute five exists and has the lowest ttl
-        $this->assertEquals(5, $this->matcher->getTtl(new Request('methodA', ['a' => 'b'], ['five' => 'foo'])));
-        // attribute five and three exists, three has the lowest ttl
-        $this->assertEquals(3, $this->matcher->getTtl(new Request('methodA', ['a' => 'b'], ['five' => 'foo', 'three' => 'foo'])));
+        // no attributes match, so using fallback
+        $this->assertEquals(['value' => 10, 'error' => 15, 'grace' => 30], $this->matcher->getTtlConfig(new Request('methodA', ['a' => 'b'])));
+        // attribute five matches and has the lowest ttl
+        $this->assertEquals(['value' => 5, 'error' => 5, 'grace' => 5], $this->matcher->getTtlConfig(new Request('methodA', ['a' => 'b'], ['five' => 'foo'])));
+        // attributes five and three match, three has the lowest ttl
+        $this->assertEquals(['value' => 3, 'error' => 3, 'grace' => 3], $this->matcher->getTtlConfig(new Request('methodA', ['a' => 'b'], ['five' => 'foo', 'three' => 'foo'])));
     }
-
 
     public function testIsExpunger()
     {

@@ -14,26 +14,24 @@ use Zicht\Service\Common\RequestInterface;
 use Zicht\Service\Common\ServiceCallInterface;
 use Zicht\Service\Common\Storage\RedisStorageFactory;
 
+/**
+ * A service calls' result that allows caching will be stored and retrieved in Redis
+ *
+ * The value stored in redis will have the form:
+ * [
+ *   'g' => 15,     // Grace TTL
+ *   'e' => null,   // Exception, or null when value is present
+ *   'v' => null,   // Value, or null when exception is present
+ * ]
+ *
+ * @todo Implement grace caching (currently only the RedisLockingCacheObserver supports grace-cache)
+ */
 class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
 
-    // todo: Remove the callStack, it is not needed.  Just persist the tag to write the cache into $call->setInfo
-
-    /** @var string */
-    const CACHE_IGNORE = 'IGNORE';
-
-    /** @var string */
-    const CACHE_HIT = 'HIT';
-
-    /** @var string */
-    const CACHE_MISS = 'MISS';
-
     /** @var RedisStorageFactory */
     protected $redisStorageFactory = null;
-
-    /** @var array Contains a stack of cached responses */
-    protected $callStack = [];
 
     /** @var RequestMatcher[] */
     protected $requestMatchers = [];
@@ -66,7 +64,6 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
 
         // Early return when this request does not have a matcher
         if (null === $requestMatcher) {
-            $this->callStack[] = ['type' => self::CACHE_IGNORE];
             return;
         }
 
@@ -78,7 +75,7 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
             // Cache miss
             //
 
-            $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttlSeconds' => $requestMatcher->getTtl($request)];
+            $call->setInfo('RedisCacheObserver--Miss', ['key' => $key, 'ttlConfig' => $requestMatcher->getTtlConfig($request)]);
             $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'miss', 'key' => $key]);
         } else {
             //
@@ -87,8 +84,11 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
 
             // Cancel the actual request
             $call->cancel($this);
-            $call->getResponse()->setResponse($value);
-            $this->callStack[] = ['type' => self::CACHE_HIT];
+            if ($value['e'] === null) {
+                $call->getResponse()->setResponse($value['v']);
+            } else {
+                $call->getResponse()->setError($value['e']);
+            }
             $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'hit', 'key' => $key]);
         }
     }
@@ -103,21 +103,21 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
      */
     public function notifyAfter(ServiceCallInterface $call)
     {
-        $item = array_pop($this->callStack);
+        if (($info = $call->getInfo('RedisCacheObserver--Miss')) === null) {
+            return;
+        }
 
-        switch ($item['type']) {
-            case self::CACHE_IGNORE:
-            case self::CACHE_HIT:
-                break;
-
-            case self::CACHE_MISS:
-                $response = $call->getResponse();
-                if (!$response->isError() && $response->isCachable()) {
-                    $redis = $this->redisStorageFactory->getClient();
-                    $redis->setex($item['key'], $item['ttlSeconds'], $response->getResponse());
-                    $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'write', 'key' => $item['key']]);
-                }
-                break;
+        $response = $call->getResponse();
+        if ($response->isCachable()) {
+            $ttlConfig = $info['ttlConfig'];
+            $redis = $this->redisStorageFactory->getClient();
+            if (($error = $response->getError()) === null) {
+                $redis->setex($info['key'], $ttlConfig['value'] + $ttlConfig['grace'], ['g' => $ttlConfig['grace'], 'e' => null, 'v' => $response->getResponse()]);
+            } else {
+                $this->makeExceptionSerializable($error);
+                $redis->setex($info['key'], $ttlConfig['error'] + $ttlConfig['grace'], ['g' => $ttlConfig['grace'], 'e' => $error, 'v' => null]);
+            }
+            $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'write', 'key' => $info['key']]);
         }
     }
 
@@ -135,5 +135,25 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
             }
         }
         return null;
+    }
+
+    /**
+     * We need exceptions to be serializable to allow them to be persisted in the cache
+     *
+     * Therefore, we need to remove the protected trace, which contains a closure,
+     * which is not serializable.  This trace needs to be removed from $exception
+     * and all its parent exceptions.
+     *
+     * @param \Exception $exception
+     */
+    protected function makeExceptionSerializable(\Exception &$exception)
+    {
+        $traceProperty = (new \ReflectionClass(\Exception::class))->getProperty('trace');
+        $traceProperty->setAccessible(true);
+        $ex = $exception;
+        do {
+            $traceProperty->setValue($ex, null);
+        } while ($ex = $ex->getPrevious());
+        $traceProperty->setAccessible(false);
     }
 }

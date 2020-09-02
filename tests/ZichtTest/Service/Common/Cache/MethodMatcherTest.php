@@ -16,17 +16,16 @@ class MethodMatcherTest extends TestCase
 
     function setUp()
     {
-        $this->matcher = new MethodMatcher(
-            [
-                'foo' => [
-                    'default' => 123,
-                    'attributes' => [],
-                    'parameters' => [
-                        [['bar'], 'baz'],
-                    ],
+        $config = [
+            'foo' => [
+                'fallback' => ['value' => 123, 'error' => 15, 'grace' => 30],
+                'attributes' => [],
+                'parameters' => [
+                    [['bar'], 'baz'],
                 ],
-            ]
-        );
+            ],
+        ];
+        $this->matcher = new MethodMatcher($config);
     }
 
     function testIsMatchMatchesExactRequest()
@@ -56,7 +55,7 @@ class MethodMatcherTest extends TestCase
 
     function testGetTtlReturnsConfiguredTtl()
     {
-        $this->assertEquals(123, $this->matcher->getTtl(new Request('foo', ['bar' => 'baz'])));
+        $this->assertEquals(['value' => 123, 'error' => 15, 'grace' => 30], $this->matcher->getTtlConfig(new Request('foo', ['bar' => 'baz'])));
     }
 
     function testGetKeyWillIncludeAllParameters()
@@ -64,6 +63,10 @@ class MethodMatcherTest extends TestCase
         $this->assertNotEquals(
             $this->matcher->getKey(new Request('foo', [])),
             $this->matcher->getKey(new Request('foo', ['a' => 'b']))
+        );
+        $this->assertNotEquals(
+            $this->matcher->getKey(new Request('foo', [])),
+            $this->matcher->getKey(new Request('foo', ['bar' => 'bar']))
         );
     }
 }

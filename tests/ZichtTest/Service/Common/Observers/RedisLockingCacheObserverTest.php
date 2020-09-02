@@ -52,8 +52,9 @@ class RedisLockingCacheObserverTest extends TestCase
         $this->redisLockingCacheObserver->attachRequestMatcher(
             new ArrayMatcher(
                 [
-                    'ttl_cachable' => ['default' => 123, 'attributes' => [], 'grace_default' => 0, 'grace_attributes' => []],
-                    'grace_cachable' => ['default' => 24, 'attributes' => [], 'grace_default' => 66, 'grace_attributes' => []],
+                    'value_cachable' => ['fallback' => ['value' => 10, 'error' => 0, 'grace' => 0], 'attributes' => []],
+                    'error_cachable' => ['fallback' => ['value' => 10, 'error' => 15, 'grace' => 0], 'attributes' => []],
+                    'grace_cachable' => ['fallback' => ['value' => 10, 'error' => 0, 'grace' => 20], 'attributes' => []],
                 ]
             )
         );
@@ -69,14 +70,14 @@ class RedisLockingCacheObserverTest extends TestCase
     {
         $this->redisLockingCacheObserver->expects($this->never())->method('createToken');
         $this->serviceWrapper->expects($this->never())->method('__call');
-        $this->redis->expects($this->exactly(1))->method('get')->with('ttl_cachable')->willReturn('data-response');
+        $this->redis->expects($this->exactly(1))->method('get')->with('value_cachable:[]')->willReturn(['g' => 0, 'e' => null, 'v' => 'data-response']);
         $this->redis->expects($this->never())->method('set');
         $this->redis->expects($this->never())->method('setex');
         $this->redis->expects($this->never())->method('eval');
         $this->redis->expects($this->never())->method('ttl');
 
         // first call will be executed
-        $call = new ServiceCall($this->serviceWrapper, new Request('ttl_cachable'), new Response());
+        $call = new ServiceCall($this->serviceWrapper, new Request('value_cachable'), new Response());
         $this->redisLockingCacheObserver->notifyBefore($call);
         $this->redisLockingCacheObserver->notifyAfter($call);
         $this->redisLockingCacheObserver->terminate();
@@ -104,14 +105,14 @@ class RedisLockingCacheObserverTest extends TestCase
     {
         $this->redisLockingCacheObserver->expects($this->exactly(1))->method('createToken')->with()->willReturn('token-12345');
         $this->serviceWrapper->expects($this->never())->method('__call');
-        $this->redis->expects($this->exactly(2))->method('get')->with('ttl_cachable')->willReturn(false);
-        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::ttl_cachable', 'token-12345', ['nx', 'ex' => 3])->willReturn(true);
-        $this->redis->expects($this->exactly(1))->method('setex')->with('ttl_cachable', 123, 'data-response')->willReturn(true);
-        $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::ttl_cachable', 'token-12345'], 1)->willReturn(1);
+        $this->redis->expects($this->exactly(2))->method('get')->with('value_cachable:[]')->willReturn(false);
+        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::value_cachable:[]', 'token-12345', ['nx', 'ex' => 3])->willReturn(true);
+        $this->redis->expects($this->exactly(1))->method('setex')->with('value_cachable:[]', 10, ['g' => 0, 'e' => null, 'v' => 'data-response'])->willReturn(true);
+        $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::value_cachable:[]', 'token-12345'], 1)->willReturn(1);
         $this->redis->expects($this->never())->method('ttl');
 
         // first call will be executed
-        $call = new ServiceCall($this->serviceWrapper, new Request('ttl_cachable'), new Response());
+        $call = new ServiceCall($this->serviceWrapper, new Request('value_cachable'), new Response());
         $this->redisLockingCacheObserver->notifyBefore($call);
         $call->getResponse()->setResponse('data-response');
         $this->redisLockingCacheObserver->notifyAfter($call);
@@ -140,14 +141,14 @@ class RedisLockingCacheObserverTest extends TestCase
     {
         $this->redisLockingCacheObserver->expects($this->exactly(1))->method('createToken')->with()->willReturn('token-12345');
         $this->serviceWrapper->expects($this->never())->method('__call');
-        $this->redis->expects($this->exactly(2))->method('get')->with('ttl_cachable')->willReturnOnConsecutiveCalls(false, 'data-response');
-        $this->redis->expects($this->exactly(4))->method('set')->with('LOCK::ttl_cachable', 'token-12345', ['nx', 'ex' => 3])->willReturnOnConsecutiveCalls(false, false, false, true);
+        $this->redis->expects($this->exactly(2))->method('get')->with('value_cachable:[]')->willReturnOnConsecutiveCalls(false, ['g' => 0, 'e' => null, 'v' => 'data-response']);
+        $this->redis->expects($this->exactly(4))->method('set')->with('LOCK::value_cachable:[]', 'token-12345', ['nx', 'ex' => 3])->willReturnOnConsecutiveCalls(false, false, false, true);
         $this->redis->expects($this->exactly(0))->method('setex');
-        $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::ttl_cachable', 'token-12345'], 1)->willReturn(1);
+        $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::value_cachable:[]', 'token-12345'], 1)->willReturn(1);
         $this->redis->expects($this->never())->method('ttl');
 
         // first call will be executed
-        $call = new ServiceCall($this->serviceWrapper, new Request('ttl_cachable'), new Response());
+        $call = new ServiceCall($this->serviceWrapper, new Request('value_cachable'), new Response());
         $this->redisLockingCacheObserver->notifyBefore($call);
         $this->redisLockingCacheObserver->notifyAfter($call);
         $this->redisLockingCacheObserver->terminate();
@@ -166,7 +167,7 @@ class RedisLockingCacheObserverTest extends TestCase
      * 1. get -> 'data-response'    (cache available)
      *
      * Redis calls made in the `terminate`
-     * 2. ttl -> $ttlResponse       (outside >24s ttl window)
+     * 2. ttl -> $ttlResponse       (outside >10s ttl window)
      *
      * @dataProvider noGraceRefreshTtlProvider
      */
@@ -174,8 +175,8 @@ class RedisLockingCacheObserverTest extends TestCase
     {
         $this->redisLockingCacheObserver->expects($this->never())->method('createToken');
         $this->serviceWrapper->expects($this->never())->method('__call');
-        $this->redis->expects($this->exactly(1))->method('get')->with('grace_cachable')->willReturn('data-response');
-        $this->redis->expects($this->exactly(1))->method('ttl')->with('grace_cachable')->willReturn($ttlResponse);
+        $this->redis->expects($this->exactly(1))->method('get')->with('grace_cachable:[]')->willReturn(['g' => 20, 'e' => null, 'v' => 'data-response']);
+        $this->redis->expects($this->exactly(1))->method('ttl')->with('grace_cachable:[]')->willReturn($ttlResponse);
         $this->redis->expects($this->never())->method('set');
         $this->redis->expects($this->never())->method('setex');
         $this->redis->expects($this->never())->method('eval');
@@ -194,18 +195,16 @@ class RedisLockingCacheObserverTest extends TestCase
     }
 
     /**
-     * Returns TTL values that should return in 'no grace refresh' given a grace configured at 66 seconds
+     * Returns TTL values that should return in 'no grace refresh' given a grace configured at 20 seconds
      *
      * @return array
      */
     function noGraceRefreshTtlProvider()
     {
         return [
-            ['ttlResponse' => 66],
-            ['ttlResponse' => 67],
-            ['ttlResponse' => 100],
-            ['ttlResponse' => 200],
-            ['ttlResponse' => 300],
+            ['ttlResponse' => 20],
+            ['ttlResponse' => 21],
+            ['ttlResponse' => 3600],
         ];
     }
 
@@ -216,7 +215,7 @@ class RedisLockingCacheObserverTest extends TestCase
      * 1. get -> 'data-response'    (cache available)
      *
      * Redis calls made in the `terminate`
-     * 2. ttl -> $ttlResponse       (outside <24s ttl window)
+     * 2. ttl -> $ttlResponse       (outside <10s ttl window)
      *
      * Redis calls made in terminating `notifyBefore`
      * 3. set -> false              (lock unavailable)
@@ -226,9 +225,9 @@ class RedisLockingCacheObserverTest extends TestCase
     function testGraceCacheHitWithGraceCheckWithoutRefresh($ttlResponse)
     {
         $this->redisLockingCacheObserver->expects($this->exactly(1))->method('createToken')->with()->willReturn('token-12345');
-        $this->redis->expects($this->exactly(1))->method('get')->with('grace_cachable')->willReturn('data-response');
-        $this->redis->expects($this->exactly(1))->method('ttl')->with('grace_cachable')->willReturn($ttlResponse);
-        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::grace_cachable', 'token-12345', ['nx', 'ex' => 3])->willReturn(false);
+        $this->redis->expects($this->exactly(1))->method('get')->with('grace_cachable:[]')->willReturn(['g' => 20, 'e' => null, 'v' => 'data-response']);
+        $this->redis->expects($this->exactly(1))->method('ttl')->with('grace_cachable:[]')->willReturn($ttlResponse);
+        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::grace_cachable:[]', 'token-12345', ['nx', 'ex' => 3])->willReturn(false);
         $this->redis->expects($this->never())->method('setex');
         $this->redis->expects($this->never())->method('eval');
 
@@ -267,11 +266,11 @@ class RedisLockingCacheObserverTest extends TestCase
      * 1. get -> 'data-response'    (cache available)
      *
      * Redis calls made in the `terminate`
-     * 2. ttl -> $ttlResponse       (outside <24s ttl window)
+     * 2. ttl -> $ttlResponse       (outside <10s ttl window)
      *
      * Redis calls made in terminating `notifyBefore`
      * 3. set -> true               (lock available)
-     * 4. ttl -> $ttlResponse       (outside <24s ttl window)
+     * 4. ttl -> $ttlResponse       (outside <10s ttl window)
      *
      * Redis calls made in terminating `notifyAfter`
      * 5. setex -> true             (cache write)
@@ -282,11 +281,11 @@ class RedisLockingCacheObserverTest extends TestCase
     function testGraceCacheHitWithGraceCheckWithRefresh($ttlResponse)
     {
         $this->redisLockingCacheObserver->expects($this->exactly(1))->method('createToken')->with()->willReturn('token-12345');
-        $this->redis->expects($this->exactly(1))->method('get')->with('grace_cachable')->willReturn('data-response');
-        $this->redis->expects($this->exactly(2))->method('ttl')->with('grace_cachable')->willReturn($ttlResponse);
-        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::grace_cachable', 'token-12345', ['nx', 'ex' => 3])->willReturn(true);
-        $this->redis->expects($this->exactly(1))->method('setex')->with('grace_cachable', 24 + 66, 'data-response')->willReturn(true);
-        $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::grace_cachable', 'token-12345'], 1)->willReturn(1);
+        $this->redis->expects($this->exactly(1))->method('get')->with('grace_cachable:[]')->willReturn(['g' => 20, 'e' => null, 'v' => 'data-response']);
+        $this->redis->expects($this->exactly(2))->method('ttl')->with('grace_cachable:[]')->willReturn($ttlResponse);
+        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::grace_cachable:[]', 'token-12345', ['nx', 'ex' => 3])->willReturn(true);
+        $this->redis->expects($this->exactly(1))->method('setex')->with('grace_cachable:[]', 10 + 20, ['g' => 20, 'e' => null, 'v' => 'data-response'])->willReturn(true);
+        $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::grace_cachable:[]', 'token-12345'], 1)->willReturn(1);
 
         $this->serviceWrapper
             ->expects($this->exactly(1))
@@ -326,7 +325,7 @@ class RedisLockingCacheObserverTest extends TestCase
      * 1. get -> 'data-response'    (cache available)
      *
      * Redis calls made in the `terminate`
-     * 2. ttl -> $ttlResponse       (outside <24s ttl window)
+     * 2. ttl -> $ttlResponse       (outside <10s ttl window)
      *
      * Redis calls made in terminating `notifyBefore`
      * 3. set -> true               (lock available)
@@ -338,10 +337,10 @@ class RedisLockingCacheObserverTest extends TestCase
     function testGraceCacheHitWithGraceCheckWithLateIgnore($ttlResponse)
     {
         $this->redisLockingCacheObserver->expects($this->exactly(1))->method('createToken')->with()->willReturn('token-12345');
-        $this->redis->expects($this->exactly(1))->method('get')->with('grace_cachable')->willReturn('data-response');
-        $this->redis->expects($this->exactly(2))->method('ttl')->with('grace_cachable')->willReturnOnConsecutiveCalls($ttlResponse, 3600);
-        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::grace_cachable', 'token-12345', ['nx', 'ex' => 3])->willReturn(true);
-        $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::grace_cachable', 'token-12345'], 1)->willReturn(1);
+        $this->redis->expects($this->exactly(1))->method('get')->with('grace_cachable:[]')->willReturn(['g' => 20, 'e' => null, 'v' => 'data-response']);
+        $this->redis->expects($this->exactly(2))->method('ttl')->with('grace_cachable:[]')->willReturnOnConsecutiveCalls($ttlResponse, 3600);
+        $this->redis->expects($this->exactly(1))->method('set')->with('LOCK::grace_cachable:[]', 'token-12345', ['nx', 'ex' => 3])->willReturn(true);
+        $this->redis->expects($this->exactly(1))->method('eval')->with(RedisLockingCacheObserver::UNLOCK_SCRIPT, ['LOCK::grace_cachable:[]', 'token-12345'], 1)->willReturn(1);
         $this->redis->expects($this->never())->method('setex');
 
         $this->serviceWrapper
@@ -383,14 +382,14 @@ class RedisLockingCacheObserverTest extends TestCase
     function graceRefreshTtlProvider()
     {
         return [
-            // Boundary checks for the configured 66s grace
-            ['ttlResponse' => 65],
-            ['ttlResponse' => 64],
+            // Boundary checks for the configured 20s grace
+            ['ttlResponse' => 19],
+            ['ttlResponse' => 18],
 
-            // Boundary checks for the configured 24s ttl
-            ['ttlResponse' => 25],
-            ['ttlResponse' => 24],
-            ['ttlResponse' => 23],
+            // Boundary checks for the configured 10s ttl
+            ['ttlResponse' => 11],
+            ['ttlResponse' => 10],
+            ['ttlResponse' => 9],
 
             // Boundary checks for approaching cache timeout
             ['ttlResponse' => 1],

@@ -22,17 +22,14 @@ class MethodMatcher extends ArrayMatcher
      * The configuration must take the structure as seen below
      * Array
      * (
-     *     [METHOD] => Array
+     *     [method] => Array
      *         (
-     *             [default] => 10
+     *             [fallback] => [value => 10, error => 10, grace => 10],
      *             [attributes] => Array
      *                 (
-     *                     [five] => 5
-     *                 )
-     *             [grace_default] => 10
-     *             [grace_attributes] => Array
-     *                 (
-     *                     [five] => 5
+     *                     [attributeA] => [value => 10, error => 10, grace => 10],
+     *                     [attributeB] => [value => 10, error => 10, grace => 10],
+     *                     [attributeC] => [value => 10, error => 10, grace => 10],
      *                 )
      *             [parameters] => Array
      *                 (
