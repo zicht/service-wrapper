@@ -109,9 +109,6 @@ class ServiceWrapper
      */
     public function __call($methodName, $args)
     {
-        // todo: note that when a alterRequest() or notifyBefore() throws an exception,
-        // that the callStack is corrupted and the associated alterResponse() and notifyAfter()
-        // calls are not made (causing problems in the RedisLockingCacheObserver in particular)
         if (count($this->callStack)) {
             $parent = $this->callStack[count($this->callStack) - 1];
         } else {
@@ -120,39 +117,43 @@ class ServiceWrapper
         $call = $this->createServiceCall($methodName, $args, $parent, $this->terminating);
         $this->callStack[] = $call;
 
-        foreach ($this->observers as $observer) {
-            $observer->alterRequest($call);
-        }
-        $call->getRequest()->freeze();
-        foreach ($this->observers as $observer) {
-            $observer->notifyBefore($call);
-        }
+        // Ensure that we pop $call from the stack using try...finally...
         try {
-            if (!$call->isCancelled()) {
-                $this->factory(); // initialize the service, if it was not yet initialized.
-                $call->getResponse()->setResponse($this->execute($call));
+            foreach ($this->observers as $observer) {
+                $observer->alterRequest($call);
             }
-        } catch (\Exception $exception) {
-            // The SoapFault will be passed to the observers, so they can decide
-            // what exception to throw
-            $call->getResponse()->setError($exception);
-        }
+            $call->getRequest()->freeze();
+            foreach ($this->observers as $observer) {
+                $observer->notifyBefore($call);
+            }
+            try {
+                if (!$call->isCancelled()) {
+                    $this->factory(); // initialize the service, if it was not yet initialized.
+                    $call->getResponse()->setResponse($this->execute($call));
+                }
+            } catch (\Exception $exception) {
+                // The SoapFault will be passed to the observers, so they can decide
+                // what exception to throw
+                $call->getResponse()->setError($exception);
+            }
 
-        foreach ($this->observers as $observer) {
-            $observer->alterResponse($call);
-        }
-        $call->getResponse()->freeze();
-        foreach ($this->observers as $observer) {
-            $observer->notifyAfter($call);
-        }
-        array_pop($this->callStack);
+            foreach ($this->observers as $observer) {
+                $observer->alterResponse($call);
+            }
+            $call->getResponse()->freeze();
+            foreach ($this->observers as $observer) {
+                $observer->notifyAfter($call);
+            }
 
-        if ($call->getResponse()->isError()) {
-            $fault = $call->getResponse()->getError();
-            throw $fault;
-        }
+            if ($call->getResponse()->isError()) {
+                $fault = $call->getResponse()->getError();
+                throw $fault;
+            }
 
-        return $call->getResponse()->getResponse();
+            return $call->getResponse()->getResponse();
+        } finally {
+            array_pop($this->callStack);
+        }
     }
 
     public function terminate()
