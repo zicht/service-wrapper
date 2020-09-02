@@ -30,7 +30,7 @@ class ServiceCall implements ServiceCallInterface
     private $cancelled = [];
 
     /** @var array */
-    private $logAttributes = [];
+    private $info = [];
 
     /**
      * @param ServiceWrapper $service
@@ -62,16 +62,6 @@ class ServiceCall implements ServiceCallInterface
     public function getResponse()
     {
         return $this->response;
-    }
-
-    /**
-     * Attributes to store in the log.
-     *
-     * @return array
-     */
-    public function getLogAttributes()
-    {
-        return $this->logAttributes;
     }
 
     /**
@@ -125,6 +115,22 @@ class ServiceCall implements ServiceCallInterface
     /**
      * {@inheritdoc}
      */
+    public function getInfo(string $key, $fallback = null)
+    {
+        return $this->info[$key] ?? $fallback;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setInfo(string $key, $info)
+    {
+        return $this->info[$key] = $info;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function hasParent()
     {
         return null !== $this->parent;
@@ -144,13 +150,5 @@ class ServiceCall implements ServiceCallInterface
     public function getService()
     {
         return $this->service;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function addLogAttributes(array $attributes)
-    {
-        $this->logAttributes = array_merge_recursive($this->logAttributes, $attributes);
     }
 }

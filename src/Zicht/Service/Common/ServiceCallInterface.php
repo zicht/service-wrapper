@@ -60,19 +60,22 @@ interface ServiceCallInterface
     public function isTerminating();
 
     /**
-     * Attributes to store in the log.
+     * Returns information added to the call.
      *
-     * @return array
+     * @param string $key
+     * @param mixed $fallback
+     * @return mixed
      */
-    public function getLogAttributes();
+    public function getInfo(string $key, $fallback = null);
 
     /**
-     * Adds log attributes to the call.
+     * Set information to the call.
      *
-     * @param mixed[] $attributes
+     * @param string $key
+     * @param mixed $info
      * @return void
      */
-    public function addLogAttributes(array $attributes);
+    public function setInfo(string $key, $info);
 
     /**
      * Checks if there is a parent call.

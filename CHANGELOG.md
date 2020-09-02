@@ -7,27 +7,39 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
-## 3.3.0 - 2020-08-21
+## 4.0.0 - 2020-08-28
 ### Added
 - The `RedisLockingCacheObserver` now supports a grace-period.
   This requires `ServiceWrapper::terminate` to be called on application termination and
   grace ttl to be configured.
-- The `RedisLockingCacheObserver` now logs statistics using INFO level.
+- `StatisticsObserver` can be enabled to log all calls made to the service.
+- `ServiceCallInterface` and `ServiceCall` now support `getInfo` and `setInfo`.
+  This can be used to store values between callbacks.
+- `ServiceWrapper::registerObservers` allows adding multiple observers in a single call.
 ### Changed
-- The `RedisCacheObserver`, `RedisLockingCacheObserver`, and `StatisticsObserver` now implement
+- All logging related logic was removed.  Any logging should be done on a observer-by-observer
+  basis, preferably using `Psr\Log\LoggerAwareInterface`.
+- The `RedisCacheObserver`, `RedisLockingCacheObserver`, and `StatisticsObserver` implement
   `Psr\Log\LoggerAwareInterface` instead of the deprecated `LoggableServiceObserverAdapter`.
   This requires changes to `zicht/sro` and `zicht/sro-bundle` to configure the logger separately
   from the deprecated `zicht/service-wrapper` logging configuration.
+### Removed
+- DataCollector/DataCollector
+- DataCollector/Observer
+- Http/Observer/VerboseLoggingObserver
+- LoggerConstants
+- Observers/LoggableException
+- Observers/LoggableServiceObserverAdapter
+- Observers/Logger
+- Observers/LoggerAwareInterface
+- Observers/Timer
+- ServiceObserver
+- Soap/Observer/VerboseLoggingObserver
 ### Fixed
 - The `RedisLockingCacheObserver` now handles exceptions thrown during observer code better
   by unlocking the redis cache key when this is detected.
-### Deprecated
-- LoggerConstants
-- VerboseLoggingObserver
-- LoggableException
-- LoggableServiceObserverAdapter
-- Logger
-- LoggerAwareInterface
+- The `ServiceWrapper` now handles exceptions thrown during observer code better, i.e. the
+  internal `$this->callStack` will no longer corrupt, thereby preserving the `$parent` value.
 
 All this custom logger code should be replaces by a logger that can be enabled or
 disabled per observer using `Psr\Log\LoggerAwareInterface` and `Psr\Log\LoggerAwareTrait`.

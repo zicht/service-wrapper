@@ -23,23 +23,36 @@ class StatisticsObserver extends ServiceObserverAdapter implements LoggerAwareIn
     }
 
     /**
-     * @param ServiceCallInterface $call
-     * @return void
+     * {@inheritdoc}
+     */
+    public function notifyBefore(ServiceCallInterface $call)
+    {
+        $call->setInfo('StatisticsObserver', ['t_start' => microtime(true), 'm_start' => memory_get_usage()]);
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function notifyAfter(ServiceCallInterface $call)
     {
+        $info = $call->getInfo('StatisticsObserver');
         $request = $call->getRequest();
         $response = $call->getResponse();
         $this->logger->log(
             LogLevel::DEBUG,
             'Stats',
-            [
-                'method' => $request->getMethod(),
-                'parameters' => $request->getParameters(),
-                'cancelled' => (int)$call->isCancelled(),
-                'cachable' => (int)$response->isCachable(),
-                'error' => (int)$response->isError(),
-            ]
+            array_filter(
+                [
+                    'cancelledBy' => $call->getCancelledBy(),
+                    'errors' => ($error = $response->getError()) instanceof \Exception ? [$error->getMessage()] : null,
+                    'isCancelled' => (int)$call->isCancelled(),
+                    'isError' => (int)$response->isError(),
+                    'memory' => memory_get_usage() - $info['m_start'],
+                    'method' => $request->getMethod(),
+                    'parameters' => $request->getParameters(),
+                    'time' => microtime(true) - $info['t_start'],
+                ]
+            )
         );
     }
 }

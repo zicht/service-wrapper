@@ -18,6 +18,8 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
 {
     use LoggerAwareTrait;
 
+    // todo: Remove the callStack, it is not needed.  Just persist the tag to write the cache into $call->setInfo
+
     /** @var string */
     const CACHE_IGNORE = 'IGNORE';
 
@@ -38,8 +40,8 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
 
     public function __construct(RedisStorageFactory $redisStorageFactory)
     {
-        $this->redisStorageFactory = $redisStorageFactory;
         $this->logger = new NullLogger();
+        $this->redisStorageFactory = $redisStorageFactory;
     }
 
     /**
@@ -77,7 +79,7 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
             //
 
             $this->callStack[] = ['type' => self::CACHE_MISS, 'key' => $key, 'ttlSeconds' => $requestMatcher->getTtl($request)];
-            $this->logger->log(LogLevel::DEBUG, 'Cache' , ['type' => 'miss', 'key' => $key]);
+            $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'miss', 'key' => $key]);
         } else {
             //
             // Cache hit

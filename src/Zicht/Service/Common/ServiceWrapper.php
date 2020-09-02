@@ -13,9 +13,6 @@ class ServiceWrapper
     /** @var array */
     private $callStack = [];
 
-    /** @var \Psr\Log\LoggerInterface The logger instance to delegate to the observers (if they are LoggerAwareInterface instances) */
-    private $logger = null;
-
     /** @var bool */
     private $terminating = false;
 
@@ -56,15 +53,22 @@ class ServiceWrapper
      * Add an observer to the list of observers
      *
      * @param ServiceObserverInterface $observer
-     * @param int $index
      * @return void
      */
-    public function registerObserver(ServiceObserverInterface $observer, $index = null)
+    public function registerObserver(ServiceObserverInterface $observer)
     {
-        if ($this->logger && $observer instanceof Observers\LoggerAwareInterface) {
-            $observer->setLogger($this->logger);
-        }
         $this->observers[] = $observer;
+    }
+
+    /**
+     * Add one or more observers to the list of observers
+     *
+     * @param ServiceObserverInterface[] $observers
+     * @return void
+     */
+    public function registerObservers(array $observers)
+    {
+        $this->observers = array_merge($this->observers, $observers);
     }
 
     /**
@@ -162,27 +166,6 @@ class ServiceWrapper
         foreach ($this->observers as $observer) {
             $observer->terminate($this);
         }
-    }
-
-    /**
-     * Register a logger with the service.
-     *
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param array $raisedLogLevels
-     * @return void
-     */
-    public function setLogger($logger, $raisedLogLevels = [])
-    {
-        $this->logger = $logger;
-        // update the observer stack.
-        foreach ($this->observers as $observer) {
-            if ($observer instanceof Observers\LoggerAwareInterface) {
-                $observer->setLogger($this->logger);
-            }
-        }
-        $logger = new Observers\Logger();
-        $logger->setRaisedLogLevels($raisedLogLevels);
-        $this->registerObserver($logger);
     }
 
     /**

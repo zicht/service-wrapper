@@ -13,6 +13,8 @@ use Zicht\Service\Common\Storage\RedisStorageFactory;
 
 class RedisLockingCacheObserver extends RedisCacheObserver
 {
+    // todo: Add a callId to the callStack and match it using $call->{get|set}Info
+
     /** @var int */
     const LOCK_FAILURE_WARNING_THRESHOLD = 3;
 
