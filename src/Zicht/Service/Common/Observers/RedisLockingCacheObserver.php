@@ -24,8 +24,6 @@ use Zicht\Service\Common\Storage\RedisStorageFactory;
  */
 class RedisLockingCacheObserver extends RedisCacheObserver
 {
-    // todo: Add a callId to the callStack and match it using $call->{get|set}Info
-
     /** @var string */
     const CACHE_IGNORE = 'IGNORE';
 
@@ -58,9 +56,6 @@ class RedisLockingCacheObserver extends RedisCacheObserver
 
     /** @var int */
     protected $maxLockSleepMicroSeconds = 200;
-
-    /** @var array Contains a mapping with caches that need to have their cache TTL checked */
-    protected $graceChecks = [];
 
 //    /** @var int[] */
 //    protected $statistics = [
@@ -98,6 +93,11 @@ class RedisLockingCacheObserver extends RedisCacheObserver
      */
     public function notifyBefore(ServiceCallInterface $call)
     {
+// todo: should not do anything when cancelled... but the callStack should not corrupt
+//        if ($call->isCancelled()) {
+//            return;
+//        }
+
         $request = $call->getRequest();
         $requestMatcher = $this->getRequestMatcher($request);
         $isTerminating = $call->isTerminating();
@@ -262,7 +262,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
     }
 
     /**
-     * If a cache hit has occurred for a key that has a grace-period, the cache will be refreshed if needed.
+     * Unlock any calls that are left and check grace-perdiod for eligible calls
      *
      * @return void
      */
@@ -283,21 +283,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
             }
         }
 
-        foreach ($this->graceChecks as $key => $item) {
-            $redis = $this->redisStorageFactory->getClient();
-            $ttlRemaining = $redis->ttl($key);
-            if ($ttlRemaining === false || $ttlRemaining < $item['ttlConfig']['grace']) {
-                // Perform the request again in 'terminate' mode
-                $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'grace-invalid', 'key' => $key]);
-                try {
-                    $item['service']->__call($item['method'], $item['parameters']);
-                } catch (RedisLockingCacheTerminateException $exception) {
-                    // pass
-                }
-            } else {
-                $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'cache-valid', 'key' => $key]);
-            }
-        }
+        parent::terminate();
     }
 
     /**

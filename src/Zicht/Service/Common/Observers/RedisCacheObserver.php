@@ -36,6 +36,9 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
     /** @var RequestMatcher[] */
     protected $requestMatchers = [];
 
+    /** @var array Contains a mapping with caches that need to have their cache TTL checked */
+    protected $graceChecks = [];
+
     public function __construct(RedisStorageFactory $redisStorageFactory)
     {
         $this->logger = new NullLogger();
@@ -59,8 +62,13 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
      */
     public function notifyBefore(ServiceCallInterface $call)
     {
+        if ($call->isCancelled()) {
+            return;
+        }
+
         $request = $call->getRequest();
         $requestMatcher = $this->getRequestMatcher($request);
+        $isTerminating = $call->isTerminating();
 
         // Early return when this request does not have a matcher
         if (null === $requestMatcher) {
@@ -68,28 +76,59 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
         }
 
         $key = $requestMatcher->getKey($request);
+        $ttlConfig = $requestMatcher->getTtlConfig($request);
         $redis = $this->redisStorageFactory->getClient();
-        $value = $redis->get($key);
-        if (false === $value) {
-            //
-            // Cache miss
-            //
 
-            $call->setInfo('RedisCacheObserver--Miss', ['key' => $key, 'ttlConfig' => $requestMatcher->getTtlConfig($request)]);
-            $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'miss', 'key' => $key]);
-        } else {
-            //
-            // Cache hit
-            //
-
-            // Cancel the actual request
-            $call->cancel($this);
-            if ($value['e'] === null) {
-                $call->getResponse()->setResponse($value['v']);
+        if ($isTerminating) {
+            // Check if the value has already been set by another process
+            $ttlRemaining = $redis->ttl($key);
+            if ($ttlRemaining === false || $ttlRemaining < $ttlConfig['grace']) {
+                // Redis did not receive the data while we were waiting to obtain the lock, therefore,
+                // we will let the call though to the service
+                $call->setInfo('RedisCacheObserver--Miss', ['key' => $key, 'ttlConfig' => $ttlConfig]);
+                $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'grace-refresh', 'key' => $key]);
+                return;
             } else {
-                $call->getResponse()->setError($value['e']);
+                // Redis received the data while we were waiting to obtain the lock, therefore,
+                // we will use the data that is already there
+                $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'grace-late-ignore', 'key' => $key]);
             }
-            $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'hit', 'key' => $key]);
+
+            // We did not obtain the lock or redis received the data while we were waiting to obtain
+            // the lock, therefore, we do not want to continue with this request, since another process
+            // is already doing so
+            // Note that we can not simply `$call->cancel($this)` because that should still run
+            // other observers, which expect data to exist, which we haven't.  Therefore,
+            // we will throw an exception instead
+            throw new RedisLockingCacheTerminateException('Terminate service call because other process is doing or did the work');
+        } else {
+            $value = $redis->get($key);
+            if (false === $value) {
+                //
+                // Cache miss
+                //
+
+                $call->setInfo('RedisCacheObserver--Miss', ['key' => $key, 'ttlConfig' => $ttlConfig]);
+                $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'miss', 'key' => $key]);
+            } else {
+                //
+                // Cache hit
+                //
+
+                if ($ttlConfig['grace'] > 0) {
+                    // Ensure that, on terminate, we check if the cache is in its grace period
+                    $this->graceChecks[$key] = ['ttlConfig' => $ttlConfig, 'method' => $request->getMethod(), 'parameters' => $request->getParameters(), 'service' => $call->getService()];
+                }
+
+                // Cancel the actual request
+                $call->cancel($this);
+                if ($value['e'] === null) {
+                    $call->getResponse()->setResponse($value['v']);
+                } else {
+                    $call->getResponse()->setError($value['e']);
+                }
+                $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'hit', 'key' => $key]);
+            }
         }
     }
 
@@ -118,6 +157,30 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
                 $redis->setex($info['key'], $ttlConfig['error'] + $ttlConfig['grace'], ['g' => $ttlConfig['grace'], 'e' => $error, 'v' => null]);
             }
             $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'write', 'key' => $info['key']]);
+        }
+    }
+
+    /**
+     * Check grace-perdiod for eligible calls
+     *
+     * @return void
+     */
+    public function terminate()
+    {
+        foreach ($this->graceChecks as $key => $item) {
+            $redis = $this->redisStorageFactory->getClient();
+            $ttlRemaining = $redis->ttl($key);
+            if ($ttlRemaining === false || $ttlRemaining < $item['ttlConfig']['grace']) {
+                // Perform the request again in 'terminate' mode
+                $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'grace-invalid', 'key' => $key]);
+                try {
+                    $item['service']->__call($item['method'], $item['parameters']);
+                } catch (RedisLockingCacheTerminateException $exception) {
+                    // pass
+                }
+            } else {
+                $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'cache-valid', 'key' => $key]);
+            }
         }
     }
 
