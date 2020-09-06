@@ -48,15 +48,15 @@ final class CacheKey implements CacheKeyInterface
     /**
      * Return the string key representation.
      *
-     * The key consists of $this->name and $this->attributes, if the key is too long
-     *
+     * The key consists of $this->name and $this->attributes, however,
+     * if the key is too long, it will consist of $this->name and a hash.
      *
      * @return string
      */
     public function getKey()
     {
-        $attributes = json_encode($this->attributes);
-        return sprintf('%s:%s', $this->name, (strlen($attributes) + strlen($this->name)) > self::MAX_KEY_LENGTH ? sha1($attributes) : $attributes);
+        $key = sprintf('%s:%s', $this->name, json_encode($this->attributes));
+        return strlen($key) < self::MAX_KEY_LENGTH ? $key : sprintf('%s:%s', $this->name, sha1($key));
     }
 
     /**

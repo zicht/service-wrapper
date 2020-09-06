@@ -189,6 +189,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
 
         // Cancel the actual request
         $call->cancel($this);
+        // Provide ether the response or the error from the cache
         if ($value['e'] === null) {
             $call->getResponse()->setResponse($value['v']);
         } else {

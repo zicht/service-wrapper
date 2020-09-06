@@ -28,8 +28,6 @@ class MethodMatcher extends ArrayMatcher
      *             [attributes] => Array
      *                 (
      *                     [attributeA] => [value => 10, error => 10, grace => 10],
-     *                     [attributeB] => [value => 10, error => 10, grace => 10],
-     *                     [attributeC] => [value => 10, error => 10, grace => 10],
      *                 )
      *             [parameters] => Array
      *                 (

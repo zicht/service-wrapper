@@ -31,7 +31,7 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
     use LoggerAwareTrait;
 
     /** @var RedisStorageFactory */
-    protected $redisStorageFactory = null;
+    protected $redisStorageFactory;
 
     /** @var RequestMatcher[] */
     protected $requestMatchers = [];
@@ -57,7 +57,7 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
      * Notifies the Cache of a service method that is about to be executed. If the Cache has a response in the cache
      * container, the request is cancelled and the response is overwritten with the cached response.
      *
-     * @param \Zicht\Service\Common\ServiceCallInterface $call
+     * @param ServiceCallInterface $call
      * @return void
      */
     public function notifyBefore(ServiceCallInterface $call)
@@ -83,24 +83,19 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
             // Check if the value has already been set by another process
             $ttlRemaining = $redis->ttl($key);
             if ($ttlRemaining === false || $ttlRemaining < $ttlConfig['grace']) {
-                // Redis did not receive the data while we were waiting to obtain the lock, therefore,
-                // we will let the call though to the service
+                // Redis does not have the data, therefore, we will let the call though to the service
                 $call->setInfo('RedisCacheObserver--Miss', ['key' => $key, 'ttlConfig' => $ttlConfig]);
                 $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'grace-refresh', 'key' => $key]);
                 return;
             } else {
-                // Redis received the data while we were waiting to obtain the lock, therefore,
-                // we will use the data that is already there
+                // Redis already has the data, therefore, we do not need to do anything anymore
                 $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'grace-late-ignore', 'key' => $key]);
-            }
 
-            // We did not obtain the lock or redis received the data while we were waiting to obtain
-            // the lock, therefore, we do not want to continue with this request, since another process
-            // is already doing so
-            // Note that we can not simply `$call->cancel($this)` because that should still run
-            // other observers, which expect data to exist, which we haven't.  Therefore,
-            // we will throw an exception instead
-            throw new RedisLockingCacheTerminateException('Terminate service call because other process is doing or did the work');
+                // Note that we can not simply `$call->cancel($this)` because that whould still run
+                // other observers, which expect data to exist, which we haven't.  Therefore,
+                // we will throw an exception instead
+                throw new RedisLockingCacheTerminateException('Terminate service call because other process is doing or did the work');
+            }
         } else {
             $value = $redis->get($key);
             if (false === $value) {
@@ -115,19 +110,21 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
                 // Cache hit
                 //
 
-                if ($ttlConfig['grace'] > 0) {
-                    // Ensure that, on terminate, we check if the cache is in its grace period
-                    $this->graceChecks[$key] = ['ttlConfig' => $ttlConfig, 'method' => $request->getMethod(), 'parameters' => $request->getParameters(), 'service' => $call->getService()];
-                }
-
                 // Cancel the actual request
                 $call->cancel($this);
+                // Provide ether the response or the error from the cache
                 if ($value['e'] === null) {
                     $call->getResponse()->setResponse($value['v']);
                 } else {
                     $call->getResponse()->setError($value['e']);
                 }
                 $this->logger->log(LogLevel::DEBUG, 'Cache', ['type' => 'hit', 'key' => $key]);
+
+                // Check if grace-period applies for this call
+                if ($ttlConfig['grace'] > 0) {
+                    // Ensure that, on terminate, we check if the cache is in its grace period
+                    $this->graceChecks[$key] = ['ttlConfig' => $ttlConfig, 'method' => $request->getMethod(), 'parameters' => $request->getParameters(), 'service' => $call->getService()];
+                }
             }
         }
     }

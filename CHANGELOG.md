@@ -23,11 +23,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - All logging related logic was removed.  Any logging should be done on a observer-by-observer
   basis, preferably using `Psr\Log\LoggerAwareInterface`.
 - The `RedisCacheObserver`, `RedisLockingCacheObserver`, and `StatisticsObserver` implement
-  `Psr\Log\LoggerAwareInterface` instead of the deprecated `LoggableServiceObserverAdapter`.
-  This requires changes to `zicht/sro` and `zicht/sro-bundle` to configure the logger separately
-  from the deprecated `zicht/service-wrapper` logging configuration.
+  `Psr\Log\LoggerAwareInterface` instead of the removed `LoggableServiceObserverAdapter`.
 ### Removed
-Files
+Files (mostly logging related)
 - DataCollector/DataCollector
 - DataCollector/Observer
 - Http/Observer/VerboseLoggingObserver
@@ -42,8 +40,9 @@ Files
 Methods
 - ServiceWrapper::unregisterObserver
 ### Fixed
-- The `RedisLockingCacheObserver` now handles exceptions thrown during observer code better
-  by unlocking the redis cache key when this is detected.
+- The `RedisLockingCacheObserver` now handles exceptions thrown during observer code
+  by unlocking the redis cache key when either a subsequent call is made or when `terminate`
+  is called.  This will theoretically always result in an unlock.
 - The `ServiceWrapper` now handles exceptions thrown during observer code better, i.e. the
   internal `$this->callStack` will no longer corrupt, thereby preserving the `$parent` value.
 

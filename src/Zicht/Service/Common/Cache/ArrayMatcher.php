@@ -27,9 +27,7 @@ class ArrayMatcher implements RequestMatcher
      *             [fallback] => [value => 10, error => 10, grace => 10],
      *             [attributes] => Array
      *                 (
-     *                     [attributeA] => [value => 10, error => 10, grace => 10],
-     *                     [attributeB] => [value => 10, error => 10, grace => 10],
-     *                     [attributeC] => [value => 10, error => 10, grace => 10],
+     *                     [attribute] => [value => 10, error => 10, grace => 10],
      *                 )
      *         )
      * )
