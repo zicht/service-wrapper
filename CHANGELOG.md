@@ -7,13 +7,26 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 3.2.3 - 2020-09-30
+### Fixed
+- Fixes bug in `RedisLockingCacheObserver` where the busy-wait would wait 1000 times
+  as short, resulting in 1000 times the number of Redis checks, causing a large CPU spike
+  to occur whenever the lock could not be obtained.
+
+  [usleep](https://www.php.net/manual/en/function.usleep.php) expects a value in microseconds,
+  i.e. this means that 1,000,000 equals 1 seconds.  We were calling `usleep` with, on average,
+  150 microseconds.  This should have been 150,000 microseconds.
+
+  'Fun fact'... The `RedisLockingCacheObserver`, and this bug, was introduced over two years
+  ago in 2018-06-26... and has been causing occasional problems ever since.
+
 ## 3.2.2 - 2020-07-17
 ### Fixed
 - The `RedisLockingCacheObserver` would always unlock, even when the lock should have been
   maintained.  This fixes a bug introduced in version 3.1.2.
 - To reduce CPU and traffic usage during busy-wait, the `RedisLockingCacheObserver` will has
   increased the default `$minLockSleepMicroSeconds` and `$maxLockSleepMicroSeconds` times.
-- To reduce the maximum time a process will busy-wait, the `$minLockTTLSeconds` was reduced. 
+- To reduce the maximum time a process will busy-wait, the `$minLockTTLSeconds` was reduced.
 - Rename variables to clearly indicate whether their values are in seconds or microseconds.
 - Add unit tests to verify the behavior of the `RedisLockingCacheObserver`.
 

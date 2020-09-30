@@ -158,7 +158,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
     {
         $attemptCounter = 1;
         while (!($res = $redis->set($lockKey, $token, ['nx', 'ex' => $ttlSeconds]))) {
-            usleep(mt_rand($this->minLockSleepMicroSeconds, $this->maxLockSleepMicroSeconds));
+            usleep(mt_rand($this->minLockSleepMicroSeconds, $this->maxLockSleepMicroSeconds) * 1000);
             $attemptCounter++;
         }
 
