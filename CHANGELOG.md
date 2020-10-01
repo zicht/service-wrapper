@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 3.2.4 - 2020-10-01
+### Fixed
+- Fixes naming confusion.  The variables are called '$...micoseconds' and hence their
+  value should be in microseconds.
+
 ## 3.2.3 - 2020-09-30
 ### Fixed
 - Fixes bug in `RedisLockingCacheObserver` where the busy-wait would wait 1000 times

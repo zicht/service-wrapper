@@ -25,10 +25,10 @@ class RedisLockingCacheObserver extends RedisCacheObserver
     protected $minLockTTLSeconds = 3;
 
     /** @var int */
-    protected $minLockSleepMicroSeconds = 100;
+    protected $minLockSleepMicroSeconds = 100000;
 
     /** @var int */
-    protected $maxLockSleepMicroSeconds = 200;
+    protected $maxLockSleepMicroSeconds = 200000;
 
     /**
      * @param integer $minLockTTL in seconds
@@ -38,8 +38,8 @@ class RedisLockingCacheObserver extends RedisCacheObserver
     public function configure($minLockTTL, $minLockSleepSeconds, $maxLockSleepSeconds)
     {
         $this->minLockTTLSeconds = $minLockTTL;
-        $this->minLockSleepMicroSeconds = $minLockSleepSeconds * 1000;
-        $this->maxLockSleepMicroSeconds = $maxLockSleepSeconds * 1000;
+        $this->minLockSleepMicroSeconds = $minLockSleepSeconds * 1000000;
+        $this->maxLockSleepMicroSeconds = $maxLockSleepSeconds * 1000000;
     }
 
     /**
@@ -158,7 +158,7 @@ class RedisLockingCacheObserver extends RedisCacheObserver
     {
         $attemptCounter = 1;
         while (!($res = $redis->set($lockKey, $token, ['nx', 'ex' => $ttlSeconds]))) {
-            usleep(mt_rand($this->minLockSleepMicroSeconds, $this->maxLockSleepMicroSeconds) * 1000);
+            usleep(mt_rand($this->minLockSleepMicroSeconds, $this->maxLockSleepMicroSeconds));
             $attemptCounter++;
         }
 
