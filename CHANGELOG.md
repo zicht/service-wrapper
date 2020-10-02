@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 4.0.0 - 2020-10-02
+### Added
+- `RedisLockingCacheObserver` now supports a grace-period and exception caching.
+  This requires `ServiceWrapper::terminate` to be called on application termination and
+  grace ttl to be configured.
+- `StatisticsObserver` can be enabled to log all calls made to the service.
+- `ServiceCallInterface` and `ServiceCall` now support `getInfo` and `setInfo`.
+  This can be used to store values between callbacks.
+- `ServiceWrapper::registerObservers` allows adding multiple observers in a single call.
+### Changed
+- `ArrayMatcher` and `MethodMatcher` are now configured very differently (see their constructor docs).
+- `ArrayMatcher` and `MethodMatcher` will now match case-sensitive.
+- `CacheKey::getKey` now returns a longer but much more readable key.
+- All logging related logic was removed.  Any logging should be done on a observer-by-observer
+  basis, preferably using `Psr\Log\LoggerAwareInterface`.
+- The `RedisCacheObserver`, `RedisLockingCacheObserver`, and `StatisticsObserver` implement
+  `Psr\Log\LoggerAwareInterface` instead of the removed `LoggableServiceObserverAdapter`.
+### Removed
+Files (mostly logging related)
+- DataCollector/DataCollector
+- DataCollector/Observer
+- Http/Observer/VerboseLoggingObserver
+- LoggerConstants
+- Observers/LoggableException
+- Observers/LoggableServiceObserverAdapter
+- Observers/Logger
+- Observers/LoggerAwareInterface
+- Observers/Timer
+- ServiceObserver
+- Soap/Observer/VerboseLoggingObserver
+Methods
+- ServiceWrapper::unregisterObserver
+### Fixed
+- The `RedisLockingCacheObserver` now handles exceptions thrown during observer code
+  by unlocking the redis cache key when either a subsequent call is made or when `terminate`
+  is called.  This will theoretically always result in an unlock.
+- The `ServiceWrapper` now handles exceptions thrown during observer code better, i.e. the
+  internal `$this->callStack` will no longer corrupt, thereby preserving the `$parent` value.
+
 ## 3.2.4 - 2020-10-01
 ### Fixed
 - Fixes naming confusion.  The variables are called '$...micoseconds' and hence their

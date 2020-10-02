@@ -5,16 +5,24 @@
 
 namespace Zicht\Service\Common;
 
-class ServiceWrapper
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
+use Zicht\Service\Common\Observers\RedisCacheTerminateException;
+
+class ServiceWrapper implements LoggerAwareInterface
 {
-    /** @var ServiceObserver[] The set of observers notified of any call to the Soap service */
+    use LoggerAwareTrait;
+
+    /** @var ServiceObserverInterface[] The set of observers notified of any call to the Soap service */
     private $observers = [];
 
     /** @var array */
     private $callStack = [];
 
-    /** @var \Psr\Log\LoggerInterface The logger instance to delegate to the observers (if they are LoggerAwareInterface instances) */
-    private $logger = null;
+    /** @var bool */
+    private $terminating = false;
 
     /** @var mixed The wrapped service */
     private $service;
@@ -26,6 +34,7 @@ class ServiceWrapper
      */
     public function __construct($service)
     {
+        $this->logger = new NullLogger();
         if ($service instanceof ServiceFactoryInterface) {
             $this->serviceFactory = $service;
             $this->service = null;
@@ -52,41 +61,27 @@ class ServiceWrapper
     /**
      * Add an observer to the list of observers
      *
-     * @param ServiceObserver $observer
-     * @param int $index
+     * @param ServiceObserverInterface $observer
      * @return void
      */
-    public function registerObserver(ServiceObserver $observer, $index = null)
+    public function registerObserver(ServiceObserverInterface $observer)
     {
-        if ($this->logger && $observer instanceof Observers\LoggerAwareInterface) {
-            $observer->setLogger($this->logger);
-        }
         $this->observers[] = $observer;
     }
 
     /**
-     * Returns a tuple of `index` and observer `instance`. The index can be used to pass to `registerObserver` to
-     * put it back at the index where it was.
+     * Add one or more observers to the list of observers
      *
-     * The use case is that some implementation knows about an observer being incompatible with some kind of
-     * situation, so the observer needs to be temporarily unregistered and restored.
-     *
-     * @param string $className
-     * @return array
+     * @param ServiceObserverInterface[] $observers
+     * @return void
      */
-    public function unregisterObserver($className)
+    public function registerObservers(array $observers)
     {
-        foreach ($this->observers as $idx => $observer) {
-            if ($observer instanceof $className) {
-                array_splice($this->observers, $idx, 1, []);
-                return [$idx, $observer];
-            }
-        }
-        return null;
+        $this->observers = array_merge($this->observers, $observers);
     }
 
     /**
-     * @return ServiceObserver[]
+     * @return ServiceObserverInterface[]
      */
     public function getObservers()
     {
@@ -102,7 +97,6 @@ class ServiceWrapper
      * @param string $methodName
      * @param array $args
      * @return mixed
-     *
      * @throws \Exception
      */
     public function __call($methodName, $args)
@@ -112,68 +106,92 @@ class ServiceWrapper
         } else {
             $parent = null;
         }
-        $call = $this->createServiceCall($methodName, $args, $parent);
+        $call = $this->createServiceCall($methodName, $args, $parent, $this->terminating);
         $this->callStack[] = $call;
+        $isObserverException = false;
 
-        /** @var ServiceObserverInterface[] $observers */
-        foreach ($this->observers as $observer) {
-            $observer->alterRequest($call);
-        }
-        $call->getRequest()->freeze();
-        foreach ($this->observers as $observer) {
-            $observer->notifyBefore($call);
-        }
+        // Ensure that we pop $call from the stack using try...finally...
         try {
-            if (!$call->isCancelled()) {
-                $this->factory(); // initialize the service, if it was not yet initialized.
-                $call->getResponse()->setResponse($this->execute($call));
+            foreach ($this->observers as $observer) {
+                $observer->alterRequest($call);
             }
-        } catch (\Exception $exception) {
-            // The SoapFault will be passed to the observers, so they can decide
-            // what exception to throw
-            $call->getResponse()->setError($exception);
-        }
+            $call->getRequest()->freeze();
+            foreach ($this->observers as $observer) {
+                $observer->notifyBefore($call);
+            }
+            try {
+                if (!$call->isCancelled()) {
+                    $this->factory(); // initialize the service, if it was not yet initialized.
+                    $call->getResponse()->setResponse($this->execute($call));
+                    if ($this->service instanceof ClientStatisticsInterface) {
+                        $call->setInfo('ClientStatistics', $this->service->__getLastStatistics());
+                    }
+                }
+            } catch (\Exception $exception) {
+                // The SoapFault will be passed to the observers, so they can decide
+                // what exception to throw
+                $call->getResponse()->setError($exception);
+            }
 
-        foreach ($this->observers as $observer) {
-            $observer->alterResponse($call);
-        }
-        $call->getResponse()->freeze();
-        foreach ($this->observers as $observer) {
-            $observer->notifyAfter($call);
-        }
-        array_pop($this->callStack);
+            foreach ($this->observers as $observer) {
+                $observer->alterResponse($call);
+            }
+            $call->getResponse()->freeze();
+            foreach ($this->observers as $observer) {
+                $observer->notifyAfter($call);
+            }
+        } catch (RedisCacheTerminateException $exception) {
+            // We want to throw the exception that occurred in our code, not a possible exception
+            // in the response.  Therefore, we set `$isObserverException = true` to prevent a service
+            // error from being thrown in the `finally` below
+            $isObserverException = true;
 
-        if ($call->getResponse()->isError()) {
-            $fault = $call->getResponse()->getError();
-            throw $fault;
-        }
+            // No error logging is needed, this is actually a normal part of the grace cache mechanism
+            throw $exception;
+        } catch (\Throwable $exception) {
+            // We want to throw the exception that occurred in our code, not a possible exception
+            // in the response.  Therefore, we set `$isObserverException = true` to prevent a service
+            // error from being thrown in the `finally` below
+            $isObserverException = true;
 
-        return $call->getResponse()->getResponse();
+            // This is an exception that occurs within one of the observer calls
+            $this->logger->log(
+                LogLevel::ERROR,
+                'ServiceWrapper local exception',
+                [
+                    'isTerminating' => (int)$call->isTerminating(),
+                    'message' => $exception->getMessage(),
+                    'method' => $call->getRequest()->getMethod(),
+                ]
+            );
+            throw $exception;
+        } finally {
+            array_pop($this->callStack);
+
+            if (!$isObserverException) {
+                if ($call->getResponse()->isError()) {
+                    $this->logServiceError($call);
+                    throw $call->getResponse()->getError();
+                }
+
+                return $call->getResponse()->getResponse();
+            }
+        }
     }
 
-    /**
-     * Register a logger with the service.
-     *
-     * @param \Psr\Log\LoggerInterface $logger
-     * @param array $raisedLogLevels
-     * @return void
-     */
-    public function setLogger($logger, $raisedLogLevels = [])
+    public function terminate()
     {
-        $this->logger = $logger;
-        // update the observer stack.
+        $this->terminating = true;
         foreach ($this->observers as $observer) {
-            if ($observer instanceof Observers\LoggerAwareInterface) {
-                $observer->setLogger($this->logger);
-            }
+            $observer->terminate($this);
         }
-        $logger = new Observers\Logger();
-        $logger->setRaisedLogLevels($raisedLogLevels);
-        $this->registerObserver($logger);
     }
 
     /**
-     * {@inheritdoc}
+     * Perform the service call
+     *
+     * @param ServiceCallInterface $call
+     * @return mixed
      */
     protected function execute(ServiceCallInterface $call)
     {
@@ -189,15 +207,29 @@ class ServiceWrapper
      * @param string $methodName
      * @param array $args
      * @param ServiceCall $parent
+     * @param bool $terminating
      * @return ServiceCall
      */
-    protected function createServiceCall($methodName, $args, $parent = null)
+    protected function createServiceCall($methodName, $args, $parent = null, $terminating = false)
     {
-        return new ServiceCall(
-            $this,
-            new Request($methodName, $args),
-            new Response(),
-            $parent
+        return new ServiceCall($this, new Request($methodName, $args), new Response(), $parent, $terminating);
+    }
+
+    /**
+     * Called to log exceptions that were returned from the wrapped service
+     *
+     * @param ServiceCallInterface $call
+     */
+    protected function logServiceError(ServiceCallInterface $call)
+    {
+        $this->logger->log(
+            LogLevel::WARNING,
+            'ServiceWrapper remote exception',
+            [
+                'isTerminating' => (int)$call->isTerminating(),
+                'message' => $call->getResponse()->getError()->getMessage(),
+                'method' => $call->getRequest()->getMethod(),
+            ]
         );
     }
 

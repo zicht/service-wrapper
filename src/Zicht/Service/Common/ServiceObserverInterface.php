@@ -54,4 +54,11 @@ interface ServiceObserverInterface
      * @return void
      */
     public function notifyAfter(ServiceCallInterface $call);
+
+    /**
+     * An opportunity to perform actions just before the application terminates
+     *
+     * @return void
+     */
+    public function terminate();
 }
