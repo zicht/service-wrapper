@@ -22,6 +22,7 @@ jobs:
                 with:
                     php-version: '7.1'
                     coverage: none # disable xdebug, pcov
+                    tools: composer:v1
 
             -   run: composer validate --strict
             -   run: composer config -g github-oauth.github.com ${{ secrets.COMPOSER_ZICHTONLINE_TOKEN }}

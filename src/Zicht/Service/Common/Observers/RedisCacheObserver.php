@@ -212,7 +212,7 @@ class RedisCacheObserver extends ServiceObserverAdapter implements LoggerAwareIn
         $traceProperty->setAccessible(true);
         $ex = $exception;
         do {
-            $traceProperty->setValue($ex, null);
+            $traceProperty->setValue($ex, []);
         } while ($ex = $ex->getPrevious());
         $traceProperty->setAccessible(false);
     }
