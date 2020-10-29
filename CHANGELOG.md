@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## 4.0.1 - 2020-10-29
 ### Fixed
-- `RedisCacheObserver::makeExceptionSerializable` will now set the trace too `[]` instead of `null`.
+- `RedisCacheObserver::makeExceptionSerializable` will now set the trace to `[]` instead of `null`.
 
 ## 4.0.0 - 2020-10-02
 ### Added
