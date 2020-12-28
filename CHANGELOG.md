@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 3.2.5 - 2020-12-28
+### Fixed
+- Reverted 3.2.1.  The current code (see AbstractRest.php) is not compatible with
+  guzzle 6+.
+
 ## 3.2.4 - 2020-10-01
 ### Fixed
 - Fixes naming confusion.  The variables are called '$...micoseconds' and hence their
