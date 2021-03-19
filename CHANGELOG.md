@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 4.0.2 - 2021-03-19
+# Fixed
+- Forward merge from 3.2.5.
+
 ## 4.0.1 - 2020-10-29
 ### Fixed
 - `RedisCacheObserver::makeExceptionSerializable` will now set the trace to `[]` instead of `null`.
@@ -49,6 +53,11 @@ Methods
   is called.  This will theoretically always result in an unlock.
 - The `ServiceWrapper` now handles exceptions thrown during observer code better, i.e. the
   internal `$this->callStack` will no longer corrupt, thereby preserving the `$parent` value.
+
+## 3.2.5 - 2020-12-28
+### Fixed
+- Reverted 3.2.1.  The current code (see AbstractRest.php) is not compatible with
+  guzzle 6+.
 
 ## 3.2.4 - 2020-10-01
 ### Fixed
