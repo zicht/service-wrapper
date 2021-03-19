@@ -7,10 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
-## ??? - ???
-### Fixed
-- Now using composer v2.
-
 ## 4.0.2 - 2021-03-19
 ### Fixed
 - Forward merge from 3.2.5.

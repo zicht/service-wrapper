@@ -375,7 +375,7 @@ class RedisLockingCacheObserverTest extends TestCase
     }
 
     /**
-     * Returns TTL values that should return in 'no grace refresh' given a grace configured at 66 seconds
+     * Returns TTL values that should return in 'grace refresh' given a grace configured at 66 seconds
      *
      * @return array
      */
