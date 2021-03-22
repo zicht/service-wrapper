@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
 ## 4.0.2 - 2021-03-19
-# Fixed
+### Fixed
 - Forward merge from 3.2.5.
 
 ## 4.0.1 - 2020-10-29
