@@ -25,7 +25,7 @@ jobs:
                     tools: composer:v2
 
             -   run: composer validate --strict
-            -   run: composer config -g github-oauth.github.com ${{ secrets.COMPOSER_ZICHTONLINE_TOKEN }}
+            -   run: composer config -g github-oauth.github.com ${{ secrets.GITHUB_TOKEN }}
             -   run: composer install --prefer-dist --no-progress --no-suggest --no-scripts
             -   if: always()
                 run: composer run-script lint
