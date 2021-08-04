@@ -84,6 +84,11 @@ class SoapClient extends \SoapClient implements ClientStatisticsInterface
             // resulting in a segmentation fault, after exit, i.e. in a registered shutdown function.
             // see: https://bugs.php.net/bug.php?id=71931
             'cache_wsdl' => WSDL_CACHE_DISK,
+            'stream_context' => stream_context_create([
+                'ssl' => [
+                    'verify_peer' => false,
+                ]
+            ])
         ];
     }
 
