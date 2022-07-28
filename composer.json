@@ -2,45 +2,32 @@
     "name": "zicht/service-wrapper",
     "description": "Service Wrapper classes",
     "license": "MIT",
-    "scripts": {
-        "lint": [
-            "phpcs -n -s src/Zicht/ --standard=vendor/zicht/standards-php/Zicht --extensions=php -p --parallel=$(nproc)"
-        ],
-        "lint-fix": [
-            "phpcbf -s src/Zicht/ --standard=vendor/zicht/standards-php/Zicht --extensions=php --parallel=$(nproc)"
-        ],
-        "test": [
-            "phpunit -c phpunit.xml.dist"
-        ]
-    },
     "authors": [
         {
-            "name": "Gerard van Helden",
-            "email": "gerard@zicht.nl"
+            "name": "Zicht online",
+            "email": "info@zicht.nl"
         }
     ],
     "require": {
-        "php": "^7.1",
-        "guzzlehttp/guzzle": "^4 | ^5"
+        "php": "^7.4 || ^8.0"
     },
     "require-dev": {
-        "monolog/monolog": "^1.24",
-        "phpunit/phpunit": "^7.2",
-        "symfony/http-kernel": "^2||^3",
-        "zicht/standards-php": "^3.2"
+        "phpunit/phpunit": "^9",
+        "friendsofphp/php-cs-fixer": "^3"
     },
     "autoload": {
-        "psr-0": {
-            "Zicht": [
-                "src/"
-            ]
+        "psr-4": {
+            "Zicht\\Service\\Common\\": "src/"
         }
     },
     "autoload-dev": {
-        "psr-0": {
-            "Zicht": [
-                "tests/"
-            ]
+        "psr-4": {
+            "ZichtTest\\Service\\Common\\": "tests/"
         }
+    },
+    "scripts": {
+        "lint": "php-cs-fixer fix --dry-run --diff --using-cache=no -vvv",
+        "lint-fix": "php-cs-fixer fix",
+        "test": "phpunit -c ./phpunit.xml.dist --no-coverage"
     }
 }
