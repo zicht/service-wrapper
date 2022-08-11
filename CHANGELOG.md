@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Added|Changed|Deprecated|Removed|Fixed|Security
 
+## 5.0.0 - 2022-08-04
+### Added
+- Support for PHP 8
+### Removed
+- Support for PHP < 7.4
+- All code related to REST-ful interaction. Add later (if needed at all) with contemporary implementation such as Guzzle, Httplug or HttpClient.
+- `Http/AbstractRest.php`
+- `Http/Exception/ServiceException.php`
+- `Http/JsonRest.php`
+- `Http/XmlRest.php`
+### Changed
+- Switched from PSR-0 to PSR-4 autoloading.
+
 ## 4.0.2 - 2021-03-19
 ### Fixed
 - Forward merge from 3.2.5.
